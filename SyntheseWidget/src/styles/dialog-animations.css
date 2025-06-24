@@ -1,0 +1,38 @@
+/* Animations pour les composants Dialog de Radix UI */
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96); /* Était -48% */
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.animate-overlayShow {
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-contentShow {
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Assurez-vous que les éléments Radix UI ont une priorité élevée */
+[data-radix-portal] {
+  z-index: 9000 !important;
+}
+
+/* Assurez-vous que le contenu du dialogue est au-dessus de tout */
+[data-radix-popper-content-wrapper] {
+  z-index: 10000 !important;
+} 

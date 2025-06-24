@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="dvgroup.assettableau.AssetTableau" pluginWidget="true" needsEntityContext="false" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Asset Tableau</name>
+    <description>Hierarchical asset management widget with dev/prod modes for industrial data visualization and editing</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Configuration">
+            <property key="mode" type="enumeration" defaultValue="prod" required="true">
+                <caption>Display Mode</caption>
+                <description>Dev mode shows all attributes, Prod mode shows only editable fields</description>
+                <enumerationValues>
+                    <enumerationValue key="dev">Development</enumerationValue>
+                    <enumerationValue key="prod">Production</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="maxLevels" type="integer" defaultValue="5" required="true">
+                <caption>Maximum Hierarchy Levels</caption>
+                <description>Number of hierarchy levels to support (1-10)</description>
+            </property>
+        </propertyGroup>
+        
+        <propertyGroup caption="DataSource">
+            <!-- Level 1 Configuration -->
+            <property key="level1DataSource" type="datasource" required="true" isList="true">
+                <caption>Level 1 Data Source</caption>
+                <description>Root level entities (e.g., Usine)</description>
+            </property>
+            <property key="level1Name" type="string" defaultValue="Level 1" required="true">
+                <caption>Level 1 Label</caption>
+                <description>Display name for level 1 (e.g., "Usine")</description>
+            </property>
+            <!-- Attributs principaux (lecture + édition) -->
+            <property key="level1NameAttribute" type="attribute" dataSource="level1DataSource" required="true">
+                <caption>Level 1 Name Attribute</caption>
+                <description>Attribute containing the display name for level 1</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level1ParentAttribute" type="attribute" dataSource="level1DataSource" required="false">
+                <caption>Level 1 Parent Reference</caption>
+                <description>Attribute linking to parent entity</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level1UnitAttribute" type="attribute" dataSource="level1DataSource" required="false">
+                <caption>Level 1 Unit Attribute</caption>
+                <description>Attribute containing units for IPE values</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <!-- Attributs pour la sauvegarde (transitoires) -->
+            <property key="level1SaveNameAttribute" type="attribute" dataSource="level1DataSource" required="false">
+                <caption>Level 1 Save Name Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the name (e.g., a transient attribute). If empty, Name Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level1SaveUnitAttribute" type="attribute" dataSource="level1DataSource" required="false">
+                <caption>Level 1 Save Unit Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the unit. If empty, Unit Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            
+            <!-- Level 2 Configuration -->
+            <property key="level2DataSource" type="datasource" required="false" isList="true">
+                <caption>Level 2 Data Source</caption>
+                <description>Second level entities (e.g., Secteur)</description>
+            </property>
+            <property key="level2Name" type="string" defaultValue="Level 2" required="false">
+                <caption>Level 2 Label</caption>
+                <description>Display name for level 2 (e.g., "Secteur")</description>
+            </property>
+            <property key="level2NameAttribute" type="attribute" dataSource="level2DataSource" required="false">
+                <caption>Level 2 Name Attribute</caption>
+                <description>Attribute containing the display name for level 2</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level2ParentAttribute" type="attribute" dataSource="level2DataSource" required="false">
+                <caption>Level 2 Parent Reference</caption>
+                <description>Attribute linking to parent entity</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level2UnitAttribute" type="attribute" dataSource="level2DataSource" required="false">
+                <caption>Level 2 Unit Attribute</caption>
+                <description>Attribute containing units for IPE values</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level2SaveNameAttribute" type="attribute" dataSource="level2DataSource" required="false">
+                <caption>Level 2 Save Name Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the name. If empty, Name Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level2SaveUnitAttribute" type="attribute" dataSource="level2DataSource" required="false">
+                <caption>Level 2 Save Unit Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the unit. If empty, Unit Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            
+            <!-- Level 3 Configuration -->
+            <property key="level3DataSource" type="datasource" required="false" isList="true">
+                <caption>Level 3 Data Source</caption>
+                <description>Third level entities (e.g., Atelier)</description>
+            </property>
+            <property key="level3Name" type="string" defaultValue="Level 3" required="false">
+                <caption>Level 3 Label</caption>
+                <description>Display name for level 3 (e.g., "Atelier")</description>
+            </property>
+            <property key="level3NameAttribute" type="attribute" dataSource="level3DataSource" required="false">
+                <caption>Level 3 Name Attribute</caption>
+                <description>Attribute containing the display name for level 3</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level3ParentAttribute" type="attribute" dataSource="level3DataSource" required="false">
+                <caption>Level 3 Parent Reference</caption>
+                <description>Attribute linking to parent entity</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level3UnitAttribute" type="attribute" dataSource="level3DataSource" required="false">
+                <caption>Level 3 Unit Attribute (Display)</caption>
+                <description>Attribute containing units for IPE values</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level3SaveNameAttribute" type="attribute" dataSource="level3DataSource" required="false">
+                <caption>Level 3 Save Name Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the name. If empty, Name Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level3SaveUnitAttribute" type="attribute" dataSource="level3DataSource" required="false">
+                <caption>Level 3 Save Unit Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the unit. If empty, Unit Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            
+            <!-- Level 4 Configuration -->
+            <property key="level4DataSource" type="datasource" required="false" isList="true">
+                <caption>Level 4 Data Source</caption>
+                <description>Fourth level entities (e.g., ETH)</description>
+            </property>
+            <property key="level4Name" type="string" defaultValue="Level 4" required="false">
+                <caption>Level 4 Label</caption>
+                <description>Display name for level 4 (e.g., "ETH")</description>
+            </property>
+            <property key="level4NameAttribute" type="attribute" dataSource="level4DataSource" required="false">
+                <caption>Level 4 Name Attribute</caption>
+                <description>Attribute containing the display name for level 4</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level4ParentAttribute" type="attribute" dataSource="level4DataSource" required="false">
+                <caption>Level 4 Parent Reference</caption>
+                <description>Attribute linking to parent entity</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level4UnitAttribute" type="attribute" dataSource="level4DataSource" required="false">
+                <caption>Level 4 Unit Attribute (Display)</caption>
+                <description>Attribute containing units for IPE values</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level4SaveNameAttribute" type="attribute" dataSource="level4DataSource" required="false">
+                <caption>Level 4 Save Name Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the name. If empty, Name Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level4SaveUnitAttribute" type="attribute" dataSource="level4DataSource" required="false">
+                <caption>Level 4 Save Unit Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the unit. If empty, Unit Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            
+            <!-- Level 5 Configuration -->
+            <property key="level5DataSource" type="datasource" required="false" isList="true">
+                <caption>Level 5 Data Source</caption>
+                <description>Fifth level entities (e.g., Machine)</description>
+            </property>
+            <property key="level5Name" type="string" defaultValue="Level 5" required="false">
+                <caption>Level 5 Label</caption>
+                <description>Display name for level 5 (e.g., "Machine")</description>
+            </property>
+            <property key="level5NameAttribute" type="attribute" dataSource="level5DataSource" required="false">
+                <caption>Level 5 Name Attribute</caption>
+                <description>Attribute containing the display name for level 5</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level5ParentAttribute" type="attribute" dataSource="level5DataSource" required="false">
+                <caption>Level 5 Parent Reference</caption>
+                <description>Attribute linking to parent entity</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level5UnitAttribute" type="attribute" dataSource="level5DataSource" required="false">
+                <caption>Level 5 Unit Attribute (Display)</caption>
+                <description>Attribute containing units for IPE values</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level5SaveNameAttribute" type="attribute" dataSource="level5DataSource" required="false">
+                <caption>Level 5 Save Name Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the name. If empty, Name Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="level5SaveUnitAttribute" type="attribute" dataSource="level5DataSource" required="false">
+                <caption>Level 5 Save Unit Attribute (Transient)</caption>
+                <description>Optional: Attribute to use for saving the unit. If empty, Unit Attribute is used.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        
+
+        <propertyGroup caption="Permissions">
+            <property key="allowEdit" type="boolean" defaultValue="true" required="true">
+                <caption>Allow Editing</caption>
+                <description>Enable inline editing of attributes</description>
+            </property>
+            <property key="allowDelete" type="boolean" defaultValue="false" required="true">
+                <caption>Allow Deletion</caption>
+                <description>Enable deletion of entities (dev mode only)</description>
+            </property>
+            <property key="allowCreate" type="boolean" defaultValue="false" required="true">
+                <caption>Allow Creation</caption>
+                <description>Enable creation of new entities (dev mode only)</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Actions">
+            <property key="onSaveLevel1Action" type="action" dataSource="level1DataSource" required="false">
+                <caption>On Save Level 1 (Usine)</caption>
+                <description>Microflow to call when saving Usine changes</description>
+            </property>
+            <property key="onSaveLevel2Action" type="action" dataSource="level2DataSource" required="false">
+                <caption>On Save Level 2 (Secteur)</caption>
+                <description>Microflow to call when saving Secteur changes</description>
+            </property>
+            <property key="onSaveLevel3Action" type="action" dataSource="level3DataSource" required="false">
+                <caption>On Save Level 3 (Atelier)</caption>
+                <description>Microflow to call when saving Atelier changes</description>
+            </property>
+            <property key="onSaveLevel4Action" type="action" dataSource="level4DataSource" required="false">
+                <caption>On Save Level 4 (ETH)</caption>
+                <description>Microflow to call when saving ETH changes</description>
+            </property>
+            <property key="onSaveLevel5Action" type="action" dataSource="level5DataSource" required="false">
+                <caption>On Save Level 5 (Machine)</caption>
+                <description>Microflow to call when saving Machine changes</description>
+            </property>
+        </propertyGroup>
+        
+        <propertyGroup caption="UI Options">
+            <property key="showSearch" type="boolean" defaultValue="true" required="true">
+                <caption>Show Search</caption>
+                <description>Display search functionality</description>
+            </property>
+            <property key="showFilters" type="boolean" defaultValue="true" required="true">
+                <caption>Show Filters</caption>
+                <description>Display filter options</description>
+            </property>
+            <property key="expandedByDefault" type="boolean" defaultValue="false" required="true">
+                <caption>Expanded by Default</caption>
+                <description>Start with hierarchy expanded</description>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

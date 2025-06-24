@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.saisie.Saisie" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Saisie</name>
+    <description>Widget de saisie des données de consommation énergétique.</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Données">
+            <property key="energyAttribute" type="attribute" required="false">
+                <caption>Type d'énergie</caption>
+                <description>Attribut (Enum) pour le type d'énergie.</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="tariffTypeAttribute" type="attribute" required="false">
+                <caption>Type de tarif</caption>
+                <description>Attribut (Enum) pour le type de tarif (HP, HC, Pointe, Standard).</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="priceAttribute" type="attribute" required="false">
+                <caption>Prix</caption>
+                <description>Attribut (Décimal) pour stocker le prix.</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="unitAttribute" type="attribute" required="false">
+                <caption>Unité</caption>
+                <description>Attribut (String) pour stocker l'unité de mesure.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="startDateAttribute" type="attribute" required="false">
+                <caption>Date de début</caption>
+                <description>Attribut (Date/Heure) pour la date de début de la période.</description>
+                 <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+             <property key="endDateAttribute" type="attribute" required="false">
+                <caption>Date de fin</caption>
+                <description>Attribut (Date/Heure) pour la date de fin de la période.</description>
+                 <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+             <property key="historyDataSource" type="datasource" isList="true" required="false">
+                <caption>Historique</caption>
+                <description>Source de données pour l'historique de consommation.</description>
+            </property>
+            <property key="historyEnergyAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Attribut Énergie (Historique)</caption>
+                <description>Sélectionnez l'attribut Énergie (Enum) de l'entité Historique.</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="historyTariffTypeAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Attribut Type Tarif (Historique)</caption>
+                <description>Sélectionnez l'attribut Type de Tarif (Enum) de l'entité Historique.</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="historyPriceAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Attribut Prix (Historique)</caption>
+                <description>Sélectionnez l'attribut Prix (Decimal) de l'entité Historique.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="historyUnitAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Attribut Unité (Historique)</caption>
+                <description>Sélectionnez l'attribut Unité (String) de l'entité Historique.</description>
+                 <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="historyStartDateAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Attribut Date Début (Historique)</caption>
+                <description>Sélectionnez l'attribut Date de Début (Date/Heure) de l'entité Historique.</description>
+                 <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="historyEndDateAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Attribut Date Fin (Historique)</caption>
+                <description>Sélectionnez l'attribut Date de Fin (Date/Heure) de l'entité Historique.</description>
+                 <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="historyCreationDateAttribute" type="attribute" dataSource="historyDataSource">
+                <caption>Creation Date Attribute</caption>
+                <description>Attribute holding the creation date of the history item.</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="onSaveAction" type="action" required="false">
+                <caption>Action de sauvegarde</caption>
+                <description>Action à exécuter lors de la sauvegarde.</description>
+            </property>
+            <property key="onEditAction" type="action" required="false" dataSource="historyDataSource">
+                <caption>Edit Action (History)</caption>
+                <description>Action executed when the edit button is clicked for a history item.</description>
+            </property>
+            <property key="onDeleteAction" type="action" required="false" dataSource="historyDataSource">
+                <caption>Delete Action (History)</caption>
+                <description>Action executed when the delete button is confirmed for a history item.</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Apparence">
+             <property key="backgroundColor" type="string" required="false">
+                <caption>Couleur de fond</caption>
+                <description>Couleur de fond du widget (ex: #FFFFFF).</description>
+            </property>
+             <property key="textColor" type="string" required="false">
+                <caption>Couleur du texte</caption>
+                <description>Couleur du texte (ex: #000000).</description>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

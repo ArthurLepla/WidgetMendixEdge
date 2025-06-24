@@ -1,0 +1,252 @@
+Ci-dessous, un **cahier des charges** détaillé en français, pensé pour être remis à une IA (ou tout autre développeur) afin d’intégrer **shadcn/ui** dans un **Pluggable Widget Mendix** déjà généré via **Yeoman**. Il inclut :
+
+- Les prérequis (framework, versions, packages).  
+- Les étapes détaillées d’installation.  
+- Les éventuels points d’alerte ou de vigilance.  
+- Ne pas changer le rollup.config.js
+
+Il est rédigé de manière à **anticiper les problèmes** courants et à guider l’IA/développeur dans son implémentation.
+
+---
+
+# Cahier des charges : Intégration de shadcn/ui dans un Pluggable Widget Mendix
+
+## 1. **Contexte et objectifs**
+
+- **Contexte** :  
+  - Nous avons un Pluggable Widget Mendix nommé `headers` (ou un autre nom), généré avec la commande `yo @mendix/widget`.  
+  - Le widget contient un dossier `src/` qui héberge le code React, ainsi qu’un dossier `ui/` pour les feuilles de style (CSS).  
+  - Nous souhaitons **intégrer** la bibliothèque [shadcn/ui](https://ui.shadcn.com/) (souvent référencée en tant que shadcn-ui), afin de bénéficier de composants stylés avec Tailwind (DateRangePicker, Dropdown multi-sélection, Groupes de boutons, Breadcrumb, etc.).  
+
+- **Objectif** :  
+  - Permettre l’utilisation de Tailwind CSS et des composants shadcn dans le widget, pour ensuite développer un header contenant plusieurs éléments (date range picker, multi-select dropdown, etc.).
+
+---
+
+## 2. **Pré-requis techniques**
+
+1. **Node.js / NPM ou Yarn** :  
+   - Version suffisante pour exécuter le CLI de shadcn/ui (généralement Node 16+).  
+2. **Projet Pluggable Widget** (scaffoldé via Yeoman) :  
+   - Disposant de fichiers tels que `package.json`, `tsconfig.json`, etc.  
+3. **Gestionnaire de paquets** :  
+   - NPM ou Yarn, selon la préférence (à préciser).  
+4. **IA/développeur** :  
+   - Doit connaître les bases de React et Tailwind CSS (ou suivre scrupuleusement ce cahier des charges).  
+
+---
+
+## 3. **Plan d’action**
+
+### 3.1. Installation et configuration de Tailwind CSS
+
+**Justification** : shadcn/ui s’appuie fortement sur Tailwind CSS pour le styling.
+
+1. **Installer Tailwind, PostCSS, Autoprefixer**  
+   ```bash
+   npm install -D tailwindcss postcss autoprefixer
+   ```
+   ou
+   ```bash
+   yarn add -D tailwindcss postcss autoprefixer
+   ```
+
+2. **Générer les fichiers de configuration**  
+   ```bash
+   npx tailwindcss init -p
+   ```
+   Résultat attendu :
+   - `tailwind.config.js`
+   - `postcss.config.js`
+
+3. **Configurer `postcss.config.js`**  
+   S’assurer que le fichier **`postcss.config.js`** contient :
+   ```js
+   module.exports = {
+     plugins: [
+       require("tailwindcss"),
+       require("autoprefixer"),
+       // autres plugins éventuels
+     ],
+   };
+   ```
+
+4. **Configurer `tailwind.config.js`**  
+   - Ajouter les chemins des fichiers qui doivent être analysés par Tailwind (React, TSX…) :
+     ```js
+     /** @type {import('tailwindcss').Config} */
+     module.exports = {
+       content: [
+         "./src/**/*.{js,jsx,ts,tsx}",
+         // si vous avez d'autres répertoires, ajoutez-les
+       ],
+       theme: {
+         extend: {},
+       },
+       plugins: [],
+     };
+     ```
+   - Selon la structure du widget, tous les fichiers React se trouvent généralement dans `./src/`. Adapter si besoin.
+
+5. **Importer Tailwind**  
+   - Dans votre fichier CSS principal (par exemple `./src/ui/Headers.css` ou tout autre fichier global), ajouter :
+     ```css
+     @tailwind base;
+     @tailwind components;
+     @tailwind utilities;
+     ```
+   - Vérifier l’endroit où le style est importé dans le code du widget (souvent dans `Headers.tsx` ou un équivalent).
+
+6. **Optionnel : configurer un préfixe**  
+   - Afin d’éviter les collisions de classes avec Mendix, il peut être utile d’ajouter un préfixe (ex. `tw-`) dans `tailwind.config.js` :
+     ```js
+     module.exports = {
+       prefix: "tw-",
+       content: [...],
+       // ...
+     };
+     ```
+   - Cela signifie qu’on utilisera des classes du type `tw-bg-red-500`, etc.
+
+### 3.2. Installation de shadcn/ui
+
+**Justification** : importer les composants (DateRangePicker, etc.) et leurs dépendances.
+
+1. **Installer les dépendances utilitaires**  
+   ```bash
+   npm install class-variance-authority clsx tailwind-merge
+   ```
+   ou
+   ```bash
+   yarn add class-variance-authority clsx tailwind-merge
+   ```
+   > Ces librairies sont régulièrement utilisées par les composants shadcn.
+
+2. **Installer shadcn/ui (option A : CLI)**  
+   - Tenter l’installation via la commande :
+     ```bash
+     npx shadcn-ui init
+     ```
+     - Cela génèrera un dossier `components` et des fichiers de config (certains adaptés à Next.js ou Vite).  
+     - Le CLI peut ne pas fonctionner parfaitement dans le contexte Mendix ; si c’est le cas, passer à l’option B.
+
+3. **Copier les composants manuellement (option B : manuel)**  
+   - Récupérer depuis [le repo GitHub de shadcn/ui](https://github.com/shadcn/ui) ou depuis la [documentation](https://ui.shadcn.com/) les composants nécessaires (ex. `DatePicker.tsx`, `Select.tsx`, `MultiSelect.tsx`, etc.).  
+   - Les coller dans un dossier `./src/components/shadcn/` (ou un autre chemin dédié).  
+   - Vérifier et adapter les chemins d’import (par ex. `import { cn } from "@/lib/utils"` devient `import { cn } from "../lib/utils"`).
+
+4. **Adapter les dépendances internes**  
+   - Si le composant shadcn fait appel à `@radix-ui/react-*`, `react-icons`, ou autres, installer ces paquets :  
+     ```bash
+     npm install @radix-ui/react-popover @radix-ui/react-dialog react-icons date-fns
+     ```
+     (selon les besoins réels de vos composants).  
+
+5. **Vérifier l’arborescence**  
+   - S’assurer que tous les fichiers nécessaires (composants, style, utilitaires) sont accessibles sous `./src/`.  
+   - Maintenir la cohérence avec la config Tailwind (`content`).
+
+### 3.3. Intégration des composants shadcn dans le widget
+
+1. **Créer un composant parent (ex. `HeaderContainer.tsx`)**  
+   - C’est dans ce composant que vous allez assembler votre date range picker, votre dropdown, etc.  
+   - Importer le style global (fichier CSS avec `@tailwind ...`).  
+   - Importer chaque composant shadcn (ex. `import { Calendar } from "./shadcn/Calendar"`) ou la version copié/collé.
+
+2. **Exemple de code**  
+   ```tsx
+   import React from "react";
+   import { DateRangePicker } from "./shadcn/DateRangePicker";
+   import { MultiSelect } from "./shadcn/MultiSelect";
+   // etc.
+
+   export function HeaderContainer() {
+     return (
+       <div className="p-4 bg-gray-100">
+         <h1 className="text-xl font-bold mb-4">Mon Header</h1>
+         <div className="mb-4">
+           <DateRangePicker />
+         </div>
+         <div className="mb-4">
+           <MultiSelect options={[/* ... */]} />
+         </div>
+         {/* Autres éléments : Breadcrumb, ButtonGroup, etc. */}
+       </div>
+     );
+   }
+   ```
+
+3. **Exposer le composant dans le widget**  
+   - Dans votre fichier principal (ex. `Headers.tsx`), importez et rendez le composant `HeaderContainer`.  
+   - Vérifiez que la compilation se fasse sans erreur (`npm run build`).  
+
+4. **Props Mendix**  
+   - Si vous souhaitez que certains paramètres soient configurables dans Mendix Studio Pro (ex. la plage de dates par défaut), il faut mettre à jour le `Headers.xml` et le code TypeScript pour exposer ces props.  
+
+### 3.4. Build et test dans Mendix
+
+1. **Compilez**  
+   - Lancer la commande `npm run build` (ou `yarn build`) pour générer la version du widget.  
+   - Vérifier qu’il n’y a **aucune erreur** de compilation (type, import manquant, etc.).
+
+2. **Déployer dans Mendix**  
+   - Importer le widget dans Mendix Studio Pro (Widget > Import).  
+   - Placer le widget dans une page et vérifier l’affichage des composants (ex. tailwind classes actives, date picker fonctionnel…).
+
+3. **Gestions des collisions de style** (très important)  
+   - Si Mendix apporte des styles par défaut, le risque de collision est élevé. D’où la recommandation d’utiliser un prefix Tailwind (`tw-`) si nécessaire.  
+   - Faire un test sur plusieurs pages Mendix pour s’assurer que rien n’est “cassé”.
+
+---
+
+## 4. **Risques et points de vigilance**
+
+1. **Compatibilité du CLI de shadcn**  
+   - Si le CLI ne marche pas ou génère des fichiers Next.js spécifiques, il faudra copier-coller manuellement les composants.  
+   - Vérifier notamment les imports relatifs à `@/lib/utils` ou `@/components/ui`.
+
+2. **Collisions de classes**  
+   - Les classes Tailwind peuvent entrer en conflit avec celles fournies par Mendix.  
+   - L’utilisation d’un préfixe (`tw-`) peut être indispensable en environnement de production.
+
+3. **Performances**  
+   - Vérifier l’impact sur le bundling du widget : certains composants shadcn peuvent importer beaucoup de dépendances.  
+   - Si nécessaire, n’embarquer que les composants strictement utiles.
+
+4. **Version de React**  
+   - Les Pluggable Widgets Mendix utilisent généralement une version donnée de React (ex. React 17 ou 18).  
+   - s’assurer que la version requise par shadcn/ui soit compatible.
+
+5. **Localisation / i18n**  
+   - Le DateRangePicker (ou DatePicker) peut s’appuyer sur `date-fns` ou un équivalent pour la localisation.  
+   - Vérifier si vous avez besoin d’une langue particulière (fr, etc.).
+
+6. **Props du Widget**  
+   - Afin de rendre le widget configurable via Mendix Studio Pro, il faudra définir les props dans `Headers.xml` et les utiliser dans le code React (ex. `this.props.myDateRange`, etc.).
+
+---
+
+## 5. **Livrables attendus**
+
+1. **Fichiers de configuration** :  
+   - `tailwind.config.js` et `postcss.config.js` correctement configurés.  
+2. **Fichier(s) CSS** :  
+   - Par exemple `Headers.css` (ou un autre nom) incluant `@tailwind base; @tailwind components; @tailwind utilities;`.  
+3. **Composants** :  
+   - Répertoire `src/components/shadcn/` (ou équivalent) contenant les composants nécessaires (DateRangePicker, MultiSelect, etc.).  
+4. **Code du widget** :  
+   - Mise à jour de `Headers.tsx` (ou un composant parent) intégrant les composants shadcn.  
+5. **Documentation** :  
+   - README ou note de synthèse indiquant comment utiliser et personnaliser les composants.
+
+---
+
+## 6. **Conclusion**
+
+En suivant ces étapes, vous aurez un Pluggable Widget Mendix disposant de toute la puissance de **Tailwind CSS** et de **shadcn/ui**. Ce cahier des charges devra être respecté par l’IA/développeur pour éviter les problèmes courants (collisions de style, erreurs d’import, etc.).  
+
+**Prochaine étape** :  
+- Mettre en place ce plan d’action point par point (ou confier ce cahier des charges à votre IA de code)  
+- Tester progressivement dans l’environnement Mendix pour vous assurer que l’intégration est fonctionnelle et esthétique.  
+
+**Fin du cahier des charges**.

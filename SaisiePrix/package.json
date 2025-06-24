@@ -1,0 +1,64 @@
+{
+  "name": "saisie",
+  "widgetName": "Saisie",
+  "version": "1.0.0",
+  "description": "My widget description",
+  "copyright": "© Mendix Technology BV 2022. All rights reserved.",
+  "author": "Arthur",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArthurLepla/SaisiePrix.git"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "Apache-2.0",
+  "config": {
+    "projectPath": "../../",
+    "mendixHost": "http://localhost:8080",
+    "developmentPort": 3000
+  },
+  "packagePath": "mendix",
+  "scripts": {
+    "start": "pluggable-widgets-tools start:server",
+    "dev": "pluggable-widgets-tools start:web",
+    "build": "pluggable-widgets-tools build:web",
+    "lint": "pluggable-widgets-tools lint",
+    "lint:fix": "pluggable-widgets-tools lint:fix",
+    "prerelease": "npm run lint",
+    "release": "pluggable-widgets-tools release:web"
+  },
+  "devDependencies": {
+    "@mendix/pluggable-widgets-tools": "^10.15.0",
+    "@types/big.js": "^6.0.2"
+  },
+  "dependencies": {
+    "@radix-ui/colors": "^3.0.0",
+    "@radix-ui/react-dialog": "^1.1.7",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.1.7",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.1.4",
+    "@radix-ui/themes": "^3.2.1",
+    "@types/react-date-range": "^1.4.0",
+    "classnames": "^2.2.6",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^12.6.5",
+    "lucide-react": "^0.488.0",
+    "react-date-range": "^1.4.0",
+    "tslib": "^2.6.3"
+  },
+  "resolutions": {
+    "react": "^18.2.0",
+    "@types/react": "^18.2.0",
+    "react-native": "0.72.7"
+  },
+  "overrides": {
+    "react": "^18.2.0",
+    "@types/react": "^18.2.0",
+    "react-native": "0.72.7"
+  }
+}

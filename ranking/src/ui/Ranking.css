@@ -1,0 +1,468 @@
+/* Import des styles Ant Design */
+@import 'antd/dist/reset.css';
+
+/* Styles de base pour le tableau de classement */
+.dashboard {
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                 sans-serif;
+    background-color: #fafafa;
+}
+
+/* Header avec titre et bouton de réglages */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dashboard-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.dashboard-icon {
+    margin-right: 8px;
+}
+
+/* Bouton de réglages */
+.settings-button {
+    background: none;
+    border: none;
+    border-radius: 4px;
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.settings-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Section date */
+.date-range {
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.date-range svg {
+    margin-right: 10px;
+    color: #666;
+}
+
+/* Résumé de consommation */
+.consumption-summary {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-left: 4px solid #ef4444;
+}
+
+.summary-item {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+}
+
+.summary-value {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 6px;
+    color: #ef4444;
+}
+
+.summary-label {
+    font-weight: 500;
+    margin-right: 6px;
+}
+
+.summary-details {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Tableau de classement */
+.table-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.ranking-table th {
+    text-align: left;
+    padding: 16px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 2px solid #eee;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.ranking-table td {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.ranking-table tr:last-child td {
+    border-bottom: none;
+}
+
+.ranking-table tr:hover {
+    background-color: #f8f8f8;
+    transition: background-color 0.3s ease;
+}
+
+/* Style pour les lignes critiques */
+.critical-row {
+    background-color: #fff2f0 !important;
+}
+
+.critical-row:hover {
+    background-color: #ffebe8 !important;
+}
+
+/* Badge de rang */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Nom de machine */
+.machine-name {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Affichage de la consommation */
+.consumption {
+    display: flex;
+    align-items: center;
+}
+
+.consumption-icon {
+    margin-right: 8px;
+    color: #4caf50;
+}
+
+.consumption-value {
+    font-weight: 700;
+    color: #333;
+    font-size: 18px;
+}
+
+.consumption-unit {
+    margin-left: 4px;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Badge de statut */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Statuts originaux */
+.status-badge.élevée {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+.status-badge.moyenne {
+    background-color: #f59e0b;
+    color: #ffffff;
+}
+
+.status-badge.basse {
+    background-color: #10b981;
+    color: #ffffff;
+}
+
+/* Nouveaux statuts */
+.status-badge.critical {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+.status-badge.watch {
+    background-color: #f59e0b;
+    color: #ffffff;
+}
+
+.status-badge.normal {
+    background-color: #10b981;
+    color: #ffffff;
+}
+
+/* Détails du statut */
+.status-details {
+    display: flex;
+    align-items: center;
+    color: #555;
+    font-size: 13px;
+}
+
+.details-text {
+    margin-right: 6px;
+}
+
+.info-icon {
+    color: #ff4d4f;
+    margin-left: 8px;
+}
+
+/* Dialog de configuration */
+.settings-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.settings-dialog {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 480px;
+    overflow: hidden;
+    animation: dialog-appear 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+@keyframes dialog-appear {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.dialog-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.close-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dialog-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.settings-group {
+    margin-bottom: 20px;
+}
+
+.settings-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.toggle-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggle-control input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.toggle-control label {
+    margin: 0;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.dialog-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cancel-button {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 16px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.save-button {
+    background-color: #38a13c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-button:hover {
+    background-color: #2d8630;
+}
+
+/* États de chargement et d'erreur */
+.ranking-widget__loading,
+.ranking-widget__error,
+.ranking-widget__no-data {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    padding: 20px;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ranking-widget__error {
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+    background-color: #fff2f0;
+}
+
+.ranking-widget__loading {
+    color: #1890ff;
+}
+
+.ranking-widget__no-data {
+    color: #8c8c8c;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 12px;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+}
+
+/* Personnalisation des composants Ant Design */
+.ant-table-thead > tr > th {
+    background-color: #fafafa;
+    font-weight: 600;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.ant-table-tbody > tr > td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+.ant-tag {
+    border-radius: 16px;
+    font-weight: 500;
+    padding: 4px 12px;
+}
+
+.details-text {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: block;
+}
+
+/* Assurer que les colonnes respectent leurs largeurs */
+.ant-table-tbody > tr > td,
+.ant-table-thead > tr > th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Exception pour la colonne détails qui peut avoir plusieurs lignes */
+.ant-table-tbody > tr > td:last-child,
+.ant-table-thead > tr > th:last-child {
+    white-space: normal;
+}
+
+/* Amélioration de l'affichage des statistiques */
+.ant-statistic-title {
+    margin-bottom: 8px;
+}
+
+.ant-statistic-content {
+    font-size: 24px;
+    font-weight: bold;
+}

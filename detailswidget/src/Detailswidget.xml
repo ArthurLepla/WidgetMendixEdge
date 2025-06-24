@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.detailswidget.Detailswidget" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Detailswidget</name>
+    <description>Widget de détails pour la consommation énergétique</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="General">
+            <propertyGroup caption="Configuration">
+                <property key="devMode" type="boolean" defaultValue="false">
+                    <caption>Mode développeur</caption>
+                    <description>Activer le mode développeur pour simuler les données (sans avoir besoin de mapper des attributs réels)</description>
+                </property>
+                <property key="viewMode" type="enumeration" defaultValue="energetic">
+                    <caption>Mode de visualisation</caption>
+                    <description>Choisir entre le mode énergétique ou IPE</description>
+                    <enumerationValues>
+                        <enumerationValue key="energetic">Énergétique</enumerationValue>
+                        <enumerationValue key="ipe">IPE</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="ipeMode" type="enumeration" defaultValue="single">
+                    <caption>Mode IPE</caption>
+                    <description>Choisir entre un IPE simple ou double</description>
+                    <enumerationValues>
+                        <enumerationValue key="single">Simple IPE</enumerationValue>
+                        <enumerationValue key="double">Double IPE</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="energyType" type="enumeration" defaultValue="electricity">
+                    <caption>Type d'énergie</caption>
+                    <description>Sélectionner le type d'énergie à afficher</description>
+                    <enumerationValues>
+                        <enumerationValue key="electricity">Électricité</enumerationValue>
+                        <enumerationValue key="gas">Gaz</enumerationValue>
+                        <enumerationValue key="water">Eau</enumerationValue>
+                        <enumerationValue key="air">Air</enumerationValue>
+                        <enumerationValue key="IPE">IPE</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="baseUnit" type="enumeration" defaultValue="auto">
+                    <caption>Unité de base des données</caption>
+                    <description>Définir l'unité d'entrée des données de consommation</description>
+                    <enumerationValues>
+                        <enumerationValue key="auto">Automatique (selon type d'énergie)</enumerationValue>
+                        <enumerationValue key="kWh">Kilowatt-heure (kWh)</enumerationValue>
+                        <enumerationValue key="m3">Mètre cube (m³)</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+
+            <!-- IPE Principal (toujours visible) -->
+            <propertyGroup caption="Source de données">
+                <property key="consumptionDataSource" type="datasource" isList="true" required="false">
+                    <caption>Source de données de consommation</caption>
+                    <description>Sélectionner la source de données pour la consommation (non requis si le mode dev est activé)</description>
+                </property>
+                <property key="timestampAttr" type="attribute" dataSource="consumptionDataSource" required="false">
+                    <caption>Attribut timestamp</caption>
+                    <description>Sélectionner l'attribut timestamp (non requis si le mode dev est activé)</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="consumptionAttr" type="attribute" dataSource="consumptionDataSource" required="false">
+                    <caption>Attribut consommation</caption>
+                    <description>Sélectionner l'attribut de consommation (non requis si le mode dev est activé)</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+                <property key="NameAttr" type="attribute" dataSource="consumptionDataSource" required="false">
+                    <caption>Nom de l'objet</caption>
+                    <description>Nom de l'objet (non requis si le mode dev est activé)</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Période d'analyse">
+                <property key="startDate" type="attribute" required="false">
+                    <caption>Date de début</caption>
+                    <description>Sélectionner la date de début (non requis si le mode dev est activé)</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="endDate" type="attribute" required="false">
+                    <caption>Date de fin</caption>
+                    <description>Sélectionner la date de fin (non requis si le mode dev est activé)</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Configuration IPE - Card 1">
+                <property key="card1Title" type="string" required="false">
+                    <caption>Titre Card 1</caption>
+                    <description>Titre pour la première card</description>
+                </property>
+                <property key="card1Icon" type="icon" required="false">
+                    <caption>Icône Card 1</caption>
+                    <description>Sélectionner l'icône pour la première card</description>
+                </property>
+                <property key="card1Unit" type="string" required="false">
+                    <caption>Unité Card 1</caption>
+                    <description>Unité de mesure pour la première card</description>
+                </property>
+                <property key="card1DataSource" type="datasource" isList="true" required="false">
+                    <caption>Source de données Card 1</caption>
+                    <description>Sélectionner la source de données pour la première card</description>
+                </property>
+                <property key="card1ValueAttr" type="attribute" dataSource="card1DataSource" required="false">
+                    <caption>Attribut valeur Card 1</caption>
+                    <description>Sélectionner l'attribut de valeur pour la première card</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Configuration IPE - Card 2">
+                <property key="card2Title" type="string" required="false">
+                    <caption>Titre Card 2</caption>
+                    <description>Titre pour la deuxième card</description>
+                </property>
+                <property key="card2Icon" type="icon" required="false">
+                    <caption>Icône Card 2</caption>
+                    <description>Sélectionner l'icône pour la deuxième card</description>
+                </property>
+                <property key="card2Unit" type="string" required="false">
+                    <caption>Unité Card 2</caption>
+                    <description>Unité de mesure pour la deuxième card</description>
+                </property>
+                <property key="card2DataSource" type="datasource" isList="true" required="false">
+                    <caption>Source de données Card 2</caption>
+                    <description>Sélectionner la source de données pour la deuxième card</description>
+                </property>
+                <property key="card2ValueAttr" type="attribute" dataSource="card2DataSource" required="false">
+                    <caption>Attribut valeur Card 2</caption>
+                    <description>Sélectionner l'attribut de valeur pour la deuxième card</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Configuration IPE - Card 3">
+                <property key="card3Title" type="string" required="false">
+                    <caption>Titre Card 3</caption>
+                    <description>Titre pour la troisième card</description>
+                </property>
+                <property key="card3Icon" type="icon" required="false">
+                    <caption>Icône Card 3</caption>
+                    <description>Sélectionner l'icône pour la troisième card</description>
+                </property>
+                <property key="card3Unit" type="string" required="false">
+                    <caption>Unité Card 3</caption>
+                    <description>Unité de mesure pour la troisième card</description>
+                </property>
+                <property key="card3DataSource" type="datasource" isList="true" required="false">
+                    <caption>Source de données Card 3</caption>
+                    <description>Sélectionner la source de données pour la troisième card</description>
+                </property>
+                <property key="card3ValueAttr" type="attribute" dataSource="card3DataSource" required="false">
+                    <caption>Attribut valeur Card 3</caption>
+                    <description>Sélectionner l'attribut de valeur pour la troisième card</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <!-- IPE Secondaire (visible seulement en mode double) -->
+            <propertyGroup caption="Source de données 2">
+                <property key="consumptionDataSource2" type="datasource" isList="true" required="false">
+                    <caption>Source de données de consommation 2</caption>
+                    <description>Sélectionner la source de données pour la consommation du deuxième IPE</description>
+                </property>
+                <property key="timestampAttr2" type="attribute" dataSource="consumptionDataSource2" required="false">
+                    <caption>Attribut timestamp 2</caption>
+                    <description>Sélectionner l'attribut timestamp pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="consumptionAttr2" type="attribute" dataSource="consumptionDataSource2" required="false">
+                    <caption>Attribut consommation 2</caption>
+                    <description>Sélectionner l'attribut de consommation pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+                <property key="NameAttr2" type="attribute" dataSource="consumptionDataSource2" required="false">
+                    <caption>Nom de l'objet 2</caption>
+                    <description>Nom de l'objet pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Période d'analyse 2">
+                <property key="startDate2" type="attribute" required="false">
+                    <caption>Date de début 2</caption>
+                    <description>Sélectionner la date de début pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="endDate2" type="attribute" required="false">
+                    <caption>Date de fin 2</caption>
+                    <description>Sélectionner la date de fin pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Configuration IPE 2 - Card 1">
+                <property key="card1Title2" type="string" required="false">
+                    <caption>Titre Card 1 (IPE 2)</caption>
+                    <description>Titre pour la première card du deuxième IPE</description>
+                </property>
+                <property key="card1Icon2" type="icon" required="false">
+                    <caption>Icône Card 1 (IPE 2)</caption>
+                    <description>Sélectionner l'icône pour la première card du deuxième IPE</description>
+                </property>
+                <property key="card1Unit2" type="string" required="false">
+                    <caption>Unité Card 1 (IPE 2)</caption>
+                    <description>Unité de mesure pour la première card du deuxième IPE</description>
+                </property>
+                <property key="card1DataSource2" type="datasource" isList="true" required="false">
+                    <caption>Source de données Card 1 (IPE 2)</caption>
+                    <description>Sélectionner la source de données pour la première card du deuxième IPE</description>
+                </property>
+                <property key="card1ValueAttr2" type="attribute" dataSource="card1DataSource2" required="false">
+                    <caption>Attribut valeur Card 1 (IPE 2)</caption>
+                    <description>Sélectionner l'attribut de valeur pour la première card du deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Configuration IPE 2 - Card 2">
+                <property key="card2Title2" type="string" required="false">
+                    <caption>Titre Card 2 (IPE 2)</caption>
+                    <description>Titre pour la deuxième card du deuxième IPE</description>
+                </property>
+                <property key="card2Icon2" type="icon" required="false">
+                    <caption>Icône Card 2 (IPE 2)</caption>
+                    <description>Sélectionner l'icône pour la deuxième card du deuxième IPE</description>
+                </property>
+                <property key="card2Unit2" type="string" required="false">
+                    <caption>Unité Card 2 (IPE 2)</caption>
+                    <description>Unité de mesure pour la deuxième card du deuxième IPE</description>
+                </property>
+                <property key="card2DataSource2" type="datasource" isList="true" required="false">
+                    <caption>Source de données Card 2 (IPE 2)</caption>
+                    <description>Sélectionner la source de données pour la deuxième card du deuxième IPE</description>
+                </property>
+                <property key="card2ValueAttr2" type="attribute" dataSource="card2DataSource2" required="false">
+                    <caption>Attribut valeur Card 2 (IPE 2)</caption>
+                    <description>Sélectionner l'attribut de valeur pour la deuxième card du deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Configuration IPE 2 - Card 3">
+                <property key="card3Title2" type="string" required="false">
+                    <caption>Titre Card 3 (IPE 2)</caption>
+                    <description>Titre pour la troisième card du deuxième IPE</description>
+                </property>
+                <property key="card3Icon2" type="icon" required="false">
+                    <caption>Icône Card 3 (IPE 2)</caption>
+                    <description>Sélectionner l'icône pour la troisième card du deuxième IPE</description>
+                </property>
+                <property key="card3Unit2" type="string" required="false">
+                    <caption>Unité Card 3 (IPE 2)</caption>
+                    <description>Unité de mesure pour la troisième card du deuxième IPE</description>
+                </property>
+                <property key="card3DataSource2" type="datasource" isList="true" required="false">
+                    <caption>Source de données Card 3 (IPE 2)</caption>
+                    <description>Sélectionner la source de données pour la troisième card du deuxième IPE</description>
+                </property>
+                <property key="card3ValueAttr2" type="attribute" dataSource="card3DataSource2" required="false">
+                    <caption>Attribut valeur Card 3 (IPE 2)</caption>
+                    <description>Sélectionner l'attribut de valeur pour la troisième card du deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <!-- Noms des IPE pour le toggle (visible seulement en mode double) -->
+            <propertyGroup caption="Configuration Double IPE">
+                <property key="ipe1Name" type="string" required="false">
+                    <caption>Nom IPE 1</caption>
+                    <description>Nom affiché pour le premier IPE dans le toggle</description>
+                </property>
+                <property key="ipe2Name" type="string" required="false">
+                    <caption>Nom IPE 2</caption>
+                    <description>Nom affiché pour le deuxième IPE dans le toggle</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+    </properties>
+</widget>

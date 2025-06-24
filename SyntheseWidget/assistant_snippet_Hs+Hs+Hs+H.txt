@@ -1,0 +1,103 @@
+1|.variation-badge {
+2|    @apply inline-flex items-center rounded-full px-3 py-1.5 text-xl font-bold;
+3|}
+4|
+5|.bg-red-50 {
+6|    @apply rounded-lg;
+7|}
+8|
+9|.variation-increase {
+10|    @apply bg-[#38a13c]/10 text-[#38a13c] rounded-full;
+11|}
+12|
+13|.variation-decrease {
+14|    @apply bg-red-50 text-red-700 rounded-full;
+15|}
+16|
+17|const calculateVariation = (current: number, previous: number): number => {
+18|    if (current === 0 && previous === 0) return 0;
+19|    if (previous === 0 && current !== 0) return 100;
+20|    if (current === 0 && previous !== 0) return -100;
+21|    return ((current - previous) / previous) * 100;
+22|};
+23|const unit = getUnit();
+24|
+25|const getFontSize = () => {
+26|    const width = window.innerWidth;
+27|    if (width < 640) return 12; // sm
+28|    if (width < 1024) return 14; // md
+29|    return 16; // lg
+30|};
+31|
+32|const fontSize = getFontSize();
+33|
+34|const option = {
+35|    title: {
+36|        show: false
+37|    },
+38|    tooltip: {
+39|        trigger: 'axis',
+40|        axisPointer: {
+41|            type: 'shadow'
+42|        },
+43|        formatter: getTooltipFormatter,
+44|        textStyle: {
+45|            fontSize
+46|        }
+47|    },
+48|    legend: {
+49|        data: ['Période actuelle', 'Période précédente'],
+50|        top: 0,
+51|        textStyle: {
+52|            fontSize
+53|        }
+54|    },
+55|    grid: {
+56|        left: '3%',
+57|        right: '4%',
+58|        bottom: '3%',
+59|        top: fontSize * 3,
+60|        containLabel: true
+61|    },
+62|    xAxis: {
+63|        axisLabel: {
+64|            fontSize,
+65|            interval: 0,
+66|            rotate: window.innerWidth < 640 ? 30 : 0
+67|        }
+68|    },
+69|    yAxis: {
+70|        axisLabel: {
+71|            formatter: `{value} ${getUnit()}`,
+72|            fontSize
+73|        }
+74|    },
+75|    series: [
+76|        {
+77|            barWidth: window.innerWidth < 640 ? '40%' : '60%'
+78|        },
+79|        {
+80|            barWidth: window.innerWidth < 640 ? '40%' : '60%'
+81|        }
+82|    ]
+83|};
+25|} 
+1|.title-medium {
+2|    @apply text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900;
+3|}
+4|
+5|.value-large {
+6|    @apply text-2xl sm:text-3xl lg:text-4xl font-bold leading-none;
+7|}
+8|
+9|.card-base {
+10|    @apply rounded-lg bg-white p-4 sm:p-6 shadow-sm text-base sm:text-lg lg:text-xl flex flex-col h-full;
+11|}
+12|
+13|.card-header {
+14|    @apply flex items-center gap-2 sm:gap-4 mb-3 sm:mb-4;
+15|}
+16|
+17|.grid-responsive-4 {
+18|    @apply grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4;
+19|} 

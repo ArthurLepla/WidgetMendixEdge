@@ -1,0 +1,152 @@
+# ------------------------------------------------------------------------
+# MENDIX PLUGGABLE WIDGET - HEADERS COMPONENT
+# Version: 1.0.0
+# Mendix version: 10.11.0+
+# ------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------
+# 1. PREREQUISITES
+# ------------------------------------------------------------------------
+- Node.js 16.x or higher
+- NPM 8.x or higher
+- Mendix Studio Pro 10.11.0 or higher
+- @mendix/generator-widget (latest version)
+
+# ------------------------------------------------------------------------
+# 2. DEPENDENCIES
+# ------------------------------------------------------------------------
+
+## Core Dependencies
+react@18.2.0
+react-dom@18.2.0
+@mendix/pluggable-widgets-tools@latest
+typescript@4.9.5
+
+## UI Components & Styling
+tailwindcss@3.3.0
+postcss@8.4.31
+autoprefixer@10.4.16
+@radix-ui/react-popover@1.0.7
+@radix-ui/react-dialog@1.0.5
+lucide-react@0.294.0
+date-fns@2.30.0
+react-day-picker@8.9.1
+
+# ------------------------------------------------------------------------
+# 3. INSTALLATION STEPS
+# ------------------------------------------------------------------------
+
+1. Create new widget:
+   ```bash
+   npx @mendix/generator-widget create
+   ```
+   - Widget name: headers
+   - Description: Modern header component with breadcrumb, date range picker and multi-select
+   - Organization: your-organization
+   - Copyright: your-copyright
+   - License: Apache-2.0
+   - Template: Full Boilerplate
+   - Programming language: TypeScript
+   - Platform: Web
+
+2. Install dependencies:
+   ```bash
+   npm install tailwindcss postcss autoprefixer @radix-ui/react-popover @radix-ui/react-dialog lucide-react date-fns react-day-picker
+   ```
+
+3. Configure Tailwind CSS:
+   - Create tailwind.config.js
+   - Add Tailwind directives to global.css
+   - Configure PostCSS
+
+4. Create component structure:
+   ```
+   src/
+   ├── components/
+   │   ├── HeaderContainer.tsx
+   │   └── ui/
+   │       ├── breadcrumb.tsx
+   │       ├── breadcrumb-nav.tsx
+   │       ├── button.tsx
+   │       ├── calendar.tsx
+   │       ├── command.tsx
+   │       ├── date-range-picker.tsx
+   │       ├── multi-select.tsx
+   │       └── time-picker.tsx
+   ```
+
+# ------------------------------------------------------------------------
+# 4. COMPONENT FEATURES
+# ------------------------------------------------------------------------
+
+1. HeaderContainer:
+   - Flexible layout with responsive design
+   - Integration of BreadcrumbNav, DateRangePicker, and MultiSelect
+   - Configurable through Mendix Studio Pro
+
+2. BreadcrumbNav:
+   - Dynamic breadcrumb navigation
+   - Home icon support
+   - Custom navigation handling
+   - Responsive design
+
+3. DateRangePicker:
+   - Date range selection with calendar
+   - Time selection for start and end dates
+   - Temporary state management
+   - Apply/Cancel functionality
+   - Formatted date display
+
+4. MultiSelect:
+   - Multiple item selection
+   - Searchable options
+   - Custom styling for selected items
+   - Dropdown with checkmarks
+   - Click outside handling
+
+# ------------------------------------------------------------------------
+# 5. STYLING GUIDELINES
+# ------------------------------------------------------------------------
+
+1. Use Tailwind CSS classes with 'tw-' prefix
+2. Follow responsive design principles
+3. Maintain consistent spacing and sizing
+4. Use provided color scheme and theme variables
+
+# ------------------------------------------------------------------------
+# 6. CONFIGURATION IN MENDIX
+# ------------------------------------------------------------------------
+
+1. Widget Properties:
+   - Configure data source
+   - Set up navigation handling
+   - Customize appearance
+   - Define event handlers
+
+2. Security:
+   - Set up appropriate user roles
+   - Configure page access
+
+# ------------------------------------------------------------------------
+# 7. DEVELOPMENT NOTES
+# ------------------------------------------------------------------------
+
+1. Code Structure:
+   - Use TypeScript for type safety
+   - Follow React functional component patterns
+   - Implement proper state management
+   - Use custom hooks for logic separation
+
+2. Performance:
+   - Optimize component re-renders
+   - Implement proper event handling
+   - Use React.memo where appropriate
+
+3. Accessibility:
+   - Ensure keyboard navigation
+   - Maintain ARIA attributes
+   - Follow WCAG guidelines
+
+# ------------------------------------------------------------------------
+# END OF REQUIREMENTS
+# ------------------------------------------------------------------------ 

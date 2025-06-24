@@ -1,0 +1,744 @@
+mxui.js?638792846581982641:59 [Client] HeaderContainer props: {hasStartDate: true, hasEndDate: true, hasOnDateChange: true}
+mxui.js?638792846581982641:59 [Client] DateRangePicker props: {startDateAttribute: {…}, endDateAttribute: {…}, onDateChange: {…}, hasOnChange: false}
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 0
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 0
+mxui.js?638792846581982641:59 [Network] Finished runtime action "runtimeOperation" in 55.5 milliseconds.
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId '7e4e4FaUsE2x7hFqz7Qbhw' for widget Smart.VueGlobale_Elec.advancedSankey2
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId 'xj+zKilL7U6ztcMuJoRaPA' for widget Smart.VueGlobale_Elec.advancedSankey2
+ [Network] Starting runtime action: runtimeOperation
+ [Client] [LoadingService] Fetch request started
+ [Client] [LoadingService] Fetch request started
+ [Client] [LoadingService] Fetch completed, remaining: 1
+ [Client] [LoadingService] Fetch completed, remaining: 1
+ [Network] Finished runtime action "runtimeOperation" in 12.3 milliseconds.
+ [Client] Received 3 objects for widget Smart.VueGlobale_Elec.advancedSankey2 object ids: (3) ['30117822508066045', '30117822508066170', '30117822508066199']
+ [Client] Configuration de la hiérarchie: (3) [{…}, {…}, {…}]
+ [Client] Période sélectionnée: {startDate: '2025-04-01T00:00:00.000Z', endDate: '2025-04-03T14:13:13.000Z'}
+ [Client] Niveaux triés: (3) [{…}, {…}, {…}]
+ [Client] [DEBUG] Processing level Secteur: {levelOrder: 0, itemsCount: 3, hasEnergyType: false}
+ [Client] [DEBUG] Item 0 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Utilités with value: 220984.76997853
+ [Client] [DEBUG] Item 1 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Production with value: 958872.14987756
+ [Client] [DEBUG] Item 2 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Tertiaire with value: 63135.90994644
+ [Client] [DEBUG] Processing level Atelier: {levelOrder: 1, itemsCount: 10, hasEnergyType: false}
+ [Client] [DEBUG] Item 0 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Mecanique - Ebarbage with value: 220984.76997853
+ [Client] [DEBUG] Item 1 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Roche with value: 160965.19000626
+ [Client] [DEBUG] Item 2 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Autres with value: 190209.950037
+ [Client] [DEBUG] Item 3 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Machine outils with value: 288896.9799614
+ [Client] [DEBUG] Item 4 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_ALC with value: 64812.1899395
+ [Client] [DEBUG] Item 5 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Clotures Imagine with value: 63926.0799818
+ [Client] [DEBUG] Item 6 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Moulage with value: 32080.16996479
+ [Client] [DEBUG] Item 7 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Acierie with value: 157981.58998681
+ [Client] [DEBUG] Item 8 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_DTT with value: 63135.90994644
+ [Client] [DEBUG] Item 9 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Traitement thermique with value: 0
+ [Client] [DEBUG] Processing level Machine: {levelOrder: 2, itemsCount: 39, hasEnergyType: true}
+ [Client] [DEBUG] Item 0 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Chalumeau  Meulage with value: 31926.41000462
+ [Client] [DEBUG] Item 1 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Potence ESAB Roche with value: 32219.42998409
+ [Client] [DEBUG] Item 2 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Ecl Mecanique with value: 30912.96000862
+ [Client] [DEBUG] Item 3 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TVR2 with value: 32708.55002213
+ [Client] [DEBUG] Item 4 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV8 BOST with value: 31816.68996525
+ [Client] [DEBUG] Item 5 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Waldrich with value: 32821.5199728
+ [Client] [DEBUG] Item 6 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_CMD 400V with value: 31630.52993107
+ [Client] [DEBUG] Item 7 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV13 with value: 32476.79002762
+ [Client] [DEBUG] Item 8 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Scharmann with value: 32096.55005741
+ [Client] [DEBUG] Item 9 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV400 with value: 31123.59000683
+ [Client] [DEBUG] Item 10 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Csepel with value: 32357.47998714
+ [Client] [DEBUG] Item 11 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TVR1 with value: 31865.27999115
+ [Client] [DEBUG] Item 12 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_400V Roche cote magasin with value: 33417.2799387
+ [Client] [DEBUG] Item 13 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_400V Roche cote Ebarbage with value: 32127.73004532
+ [Client] [DEBUG] Item 14 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_400V Roche cote Quai with value: 31777.90002823
+ [Client] [DEBUG] Item 15 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_220V Roche cote Quai with value: 31422.85000992
+ [Client] [DEBUG] Item 16 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Ecl Moulage with value: 31859.78003502
+ [Client] [DEBUG] Item 17 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Compress Atlas COPCO with value: 32012.39994049
+ [Client] [DEBUG] Item 18 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Cumulus Vestiaire with value: 31876.92995548
+ [Client] [DEBUG] Item 19 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Modelage Atelier with value: 31414.74997616
+ [Client] [DEBUG] Item 20 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Transfo Eclairage with value: 32133.13012123
+ [Client] [DEBUG] Item 21 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depart 102 with value: 31163.55996418
+ [Client] [DEBUG] Item 22 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_FEEDER DL with value: 32101.28997898
+ [Client] [DEBUG] Item 23 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_FEEDER 220 250 KVA with value: 30817.44002533
+ [Client] [DEBUG] Item 24 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_PC Ebarbage with value: 31345.61001492
+ [Client] [DEBUG] Item 25 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depart TVR2 with value: 31198.5699873
+ [Client] [DEBUG] Item 26 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV Schiess with value: 32431.8900032
+ [Client] [DEBUG] Item 27 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Metal Blanc Etuve ALC with value: 32459.22995949
+ [Client] [DEBUG] Item 28 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Metal Blanc ALC with value: 32352.95998001
+ [Client] [DEBUG] Item 29 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Clotures Imagine 220V with value: 31626.96000862
+ [Client] [DEBUG] Item 30 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Sablerie  Malaxeur with value: 32080.16996479
+ [Client] [DEBUG] Item 31 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Clotures Imagine 400V with value: 32299.11997318
+ [Client] [DEBUG] Item 32 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Four induction 35T with value: 31970.26001072
+ [Client] [DEBUG] Item 33 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Affinage with value: 31271.94001198
+ [Client] [DEBUG] Item 34 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Four 50T with value: 31757.48999596
+ [Client] [DEBUG] Item 35 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Eclairage Bureaux DTT with value: 31629.29995537
+ [Client] [DEBUG] Item 36 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Armoire DTT with value: 31506.60999107
+ [Client] [DEBUG] Item 37 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depoussiereur Moteur 1 with value: 32489.74999619
+ [Client] [DEBUG] Item 38 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depoussiereur Moteur 2 with value: 30492.14997196
+ [Client] [DEBUG] Processing links for level Secteur, item 0
+ [Client] [DEBUG] Processing links for level Secteur, item 1
+ [Client] [DEBUG] Processing links for level Secteur, item 2
+ [Client] [DEBUG] Processing links for level Atelier, item 0
+ [Client] [Link Created] Atelier to Usine: Secteur_Utilités -> Atelier_Mecanique - Ebarbage (220984.76997853)
+ [Client] [DEBUG] Processing links for level Atelier, item 1
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Roche (160965.19000626)
+ [Client] [DEBUG] Processing links for level Atelier, item 2
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Autres (190209.950037)
+ [Client] [DEBUG] Processing links for level Atelier, item 3
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Machine outils (288896.9799614)
+ [Client] [DEBUG] Processing links for level Atelier, item 4
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_ALC (64812.1899395)
+ [Client] [DEBUG] Processing links for level Atelier, item 5
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Clotures Imagine (63926.0799818)
+ [Client] [DEBUG] Processing links for level Atelier, item 6
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Moulage (32080.16996479)
+ [Client] [DEBUG] Processing links for level Atelier, item 7
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Acierie (157981.58998681)
+ [Client] [DEBUG] Processing links for level Atelier, item 8
+ [Client] [Link Created] Atelier to Usine: Secteur_Tertiaire -> Atelier_DTT (63135.90994644)
+ [Client] [DEBUG] Processing links for level Atelier, item 9
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Traitement thermique (0)
+ [Client] [DEBUG] Processing links for level Machine, item 0
+ [Client] [DEBUG] Processing machine Chalumeau  Meulage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_Chalumeau  Meulage (31926.41000462)
+ [Client] [DEBUG] Processing links for level Machine, item 1
+ [Client] [DEBUG] Processing machine Potence ESAB Roche: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_Potence ESAB Roche (32219.42998409)
+ [Client] [DEBUG] Processing links for level Machine, item 2
+ [Client] [DEBUG] Processing machine Ecl Mecanique: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Ecl Mecanique (30912.96000862)
+ [Client] [DEBUG] Processing links for level Machine, item 3
+ [Client] [DEBUG] Processing machine TVR2: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TVR2 (32708.55002213)
+ [Client] [DEBUG] Processing links for level Machine, item 4
+ [Client] [DEBUG] Processing machine TV8 BOST: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TV8 BOST (31816.68996525)
+ [Client] [DEBUG] Processing links for level Machine, item 5
+ [Client] [DEBUG] Processing machine Waldrich: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_Waldrich (32821.5199728)
+ [Client] [DEBUG] Processing links for level Machine, item 6
+ [Client] [DEBUG] Processing machine CMD 400V: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_CMD 400V (31630.52993107)
+ [Client] [DEBUG] Processing links for level Machine, item 7
+ [Client] [DEBUG] Processing machine TV13: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TV13 (32476.79002762)
+ [Client] [DEBUG] Processing links for level Machine, item 8
+ [Client] [DEBUG] Processing machine Scharmann: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_Scharmann (32096.55005741)
+ [Client] [DEBUG] Processing links for level Machine, item 9
+ [Client] [DEBUG] Processing machine TV400: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TV400 (31123.59000683)
+ [Client] [DEBUG] Processing links for level Machine, item 10
+ [Client] [DEBUG] Processing machine Csepel: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_Csepel (32357.47998714)
+ [Client] [DEBUG] Processing links for level Machine, item 11
+ [Client] [DEBUG] Processing machine TVR1: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TVR1 (31865.27999115)
+ [Client] [DEBUG] Processing links for level Machine, item 12
+ [Client] [DEBUG] Processing machine 400V Roche cote magasin: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_400V Roche cote magasin (33417.2799387)
+ [Client] [DEBUG] Processing links for level Machine, item 13
+ [Client] [DEBUG] Processing machine 400V Roche cote Ebarbage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_400V Roche cote Ebarbage (32127.73004532)
+ [Client] [DEBUG] Processing links for level Machine, item 14
+ [Client] [DEBUG] Processing machine 400V Roche cote Quai: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_400V Roche cote Quai (31777.90002823)
+ [Client] [DEBUG] Processing links for level Machine, item 15
+ [Client] [DEBUG] Processing machine 220V Roche cote Quai: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_220V Roche cote Quai (31422.85000992)
+ [Client] [DEBUG] Processing links for level Machine, item 16
+ [Client] [DEBUG] Processing machine Ecl Moulage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Ecl Moulage (31859.78003502)
+ [Client] [DEBUG] Processing links for level Machine, item 17
+ [Client] [DEBUG] Processing machine Compress Atlas COPCO: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Compress Atlas COPCO (32012.39994049)
+ [Client] [DEBUG] Processing links for level Machine, item 18
+ [Client] [DEBUG] Processing machine Cumulus Vestiaire: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Cumulus Vestiaire (31876.92995548)
+ [Client] [DEBUG] Processing links for level Machine, item 19
+ [Client] [DEBUG] Processing machine Modelage Atelier: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Modelage Atelier (31414.74997616)
+ [Client] [DEBUG] Processing links for level Machine, item 20
+ [Client] [DEBUG] Processing machine Transfo Eclairage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Transfo Eclairage (32133.13012123)
+ [Client] [DEBUG] Processing links for level Machine, item 21
+ [Client] [DEBUG] Processing machine Depart 102: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_Depart 102 (31163.55996418)
+ [Client] [DEBUG] Processing links for level Machine, item 22
+ [Client] [DEBUG] Processing machine FEEDER DL: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_FEEDER DL (32101.28997898)
+ [Client] [DEBUG] Processing links for level Machine, item 23
+ [Client] [DEBUG] Processing machine FEEDER 220 250 KVA: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_FEEDER 220 250 KVA (30817.44002533)
+ [Client] [DEBUG] Processing links for level Machine, item 24
+ [Client] [DEBUG] Processing machine PC Ebarbage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_PC Ebarbage (31345.61001492)
+ [Client] [DEBUG] Processing links for level Machine, item 25
+ [Client] [DEBUG] Processing machine Depart TVR2: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_Depart TVR2 (31198.5699873)
+ [Client] [DEBUG] Processing links for level Machine, item 26
+ [Client] [DEBUG] Processing machine TV Schiess: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_TV Schiess (32431.8900032)
+ [Client] [DEBUG] Processing links for level Machine, item 27
+ [Client] [DEBUG] Processing machine Metal Blanc Etuve ALC: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_ALC -> Machine_Metal Blanc Etuve ALC (32459.22995949)
+ [Client] [DEBUG] Processing links for level Machine, item 28
+ [Client] [DEBUG] Processing machine Metal Blanc ALC: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_ALC -> Machine_Metal Blanc ALC (32352.95998001)
+ [Client] [DEBUG] Processing links for level Machine, item 29
+ [Client] [DEBUG] Processing machine Clotures Imagine 220V: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Clotures Imagine -> Machine_Clotures Imagine 220V (31626.96000862)
+ [Client] [DEBUG] Processing links for level Machine, item 30
+ [Client] [DEBUG] Processing machine Sablerie  Malaxeur: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Moulage -> Machine_Sablerie  Malaxeur (32080.16996479)
+ [Client] [DEBUG] Processing links for level Machine, item 31
+ [Client] [DEBUG] Processing machine Clotures Imagine 400V: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Clotures Imagine -> Machine_Clotures Imagine 400V (32299.11997318)
+ [Client] [DEBUG] Processing links for level Machine, item 32
+ [Client] [DEBUG] Processing machine Four induction 35T: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Four induction 35T (31970.26001072)
+ [Client] [DEBUG] Processing links for level Machine, item 33
+ [Client] [DEBUG] Processing machine Affinage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Affinage (31271.94001198)
+ [Client] [DEBUG] Processing links for level Machine, item 34
+ [Client] [DEBUG] Processing machine Four 50T: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Four 50T (31757.48999596)
+ [Client] [DEBUG] Processing links for level Machine, item 35
+ [Client] [DEBUG] Processing machine Eclairage Bureaux DTT: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_DTT -> Machine_Eclairage Bureaux DTT (31629.29995537)
+ [Client] [DEBUG] Processing links for level Machine, item 36
+ [Client] [DEBUG] Processing machine Armoire DTT: {level1Parent: {…}, level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Link Created] To Atelier: Atelier_DTT -> Machine_Armoire DTT (31506.60999107)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Machine, item 37
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing machine Depoussiereur Moteur 1: {level1Parent: {…}, level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Depoussiereur Moteur 1 (32489.74999619)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Machine, item 38
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing machine Depoussiereur Moteur 2: {level1Parent: {…}, level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Depoussiereur Moteur 2 (30492.14997196)
+mxui.js?638792846581982641:59 [Client] Données Sankey initiales avant recalcul: {nodesCount: 52, linksCount: 49}
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs des nœuds pour le type d'énergie: elec
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 2 avec énergie elec: 39
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs pour les 10 nœuds de niveau 1
+mxui.js?638792846581982641:59 [Client] [RECALCUL] Nœud Atelier_Acierie: 157981.58998681 -> 157981.58998681002 (5 enfants)
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs pour les 3 nœuds de niveau 0
+mxui.js?638792846581982641:59 [Client] Données Sankey après recalcul: {nodesCount: 52, linksCount: 49, nodesSample: Array(3), linksSample: Array(3)}
+mxui.js?638792846581982641:59 [Client] Nœuds avec type d'énergie inféré : {count: 39, nodes: Array(39)}
+mxui.js?638792846581982641:59 [Client] Filtrage pour l'énergie: elec
+mxui.js?638792846581982641:59 [Client] Application du filtrage avec logique remontante
+mxui.js?638792846581982641:59 [Client] Niveaux détectés: 0, 1, 2
+mxui.js?638792846581982641:59 [Client] Energy filtering debug: {selectedEnergy: 'elec', nodeEnergyTypes: Array(39)}
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 2 avec type d'énergie elec: 39
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 1 à garder: 9
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 0 à garder: 3
+mxui.js?638792846581982641:59 [Client] Données après filtrage par énergie (logique remontante): {nodesCount: 51, linksCount: 48, parentNodes: Array(12)}
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Mecanique - Ebarbage (niveau 1): ancienne valeur = 220984.76997853, nouvelle valeur = 220984.76997853, enfants = 7
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Roche (niveau 1): ancienne valeur = 160965.19000626, nouvelle valeur = 160965.19000626, enfants = 5
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Autres (niveau 1): ancienne valeur = 190209.950037, nouvelle valeur = 190209.950037, enfants = 6
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Machine outils (niveau 1): ancienne valeur = 288896.9799614, nouvelle valeur = 288896.9799614, enfants = 9
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_ALC (niveau 1): ancienne valeur = 64812.1899395, nouvelle valeur = 64812.1899395, enfants = 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Clotures Imagine (niveau 1): ancienne valeur = 63926.0799818, nouvelle valeur = 63926.0799818, enfants = 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Moulage (niveau 1): ancienne valeur = 32080.16996479, nouvelle valeur = 32080.16996479, enfants = 1
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Acierie (niveau 1): ancienne valeur = 157981.58998681002, nouvelle valeur = 157981.58998681002, enfants = 5
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_DTT (niveau 1): ancienne valeur = 63135.90994644, nouvelle valeur = 63135.90994644, enfants = 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Utilités (niveau 0): ancienne valeur = 220984.76997853, nouvelle valeur = 220984.76997853, enfants niveau 1 = 1, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Production (niveau 0): ancienne valeur = 958872.14987756, nouvelle valeur = 958872.14987756, enfants niveau 1 = 7, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Tertiaire (niveau 0): ancienne valeur = 63135.90994644, nouvelle valeur = 63135.90994644, enfants niveau 1 = 1, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] Nœuds après recalcul pour la vue générale: (51) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+mxui.js?638792846581982641:59 [Client] Données filtrées: {selectedEnergy: 'elec', originalNodesCount: 52, filteredNodesCount: 12, originalLinksCount: 49, filteredLinksCount: 9, …}
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 0
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 0
+ [Client] [LoadingService] Significant DOM changes detected
+ [Client] [LoadingService] Significant DOM changes detected
+ [Network] Finished runtime action "runtimeOperation" in 53.1 milliseconds.
+ [Client] Received 10 objects for widget Smart.VueGlobale_Elec.advancedSankey2 object ids: (10) ['1970324837000371', '1970324837000516', '1970324837000617', '1970324837000746', '1970324837000926', '1970324837000982', '1970324837001115', '1970324837001252', '1970324837001375', '1970324837001551']
+ [Client] Configuration de la hiérarchie: (3) [{…}, {…}, {…}]
+ [Client] Période sélectionnée: {startDate: '2025-04-01T00:00:00.000Z', endDate: '2025-04-03T14:13:13.000Z'}
+ [Client] Niveaux triés: (3) [{…}, {…}, {…}]
+ [Client] [DEBUG] Processing level Secteur: {levelOrder: 0, itemsCount: 3, hasEnergyType: false}
+ [Client] [DEBUG] Item 0 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Utilités with value: 220984.76997853
+ [Client] [DEBUG] Item 1 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Production with value: 958872.14987756
+ [Client] [DEBUG] Item 2 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Tertiaire with value: 63135.90994644
+ [Client] [DEBUG] Processing level Atelier: {levelOrder: 1, itemsCount: 10, hasEnergyType: false}
+ [Client] [DEBUG] Item 0 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Mecanique - Ebarbage with value: 220984.76997853
+ [Client] [DEBUG] Item 1 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Roche with value: 160965.19000626
+ [Client] [DEBUG] Item 2 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Autres with value: 190209.950037
+ [Client] [DEBUG] Item 3 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Machine outils with value: 288896.9799614
+ [Client] [DEBUG] Item 4 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_ALC with value: 64812.1899395
+ [Client] [DEBUG] Item 5 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Clotures Imagine with value: 63926.0799818
+ [Client] [DEBUG] Item 6 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Moulage with value: 32080.16996479
+ [Client] [DEBUG] Item 7 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Acierie with value: 157981.58998681
+ [Client] [DEBUG] Item 8 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_DTT with value: 63135.90994644
+ [Client] [DEBUG] Item 9 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Traitement thermique with value: 0
+ [Client] [DEBUG] Processing level Machine: {levelOrder: 2, itemsCount: 39, hasEnergyType: true}
+ [Client] [DEBUG] Item 0 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Chalumeau  Meulage with value: 31926.41000462
+ [Client] [DEBUG] Item 1 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Potence ESAB Roche with value: 32219.42998409
+ [Client] [DEBUG] Item 2 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Ecl Mecanique with value: 30912.96000862
+ [Client] [DEBUG] Item 3 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TVR2 with value: 32708.55002213
+ [Client] [DEBUG] Item 4 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV8 BOST with value: 31816.68996525
+ [Client] [DEBUG] Item 5 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Waldrich with value: 32821.5199728
+ [Client] [DEBUG] Item 6 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_CMD 400V with value: 31630.52993107
+ [Client] [DEBUG] Item 7 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV13 with value: 32476.79002762
+ [Client] [DEBUG] Item 8 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Scharmann with value: 32096.55005741
+ [Client] [DEBUG] Item 9 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV400 with value: 31123.59000683
+ [Client] [DEBUG] Item 10 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Csepel with value: 32357.47998714
+ [Client] [DEBUG] Item 11 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TVR1 with value: 31865.27999115
+ [Client] [DEBUG] Item 12 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_400V Roche cote magasin with value: 33417.2799387
+ [Client] [DEBUG] Item 13 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_400V Roche cote Ebarbage with value: 32127.73004532
+ [Client] [DEBUG] Item 14 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_400V Roche cote Quai with value: 31777.90002823
+ [Client] [DEBUG] Item 15 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_220V Roche cote Quai with value: 31422.85000992
+ [Client] [DEBUG] Item 16 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Ecl Moulage with value: 31859.78003502
+ [Client] [DEBUG] Item 17 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Compress Atlas COPCO with value: 32012.39994049
+ [Client] [DEBUG] Item 18 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Cumulus Vestiaire with value: 31876.92995548
+ [Client] [DEBUG] Item 19 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Modelage Atelier with value: 31414.74997616
+ [Client] [DEBUG] Item 20 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Transfo Eclairage with value: 32133.13012123
+ [Client] [DEBUG] Item 21 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depart 102 with value: 31163.55996418
+ [Client] [DEBUG] Item 22 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_FEEDER DL with value: 32101.28997898
+ [Client] [DEBUG] Item 23 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_FEEDER 220 250 KVA with value: 30817.44002533
+ [Client] [DEBUG] Item 24 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_PC Ebarbage with value: 31345.61001492
+ [Client] [DEBUG] Item 25 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depart TVR2 with value: 31198.5699873
+ [Client] [DEBUG] Item 26 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_TV Schiess with value: 32431.8900032
+ [Client] [DEBUG] Item 27 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Metal Blanc Etuve ALC with value: 32459.22995949
+ [Client] [DEBUG] Item 28 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Metal Blanc ALC with value: 32352.95998001
+ [Client] [DEBUG] Item 29 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Clotures Imagine 220V with value: 31626.96000862
+ [Client] [DEBUG] Item 30 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Sablerie  Malaxeur with value: 32080.16996479
+ [Client] [DEBUG] Item 31 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Clotures Imagine 400V with value: 32299.11997318
+ [Client] [DEBUG] Item 32 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Four induction 35T with value: 31970.26001072
+ [Client] [DEBUG] Item 33 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Affinage with value: 31271.94001198
+ [Client] [DEBUG] Item 34 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Four 50T with value: 31757.48999596
+ [Client] [DEBUG] Item 35 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Eclairage Bureaux DTT with value: 31629.29995537
+ [Client] [DEBUG] Item 36 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Armoire DTT with value: 31506.60999107
+ [Client] [DEBUG] Item 37 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depoussiereur Moteur 1 with value: 32489.74999619
+ [Client] [DEBUG] Item 38 attributes for Machine: {name: {…}, value: {…}, energyType: {…}, level1Parent: {…}, level0Parent: {…}}
+ [Client] [Node Created] Machine_Depoussiereur Moteur 2 with value: 30492.14997196
+ [Client] [DEBUG] Processing links for level Secteur, item 0
+ [Client] [DEBUG] Processing links for level Secteur, item 1
+ [Client] [DEBUG] Processing links for level Secteur, item 2
+ [Client] [DEBUG] Processing links for level Atelier, item 0
+ [Client] [Link Created] Atelier to Usine: Secteur_Utilités -> Atelier_Mecanique - Ebarbage (220984.76997853)
+ [Client] [DEBUG] Processing links for level Atelier, item 1
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Roche (160965.19000626)
+ [Client] [DEBUG] Processing links for level Atelier, item 2
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Autres (190209.950037)
+ [Client] [DEBUG] Processing links for level Atelier, item 3
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Machine outils (288896.9799614)
+ [Client] [DEBUG] Processing links for level Atelier, item 4
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_ALC (64812.1899395)
+ [Client] [DEBUG] Processing links for level Atelier, item 5
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Clotures Imagine (63926.0799818)
+ [Client] [DEBUG] Processing links for level Atelier, item 6
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Moulage (32080.16996479)
+ [Client] [DEBUG] Processing links for level Atelier, item 7
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Acierie (157981.58998681)
+ [Client] [DEBUG] Processing links for level Atelier, item 8
+ [Client] [Link Created] Atelier to Usine: Secteur_Tertiaire -> Atelier_DTT (63135.90994644)
+ [Client] [DEBUG] Processing links for level Atelier, item 9
+ [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Traitement thermique (0)
+ [Client] [DEBUG] Processing links for level Machine, item 0
+ [Client] [DEBUG] Processing machine Chalumeau  Meulage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_Chalumeau  Meulage (31926.41000462)
+ [Client] [DEBUG] Processing links for level Machine, item 1
+ [Client] [DEBUG] Processing machine Potence ESAB Roche: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_Potence ESAB Roche (32219.42998409)
+ [Client] [DEBUG] Processing links for level Machine, item 2
+ [Client] [DEBUG] Processing machine Ecl Mecanique: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Ecl Mecanique (30912.96000862)
+ [Client] [DEBUG] Processing links for level Machine, item 3
+ [Client] [DEBUG] Processing machine TVR2: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TVR2 (32708.55002213)
+ [Client] [DEBUG] Processing links for level Machine, item 4
+ [Client] [DEBUG] Processing machine TV8 BOST: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TV8 BOST (31816.68996525)
+ [Client] [DEBUG] Processing links for level Machine, item 5
+ [Client] [DEBUG] Processing machine Waldrich: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_Waldrich (32821.5199728)
+ [Client] [DEBUG] Processing links for level Machine, item 6
+ [Client] [DEBUG] Processing machine CMD 400V: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_CMD 400V (31630.52993107)
+ [Client] [DEBUG] Processing links for level Machine, item 7
+ [Client] [DEBUG] Processing machine TV13: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TV13 (32476.79002762)
+ [Client] [DEBUG] Processing links for level Machine, item 8
+ [Client] [DEBUG] Processing machine Scharmann: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_Scharmann (32096.55005741)
+ [Client] [DEBUG] Processing links for level Machine, item 9
+ [Client] [DEBUG] Processing machine TV400: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TV400 (31123.59000683)
+ [Client] [DEBUG] Processing links for level Machine, item 10
+ [Client] [DEBUG] Processing machine Csepel: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_Csepel (32357.47998714)
+ [Client] [DEBUG] Processing links for level Machine, item 11
+ [Client] [DEBUG] Processing machine TVR1: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Machine outils -> Machine_TVR1 (31865.27999115)
+ [Client] [DEBUG] Processing links for level Machine, item 12
+ [Client] [DEBUG] Processing machine 400V Roche cote magasin: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_400V Roche cote magasin (33417.2799387)
+ [Client] [DEBUG] Processing links for level Machine, item 13
+ [Client] [DEBUG] Processing machine 400V Roche cote Ebarbage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_400V Roche cote Ebarbage (32127.73004532)
+ [Client] [DEBUG] Processing links for level Machine, item 14
+ [Client] [DEBUG] Processing machine 400V Roche cote Quai: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_400V Roche cote Quai (31777.90002823)
+ [Client] [DEBUG] Processing links for level Machine, item 15
+ [Client] [DEBUG] Processing machine 220V Roche cote Quai: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Roche -> Machine_220V Roche cote Quai (31422.85000992)
+ [Client] [DEBUG] Processing links for level Machine, item 16
+ [Client] [DEBUG] Processing machine Ecl Moulage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Ecl Moulage (31859.78003502)
+ [Client] [DEBUG] Processing links for level Machine, item 17
+ [Client] [DEBUG] Processing machine Compress Atlas COPCO: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Compress Atlas COPCO (32012.39994049)
+ [Client] [DEBUG] Processing links for level Machine, item 18
+ [Client] [DEBUG] Processing machine Cumulus Vestiaire: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Cumulus Vestiaire (31876.92995548)
+ [Client] [DEBUG] Processing links for level Machine, item 19
+ [Client] [DEBUG] Processing machine Modelage Atelier: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Modelage Atelier (31414.74997616)
+ [Client] [DEBUG] Processing links for level Machine, item 20
+ [Client] [DEBUG] Processing machine Transfo Eclairage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Autres -> Machine_Transfo Eclairage (32133.13012123)
+ [Client] [DEBUG] Processing links for level Machine, item 21
+ [Client] [DEBUG] Processing machine Depart 102: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_Depart 102 (31163.55996418)
+ [Client] [DEBUG] Processing links for level Machine, item 22
+ [Client] [DEBUG] Processing machine FEEDER DL: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_FEEDER DL (32101.28997898)
+ [Client] [DEBUG] Processing links for level Machine, item 23
+ [Client] [DEBUG] Processing machine FEEDER 220 250 KVA: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_FEEDER 220 250 KVA (30817.44002533)
+ [Client] [DEBUG] Processing links for level Machine, item 24
+ [Client] [DEBUG] Processing machine PC Ebarbage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_PC Ebarbage (31345.61001492)
+ [Client] [DEBUG] Processing links for level Machine, item 25
+ [Client] [DEBUG] Processing machine Depart TVR2: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_Depart TVR2 (31198.5699873)
+ [Client] [DEBUG] Processing links for level Machine, item 26
+ [Client] [DEBUG] Processing machine TV Schiess: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Mecanique - Ebarbage -> Machine_TV Schiess (32431.8900032)
+ [Client] [DEBUG] Processing links for level Machine, item 27
+ [Client] [DEBUG] Processing machine Metal Blanc Etuve ALC: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_ALC -> Machine_Metal Blanc Etuve ALC (32459.22995949)
+ [Client] [DEBUG] Processing links for level Machine, item 28
+ [Client] [DEBUG] Processing machine Metal Blanc ALC: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_ALC -> Machine_Metal Blanc ALC (32352.95998001)
+ [Client] [DEBUG] Processing links for level Machine, item 29
+ [Client] [DEBUG] Processing machine Clotures Imagine 220V: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Clotures Imagine -> Machine_Clotures Imagine 220V (31626.96000862)
+ [Client] [DEBUG] Processing links for level Machine, item 30
+ [Client] [DEBUG] Processing machine Sablerie  Malaxeur: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Moulage -> Machine_Sablerie  Malaxeur (32080.16996479)
+ [Client] [DEBUG] Processing links for level Machine, item 31
+ [Client] [DEBUG] Processing machine Clotures Imagine 400V: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Clotures Imagine -> Machine_Clotures Imagine 400V (32299.11997318)
+ [Client] [DEBUG] Processing links for level Machine, item 32
+ [Client] [DEBUG] Processing machine Four induction 35T: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Four induction 35T (31970.26001072)
+ [Client] [DEBUG] Processing links for level Machine, item 33
+ [Client] [DEBUG] Processing machine Affinage: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Affinage (31271.94001198)
+ [Client] [DEBUG] Processing links for level Machine, item 34
+ [Client] [DEBUG] Processing machine Four 50T: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Four 50T (31757.48999596)
+ [Client] [DEBUG] Processing links for level Machine, item 35
+ [Client] [DEBUG] Processing machine Eclairage Bureaux DTT: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_DTT -> Machine_Eclairage Bureaux DTT (31629.29995537)
+ [Client] [DEBUG] Processing links for level Machine, item 36
+ [Client] [DEBUG] Processing machine Armoire DTT: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_DTT -> Machine_Armoire DTT (31506.60999107)
+ [Client] [DEBUG] Processing links for level Machine, item 37
+ [Client] [DEBUG] Processing machine Depoussiereur Moteur 1: {level1Parent: {…}, level0Parent: {…}}
+ [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Depoussiereur Moteur 1 (32489.74999619)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Machine, item 38
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing machine Depoussiereur Moteur 2: {level1Parent: {…}, level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Link Created] To Atelier: Atelier_Acierie -> Machine_Depoussiereur Moteur 2 (30492.14997196)
+mxui.js?638792846581982641:59 [Client] Données Sankey initiales avant recalcul: {nodesCount: 52, linksCount: 49}
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs des nœuds pour le type d'énergie: elec
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 2 avec énergie elec: 39
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs pour les 10 nœuds de niveau 1
+mxui.js?638792846581982641:59 [Client] [RECALCUL] Nœud Atelier_Acierie: 157981.58998681 -> 157981.58998681002 (5 enfants)
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs pour les 3 nœuds de niveau 0
+mxui.js?638792846581982641:59 [Client] Données Sankey après recalcul: {nodesCount: 52, linksCount: 49, nodesSample: Array(3), linksSample: Array(3)}
+mxui.js?638792846581982641:59 [Client] Nœuds avec type d'énergie inféré : {count: 39, nodes: Array(39)}
+mxui.js?638792846581982641:59 [Client] Filtrage pour l'énergie: elec
+mxui.js?638792846581982641:59 [Client] Application du filtrage avec logique remontante
+mxui.js?638792846581982641:59 [Client] Niveaux détectés: 0, 1, 2
+mxui.js?638792846581982641:59 [Client] Energy filtering debug: {selectedEnergy: 'elec', nodeEnergyTypes: Array(39)}
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 2 avec type d'énergie elec: 39
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 1 à garder: 9
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 0 à garder: 3
+mxui.js?638792846581982641:59 [Client] Données après filtrage par énergie (logique remontante): {nodesCount: 51, linksCount: 48, parentNodes: Array(12)}
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Mecanique - Ebarbage (niveau 1): ancienne valeur = 220984.76997853, nouvelle valeur = 220984.76997853, enfants = 7
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Roche (niveau 1): ancienne valeur = 160965.19000626, nouvelle valeur = 160965.19000626, enfants = 5
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Autres (niveau 1): ancienne valeur = 190209.950037, nouvelle valeur = 190209.950037, enfants = 6
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Machine outils (niveau 1): ancienne valeur = 288896.9799614, nouvelle valeur = 288896.9799614, enfants = 9
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_ALC (niveau 1): ancienne valeur = 64812.1899395, nouvelle valeur = 64812.1899395, enfants = 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Clotures Imagine (niveau 1): ancienne valeur = 63926.0799818, nouvelle valeur = 63926.0799818, enfants = 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Moulage (niveau 1): ancienne valeur = 32080.16996479, nouvelle valeur = 32080.16996479, enfants = 1
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_Acierie (niveau 1): ancienne valeur = 157981.58998681002, nouvelle valeur = 157981.58998681002, enfants = 5
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Atelier_DTT (niveau 1): ancienne valeur = 63135.90994644, nouvelle valeur = 63135.90994644, enfants = 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Utilités (niveau 0): ancienne valeur = 220984.76997853, nouvelle valeur = 220984.76997853, enfants niveau 1 = 1, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Production (niveau 0): ancienne valeur = 958872.14987756, nouvelle valeur = 958872.14987756, enfants niveau 1 = 7, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Tertiaire (niveau 0): ancienne valeur = 63135.90994644, nouvelle valeur = 63135.90994644, enfants niveau 1 = 1, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] Nœuds après recalcul pour la vue générale: (51) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+mxui.js?638792846581982641:59 [Client] Données filtrées: {selectedEnergy: 'elec', originalNodesCount: 52, filteredNodesCount: 12, originalLinksCount: 49, filteredLinksCount: 9, …}
+mxui.js?638792846581982641:59 [Navigation] Open a page with id: Smart/VueGlobale_Eau.page.xml. 
+mxui.js?638792846581982641:59 [Network] Starting GET http://192.168.1.104:60000/pages/en_US/Smart/VueGlobale_Eau.page.xml?638792846581982641
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+ [Client] [LoadingService] Fetch completed, remaining: 0
+ [Client] [LoadingService] Fetch completed, remaining: 0
+ [Network] Finished GET http://192.168.1.104:60000/pages/en_US/Smart/VueGlobale_Eau.page.xml?638792846581982641 in 111.0 milliseconds. Response code 200.
+ [Client] [LoadingService] Significant DOM changes detected
+ [Client] [LoadingService] Significant DOM changes detected
+ [Client] HeaderContainer props: {hasStartDate: true, hasEndDate: true, hasOnDateChange: true}
+ [Client] DateRangePicker props: {startDateAttribute: {…}, endDateAttribute: {…}, onDateChange: {…}, hasOnChange: false}
+ [Client] Initializing state with: {startDateStatus: 'loading', startDateValue: undefined, endDateStatus: 'loading', endDateValue: undefined}
+ [Client] useEffect triggered with: {startDateStatus: 'loading', startDateValue: undefined, endDateStatus: 'loading', endDateValue: undefined}
+ [Client] Configuration de la hiérarchie: (3) [{…}, {…}, {…}]
+ [Client] Entités non disponibles: (3) [{…}, {…}, {…}]
+ [Client] [LoadingService] Significant DOM changes detected
+ [Client] [LoadingService] Significant DOM changes detected
+ [Client] Using object '1125899906945183' for widget Smart.VueGlobale_Eau.dataView3
+ [Client] HeaderContainer props: {hasStartDate: true, hasEndDate: true, hasOnDateChange: true}
+ [Client] DateRangePicker props: {startDateAttribute: {…}, endDateAttribute: {…}, onDateChange: {…}, hasOnChange: false}
+ [Client] Using object '1125899906945183' for widget Smart.VueGlobale_Eau.dataView1
+ [Client] Using object '15199648742452513' for widget Smart.VueGlobale_Eau.dataView2
+ [Client] useEffect triggered with: {startDateStatus: 'available', startDateValue: Tue Apr 01 2025 02:00:00 GMT+0200 (heure d’été d’Europe centrale), endDateStatus: 'available', endDateValue: Thu Apr 03 2025 16:13:13 GMT+0200 (heure d’été d’Europe centrale)}
+ [Client] Configuration de la hiérarchie: (3) [{…}, {…}, {…}]
+mxui.js?638792846581982641:59 [Client] Entités non disponibles: (3) [{…}, {…}, {…}]
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId '0txS525FPEqz6ecTBrrZrQ' for widget Smart.VueGlobale_Eau.headers1
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId '/QVA6CvC9UWAZqEbGMLHjg' for widget Smart.VueGlobale_Eau.advancedSankey2
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId 'VBv1WlCY9E6o+NidmFRI4A' for widget Smart.VueGlobale_Eau.advancedSankey2
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId 'Ncw+nIQb6ki0/ZZxaGRwxw' for widget Smart.VueGlobale_Eau.advancedSankey2
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId 'TQoEfQ8jnkag+HUobNc9Zw' for widget Smart.VueGlobale_Eau.advancedSankey2
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] Fetching data using XPath with operationId 'vl5dSLNwVkiNCaKUVR82yw' for widget Smart.VueGlobale_Eau.ranking1
+mxui.js?638792846581982641:59 [Network] Starting runtime action: runtimeOperation
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch request started
+mxui.js?638792846581982641:59 [Client] DateRangePicker props: {startDateAttribute: {…}, endDateAttribute: {…}, onDateChange: {…}, hasOnChange: false}
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 5
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 5
+mxui.js?638792846581982641:59 [Network] Finished runtime action "runtimeOperation" in 18.3 milliseconds.
+mxui.js?638792846581982641:59 [Client] Received 3 objects for widget Smart.VueGlobale_Eau.advancedSankey2 object ids: (3) ['30117822508066045', '30117822508066170', '30117822508066199']
+mxui.js?638792846581982641:59 [Client] Configuration de la hiérarchie: (3) [{…}, {…}, {…}]
+mxui.js?638792846581982641:59 [Client] Entités non disponibles: (2) [{…}, {…}]
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 4
+mxui.js?638792846581982641:59 [Client] [LoadingService] Fetch completed, remaining: 4
+mxui.js?638792846581982641:59 [Network] Finished runtime action "runtimeOperation" in 23.6 milliseconds.
+mxui.js?638792846581982641:59 [Client] Received 47 objects for widget Smart.VueGlobale_Eau.headers1 object ids: (47) ['35184372088857823', '35184372088857931', '35184372088858109', '35184372088858205', '35184372088858276', '35184372088858409', '35184372088858551', '35184372088858745', '35184372088858829', '35184372088858910', '35184372088859113', '35184372088859196', '35184372088859342', '35184372088859466', '35184372088859621', '35184372088859707', '35184372088859879', '35184372088859916', '35184372088860082', '35184372088860205', '35184372088860291', '35184372088860514', '35184372088860603', '35184372088860781', '35184372088860820', '35184372088860966', '35184372088861153', '35184372088861286', '35184372088861429', '35184372088861524', '35184372088861685', '35184372088861745', '35184372088861847', '35184372088861987', '35184372088862090', '35184372088862210', '35184372088862343', '35184372088862493', '35184372088862662', '35184372088862805', '35184372088862927', '35184372088863036', '35184372088863111', '35184372088863338', '35184372088863460', '35184372088863537', '35184372088863718']
+mxui.js?638792846581982641:59 [Client] HeaderContainer props: {hasStartDate: true, hasEndDate: true, hasOnDateChange: true}
+ [Client] DateRangePicker props: {startDateAttribute: {…}, endDateAttribute: {…}, onDateChange: {…}, hasOnChange: false}
+ [Client] [LoadingService] Fetch completed, remaining: 3
+ [Client] [LoadingService] Fetch completed, remaining: 3
+ [Client] [LoadingService] Fetch completed, remaining: 2
+ [Client] [LoadingService] Fetch completed, remaining: 2
+ [Client] [LoadingService] Fetch completed, remaining: 1
+ [Client] [LoadingService] Fetch completed, remaining: 1
+ [Client] [LoadingService] Fetch completed, remaining: 0
+ [Client] [LoadingService] Fetch completed, remaining: 0
+ [Network] Finished runtime action "runtimeOperation" in 21.5 milliseconds.
+ [Client] Received 1 objects for widget Smart.VueGlobale_Eau.advancedSankey2 object ids: ['27866022694355114']
+ [Network] Finished runtime action "runtimeOperation" in 20.9 milliseconds.
+ [Client] Received 0 objects for widget Smart.VueGlobale_Eau.ranking1 object ids: []
+ [Network] Finished runtime action "runtimeOperation" in 26.5 milliseconds.
+ [Client] Received 0 objects for widget Smart.VueGlobale_Eau.advancedSankey2 object ids: []
+ [Network] Finished runtime action "runtimeOperation" in 30.2 milliseconds.
+ [Client] Received 10 objects for widget Smart.VueGlobale_Eau.advancedSankey2 object ids: (10) ['1970324837000371', '1970324837000516', '1970324837000617', '1970324837000746', '1970324837000926', '1970324837000982', '1970324837001115', '1970324837001252', '1970324837001375', '1970324837001551']
+ [Client] Configuration de la hiérarchie: (3) [{…}, {…}, {…}]
+ [Client] Période sélectionnée: {startDate: '2025-04-01T00:00:00.000Z', endDate: '2025-04-03T14:13:13.000Z'}
+ [Client] Niveaux triés: (3) [{…}, {…}, {…}]
+ [Client] [DEBUG] Processing level Secteur: {levelOrder: 0, itemsCount: 3, hasEnergyType: false}
+ [Client] [DEBUG] Item 0 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Utilités with value: 220984.76997853
+ [Client] [DEBUG] Item 1 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Production with value: 958872.14987756
+ [Client] [DEBUG] Item 2 attributes for Secteur: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: 'undefined'}
+ [Client] [Node Created] Secteur_Tertiaire with value: 63135.90994644
+ [Client] [DEBUG] Processing level Atelier: {levelOrder: 1, itemsCount: 10, hasEnergyType: false}
+ [Client] [DEBUG] Item 0 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Mecanique - Ebarbage with value: 220984.76997853
+ [Client] [DEBUG] Item 1 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Roche with value: 160965.19000626
+ [Client] [DEBUG] Item 2 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Autres with value: 190209.950037
+ [Client] [DEBUG] Item 3 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_Machine outils with value: 288896.9799614
+ [Client] [DEBUG] Item 4 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+ [Client] [Node Created] Atelier_ALC with value: 64812.1899395
+ [Client] [DEBUG] Item 5 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Node Created] Atelier_Clotures Imagine with value: 63926.0799818
+mxui.js?638792846581982641:59 [Client] [DEBUG] Item 6 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Node Created] Atelier_Moulage with value: 32080.16996479
+mxui.js?638792846581982641:59 [Client] [DEBUG] Item 7 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Node Created] Atelier_Acierie with value: 157981.58998681
+mxui.js?638792846581982641:59 [Client] [DEBUG] Item 8 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Node Created] Atelier_DTT with value: 63135.90994644
+mxui.js?638792846581982641:59 [Client] [DEBUG] Item 9 attributes for Atelier: {name: {…}, value: {…}, energyType: 'non défini', level1Parent: 'undefined', level0Parent: {…}}
+mxui.js?638792846581982641:59 [Client] [Node Created] Atelier_Traitement thermique with value: 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing level Machine: {levelOrder: 2, itemsCount: 0, hasEnergyType: true}
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Secteur, item 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Secteur, item 1
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Secteur, item 2
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 0
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Utilités -> Atelier_Mecanique - Ebarbage (220984.76997853)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 1
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Roche (160965.19000626)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 2
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Autres (190209.950037)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 3
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Machine outils (288896.9799614)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 4
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_ALC (64812.1899395)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 5
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Clotures Imagine (63926.0799818)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 6
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Moulage (32080.16996479)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 7
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Acierie (157981.58998681)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 8
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Tertiaire -> Atelier_DTT (63135.90994644)
+mxui.js?638792846581982641:59 [Client] [DEBUG] Processing links for level Atelier, item 9
+mxui.js?638792846581982641:59 [Client] [Link Created] Atelier to Usine: Secteur_Production -> Atelier_Traitement thermique (0)
+mxui.js?638792846581982641:59 [Client] Données Sankey initiales avant recalcul: {nodesCount: 13, linksCount: 10}
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs des nœuds pour le type d'énergie: eau
+mxui.js?638792846581982641:59 [Client] Nœuds de niveau 1 avec énergie eau: 0
+mxui.js?638792846581982641:59 [Client] Recalcul des valeurs pour les 3 nœuds de niveau 0
+mxui.js?638792846581982641:59 [Client] Données Sankey après recalcul: {nodesCount: 13, linksCount: 10, nodesSample: Array(3), linksSample: Array(3)}
+mxui.js?638792846581982641:59 [Client] Nœuds avec type d'énergie inféré : {count: 0, nodes: Array(0)}
+mxui.js?638792846581982641:59 [Client] Filtrage pour l'énergie: eau
+mxui.js?638792846581982641:59 [Client] Aucun nœud n'a de type d'énergie défini, affichage complet
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Utilités (niveau 0): ancienne valeur = 220984.76997853, nouvelle valeur = 220984.76997853, enfants niveau 1 = 1, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Production (niveau 0): ancienne valeur = 958872.14987756, nouvelle valeur = 958872.14987756, enfants niveau 1 = 8, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] [DEBUG] Recalcul du nœud Secteur_Tertiaire (niveau 0): ancienne valeur = 63135.90994644, nouvelle valeur = 63135.90994644, enfants niveau 1 = 1, enfants niveau 2 = 0
+mxui.js?638792846581982641:59 [Client] Nœuds après recalcul pour la vue générale: (13) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+mxui.js?638792846581982641:59 [Client] Données filtrées: {selectedEnergy: 'eau', originalNodesCount: 13, filteredNodesCount: 13, originalLinksCount: 10, filteredLinksCount: 10, …}
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected
+mxui.js?638792846581982641:59 [Client] [LoadingService] Significant DOM changes detected

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.ranking.Ranking" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Ranking</name>
+    <description>A customizable ranking widget for energy consumption visualization</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="General">
+            <property key="title" type="string" required="false">
+                <caption>Title</caption>
+                <description>The title of the ranking</description>
+            </property>
+            <property key="useDummyData" type="boolean" defaultValue="false">
+                <caption>Use Dummy Data</caption>
+                <description>Use dummy data for testing (overrides data source)</description>
+            </property>
+            <property key="mode" type="enumeration" defaultValue="Elec">
+                <caption>Mode de consommation</caption>
+                <description>Sélectionnez le type de consommation à afficher.</description>
+                <enumerationValues>
+                    <enumerationValue key="Elec">Électricité</enumerationValue>
+                    <enumerationValue key="gaz">Gaz</enumerationValue>
+                    <enumerationValue key="eau">Eau</enumerationValue>
+                    <enumerationValue key="Air">Air Comprimé</enumerationValue>
+                </enumerationValues>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Data">
+            <property key="machineGroupEntity" type="datasource" isList="true" required="false">
+                <caption>Machine Group Entity</caption>
+                <description>The data source containing machine group data</description>
+            </property>
+            <property key="machineNameAttribute" type="attribute" dataSource="machineGroupEntity" required="false">
+                <caption>Machine Name Attribute</caption>
+                <description>The attribute representing the machine name</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="consumptionAttribute" type="attribute" dataSource="machineGroupEntity" required="false">
+                <caption>Consumption Attribute</caption>
+                <description>The attribute representing the consumption value</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="consumptionUnit" type="string" required="false">
+                <caption>Consumption Unit</caption>
+                <description>The unit of measurement for consumption (defaults to selected energy mode unit if left empty)</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Behavior">
+            <property key="limitResults" type="integer" defaultValue="10">
+                <caption>Limit Results</caption>
+                <description>The maximum number of results to display in the ranking</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Appearance">
+            <property key="highConsumptionColor" type="string" required="false" defaultValue="#ef4444">
+                <caption>High Consumption Color</caption>
+                <description>The color for high consumption items</description>
+            </property>
+            <property key="mediumConsumptionColor" type="string" required="false" defaultValue="#f59e0b">
+                <caption>Medium Consumption Color</caption>
+                <description>The color for medium consumption items</description>
+            </property>
+            <property key="lowConsumptionColor" type="string" required="false" defaultValue="#10b981">
+                <caption>Low Consumption Color</caption>
+                <description>The color for low consumption items</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Date Range">
+            <property key="dateStart" type="attribute" required="true">
+                <caption>Start Date</caption>
+                <description>The attribute for the start date of the data range</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="dateEnd" type="attribute" required="true">
+                <caption>End Date</caption>
+                <description>The attribute for the end date of the data range</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

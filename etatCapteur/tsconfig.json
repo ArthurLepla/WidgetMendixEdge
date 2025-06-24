@@ -1,0 +1,9 @@
+{
+  "extends": "@mendix/pluggable-widgets-tools/configs/tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "allowJs": true
+  },
+  "include": ["./src", "./typings"],
+  "exclude": [".eslintrc.js", "prettier.config.js", "node_modules"]
+}

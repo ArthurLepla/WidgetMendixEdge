@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary-color: #18213e;
+    --primary-light: rgba(24, 33, 62, 0.8);
+    --primary-lighter: rgba(24, 33, 62, 0.05);
+    --text-color: #374151;
+    --text-light: rgba(55, 65, 81, 0.6);
+    --text-lighter: rgba(55, 65, 81, 0.4);
+    --border-color: #e5e7eb;
+    --border-hover: #d1d5db;
+    --border-focus: var(--primary-color);
+    --background-white: #ffffff;
+    --background-hover: var(--primary-lighter);
+    --background-active: var(--primary-color);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --radius-base: 0.375rem;
+    --radius-sm: 0.25rem;
+    --radius-lg: 0.5rem;
+    --component-height: 44px;
+    --spacing-base: 1rem;
+}
+
+body {
+    font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+.widget-energy-dashboard {
+    @apply w-full h-full min-h-screen;
+    font-family: 'Barlow', sans-serif;
+}
+
+/* Mendix-specific overrides */
+.widget-energy-dashboard.mx-name-container {
+    height: 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Ensure proper nesting in Mendix */
+.mx-window .widget-energy-dashboard {
+    @apply p-0 w-full;
+}
+
+/* Fix potential Mendix conflicts */
+.widget-energy-dashboard h1,
+.widget-energy-dashboard h2,
+.widget-energy-dashboard h3,
+.widget-energy-dashboard p {
+    font-family: 'Barlow', sans-serif;
+}
+
+/* Ensure proper z-index handling in Mendix */
+.widget-energy-dashboard .relative {
+    position: relative;
+    z-index: 1;
+}
+
+.widget-energy-dashboard .absolute {
+    position: absolute;
+    z-index: 0;
+}
+
+/* Responsive container */
+.widget-energy-dashboard > div {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 2rem;
+}
+
+/* Transition classes */
+.se-transition-transform {
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+.se-transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+.se-transition-opacity {
+    transition-property: opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+.se-transition-colors {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+.se-transition-shadow {
+    transition-property: box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 250ms;
+}
+
+/* Animation de pulsation */
+@keyframes se-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.se-animate-pulse {
+    animation: se-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animation de rotation */
+@keyframes se-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.se-animate-spin {
+    animation: se-spin 1s linear infinite;
+}
+
+/* Pour aider à optimiser les performances */
+.se-transform {
+    will-change: transform;
+}
+
+.se-backface-hidden {
+    backface-visibility: hidden;
+}
+
+/* Amélioration du comportement au clic */
+.se-active-scale {
+    transform: scale(0.98);
+}

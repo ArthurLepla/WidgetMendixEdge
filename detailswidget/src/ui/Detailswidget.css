@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles below */
+.widget-detailswidget {
+    @apply tw-w-full tw-h-full;
+    font-family: 'Barlow', sans-serif;
+}
+
+/* Force Radix Dialog visibility */
+/* Targets the main dialog content window */
+div[role="dialog"][data-radix-dialog-content][data-state="open"] {
+    display: block !important;
+    /* Tailwind classes should handle z-index, but if needed, uncomment: */
+    /* z-index: 50 !important; */
+}
+
+/* Targets the dialog overlay (the semi-transparent background) */
+[data-radix-dialog-overlay][data-state="open"] {
+    display: block !important;
+    /* Tailwind classes should handle z-index, but if needed, uncomment: */
+    /* z-index: 40 !important; */
+}

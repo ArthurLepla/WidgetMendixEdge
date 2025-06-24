@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.comparedata.CompareData" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Compare Data</name>
+    <description>Widget de comparaison des données de consommation entre machines</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="General">
+            <propertyGroup caption="Configuration">
+                <property key="viewMode" type="enumeration" defaultValue="energetic">
+                    <caption>Mode de visualisation</caption>
+                    <description>Choisir entre le mode énergétique ou IPE</description>
+                    <enumerationValues>
+                        <enumerationValue key="energetic">Énergétique</enumerationValue>
+                        <enumerationValue key="ipe">IPE</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="energyType" type="enumeration" defaultValue="electricity">
+                    <caption>Type d'énergie</caption>
+                    <description>Sélectionner le type d'énergie à afficher</description>
+                    <enumerationValues>
+                        <enumerationValue key="electricity">Électricité</enumerationValue>
+                        <enumerationValue key="gas">Gaz</enumerationValue>
+                        <enumerationValue key="water">Eau</enumerationValue>
+                        <enumerationValue key="air">Air</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="baseUnit" type="enumeration" defaultValue="auto">
+                    <caption>Unité de base des données</caption>
+                    <description>Choisir l'unité dans laquelle arrivent les données d'entrée (Auto = unité par défaut selon le type d'énergie)</description>
+                    <enumerationValues>
+                        <enumerationValue key="auto">Auto (selon type d'énergie)</enumerationValue>
+                        <enumerationValue key="kWh">kWh (kilowatt-heure)</enumerationValue>
+                        <enumerationValue key="m3">m³ (mètre cube)</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="ipeMode" type="enumeration" defaultValue="single">
+                    <caption>Mode IPE</caption>
+                    <description>Choisir entre un IPE simple ou double</description>
+                    <enumerationValues>
+                        <enumerationValue key="single">Simple IPE</enumerationValue>
+                        <enumerationValue key="double">Double IPE</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="onAddProductionClick" type="action" required="false">
+                    <caption>Action de saisie de production</caption>
+                    <description>Action à exécuter pour naviguer vers la page de saisie de production</description>
+                </property>
+                <property key="enableTestMode" type="boolean" defaultValue="false">
+                    <caption>Mode Test</caption>
+                    <description>Activer le mode test pour afficher les données de test</description>
+                </property>
+                <property key="ipe1Name" type="string" required="false">
+                    <caption>Nom IPE 1</caption>
+                    <description>Nom affiché pour le premier IPE dans le toggle (requis en mode double)</description>
+                </property>
+                <property key="ipe2Name" type="string" required="false">
+                    <caption>Nom IPE 2</caption>
+                    <description>Nom affiché pour le deuxième IPE dans le toggle (requis en mode double)</description>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Data source">
+                <property key="selectedMachines" type="datasource" isList="true" required="false">
+                    <caption>Machines sélectionnées</caption>
+                    <description>Liste des machines sélectionnées (SelectedMachine)</description>
+                </property>
+                <property key="attrMachineName" type="attribute" dataSource="selectedMachines" required="false">
+                    <caption>Nom de la machine</caption>
+                    <description>Attribut contenant le nom de la machine</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+
+                <property key="dsMesures" type="datasource" isList="true" required="false">
+                    <caption>Mesures des machines</caption>
+                    <description>Liste des mesures (Mesure_machine)</description>
+                </property>
+                <property key="attrMachineMesureName" type="attribute" dataSource="dsMesures" required="false">
+                    <caption>Nom de la machine (mesure)</caption>
+                    <description>Attribut contenant le nom de la machine dans les mesures</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="attrTimestamp" type="attribute" dataSource="dsMesures" required="false">
+                    <caption>Horodatage</caption>
+                    <description>Horodatage de la mesure</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="attrConsommation" type="attribute" dataSource="dsMesures" required="false">
+                    <caption>Consommation</caption>
+                    <description>Valeur de consommation</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+
+                <property key="dateDebut" type="attribute" required="false">
+                    <caption>Date de début</caption>
+                    <description>Date de début de la période</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="dateFin" type="attribute" required="false">
+                    <caption>Date de fin</caption>
+                    <description>Date de fin de la période</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="Data source 2 (Double IPE)">
+                <property key="selectedMachines2" type="datasource" isList="true" required="false">
+                    <caption>Machines sélectionnées 2</caption>
+                    <description>Liste des machines sélectionnées pour le deuxième IPE (requis en mode double)</description>
+                </property>
+                <property key="attrMachineName2" type="attribute" dataSource="selectedMachines2" required="false">
+                    <caption>Nom de la machine 2</caption>
+                    <description>Attribut contenant le nom de la machine pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+
+                <property key="dsMesures2" type="datasource" isList="true" required="false">
+                    <caption>Mesures des machines 2</caption>
+                    <description>Liste des mesures pour le deuxième IPE (requis en mode double)</description>
+                </property>
+                <property key="attrMachineMesureName2" type="attribute" dataSource="dsMesures2" required="false">
+                    <caption>Nom de la machine (mesure) 2</caption>
+                    <description>Attribut contenant le nom de la machine dans les mesures pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="attrTimestamp2" type="attribute" dataSource="dsMesures2" required="false">
+                    <caption>Horodatage 2</caption>
+                    <description>Horodatage de la mesure pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="attrConsommation2" type="attribute" dataSource="dsMesures2" required="false">
+                    <caption>Consommation 2</caption>
+                    <description>Valeur de consommation pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+
+                <property key="dateDebut2" type="attribute" required="false">
+                    <caption>Date de début 2</caption>
+                    <description>Date de début de la période pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+                <property key="dateFin2" type="attribute" required="false">
+                    <caption>Date de fin 2</caption>
+                    <description>Date de fin de la période pour le deuxième IPE</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+
+        <propertyGroup caption="Common">
+            <systemProperty key="Name"/>
+            <systemProperty key="TabIndex"/>
+            <systemProperty key="Visibility"/>
+        </propertyGroup>
+        <propertyGroup caption="Données IPE (Production/Consommation)">
+            <property key="dsProduction_Consommation" type="datasource" isList="true" required="false">
+                <caption>Production/Consommation IPE</caption>
+                <description>Liste des données de production et consommation pour le calcul IPE. Requis en mode IPE. Non requis si Mode Test activé.</description>
+            </property>
+            <property key="attrMachineProductionName" type="attribute" dataSource="dsProduction_Consommation" required="false">
+                <caption>Nom machine (production)</caption>
+                <description>Nom de la machine dans les données de production. Requis en mode IPE. Non requis si Mode Test activé.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="attrProduction" type="attribute" dataSource="dsProduction_Consommation" required="false">
+                <caption>Production</caption>
+                <description>Valeur de production (nombre de pièces). Requis en mode IPE. Non requis si Mode Test activé.</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="attrConsommationIPE" type="attribute" dataSource="dsProduction_Consommation" required="false">
+                <caption>Consommation IPE</caption>
+                <description>Valeur de consommation pour le calcul IPE. Requis en mode IPE. Non requis si Mode Test activé.</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Données IPE 2 (Production/Consommation)">
+            <property key="dsProduction_Consommation2" type="datasource" isList="true" required="false">
+                <caption>Production/Consommation IPE 2</caption>
+                <description>Liste des données de production et consommation pour le calcul du deuxième IPE. Requis en mode double IPE.</description>
+            </property>
+            <property key="attrMachineProductionName2" type="attribute" dataSource="dsProduction_Consommation2" required="false">
+                <caption>Nom machine (production) 2</caption>
+                <description>Nom de la machine dans les données de production pour le deuxième IPE. Requis en mode double IPE.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="attrProduction2" type="attribute" dataSource="dsProduction_Consommation2" required="false">
+                <caption>Production 2</caption>
+                <description>Valeur de production (nombre de pièces) pour le deuxième IPE. Requis en mode double IPE.</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="attrConsommationIPE2" type="attribute" dataSource="dsProduction_Consommation2" required="false">
+                <caption>Consommation IPE 2</caption>
+                <description>Valeur de consommation pour le calcul du deuxième IPE. Requis en mode double IPE.</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

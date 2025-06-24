@@ -1,0 +1,199 @@
+@import "@mantine/core/styles.css";
+
+/* tailwind.config.js */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .btn-date {
+        @apply rounded border border-gray-200 bg-white px-2 sm:px-4 py-1 sm:py-2 transition-all hover:bg-gray-50 cursor-pointer text-base sm:text-lg lg:text-xl font-medium;
+    }
+
+    .card-base {
+        @apply bg-white rounded-xl shadow-md p-6;
+    }
+
+    .card-header {
+        @apply flex items-center gap-4;
+    }
+
+    .card-content {
+        @apply flex-1 flex flex-col gap-4 sm:gap-6 lg:gap-8;
+    }
+
+    .value-container {
+        @apply flex flex-col gap-2 sm:gap-3 lg:gap-4;
+    }
+
+    .value-large {
+        @apply text-3xl font-bold;
+    }
+
+    .value-medium {
+        @apply text-2xl font-bold;
+    }
+
+    .variation-container {
+        @apply flex items-center gap-2 sm:gap-3 lg:gap-4;
+    }
+
+    .variation-badge {
+        @apply inline-flex items-center rounded-full px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 text-base sm:text-lg lg:text-xl font-bold leading-none transition-all duration-300 ease-in-out;
+    }
+
+    .icon-container {
+        @apply p-3 rounded-lg flex items-center justify-center;
+    }
+
+    /* Typography */
+    .title-large {
+        @apply text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900;
+    }
+
+    .title-medium {
+        @apply text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900;
+    }
+
+    .text-regular {
+        @apply text-base sm:text-lg lg:text-xl text-gray-900;
+    }
+
+    .text-secondary {
+        @apply text-base sm:text-lg lg:text-xl text-gray-600;
+    }
+
+    /* Grid layouts */
+    .grid-responsive {
+        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8;
+    }
+
+    .grid-responsive-2 {
+        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2;
+    }
+
+    .grid-responsive-3 {
+        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3;
+    }
+
+    .grid-responsive-4 {
+        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-4;
+    }
+
+    /* Rest of existing styles... */
+}
+
+/* Spacing utilities */
+.gap-standard {
+    @apply gap-6;
+}
+
+.p-standard {
+    @apply p-6;
+}
+
+.m-standard {
+    @apply m-6;
+}
+
+/* Namespace pour isoler le widget des styles globaux */
+.syntheseWidget-root {
+    /* Reset des propriétés globales qui pourraient affecter le layout */
+    all: revert;
+    position: relative;
+    box-sizing: border-box;
+    z-index: 1; /* Lower than the loader's z-index (50) */
+}
+
+/* Préserver la structure des composants et le positionnement des icônes */
+.syntheseWidget-root .icon-container {
+    position: relative !important;
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.syntheseWidget-root svg {
+    position: relative !important;
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+}
+
+/* S'assurer que les cartes conservent leur disposition */
+.syntheseWidget-root .card-base {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Garantir que les flex containers conservent leur disposition */
+.syntheseWidget-root .flex {
+    position: relative !important;
+    display: flex !important;
+}
+
+/* Garantir que les grilles conservent leur disposition */
+.syntheseWidget-root .grid-responsive-2,
+.syntheseWidget-root .grid-responsive-4 {
+    position: relative !important;
+    display: grid !important;
+}
+
+/* Replace or enhance your existing .badge-container definition */
+.syntheseWidget-root .badge-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    /* Add sufficient space between items */
+    gap: 0.5rem !important;
+}
+
+/* Ensure badges have minimum width and don't shrink */
+.syntheseWidget-root .badge {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    /* Ensure the badge isn't too large */
+    max-width: fit-content !important;
+    /* Give it higher specificity than any potential conflicts */
+    display: inline-flex !important;
+}
+
+/* If the color bar is pushing off the badge */
+.syntheseWidget-root .color-bar {
+    flex-grow: 0 !important;
+    max-width: calc(100% - 4rem) !important; /* Adjust based on badge width */
+}
+
+/* Add responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    /* You might need to reduce padding or font sizes on smaller screens */
+    .syntheseWidget-root {
+        padding: 0.5rem !important;
+    }
+    
+    /* Make the badges more compact on smaller screens */
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+/* Make sure Radix dialog is not affected by resets */
+[data-radix-dialog-content] {
+    all: initial;
+    box-sizing: border-box;
+    font-family: inherit;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1000 !important;
+}

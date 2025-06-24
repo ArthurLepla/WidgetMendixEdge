@@ -1,0 +1,283 @@
+/* ChartContainer.css */
+.chart-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f3f4f6;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.chart-container:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.chart-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-container.hidden {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.chart-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+}
+
+.chart-header-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 60px;
+}
+
+.chart-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.chart-icon-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  padding: 0.625rem;
+  background-color: #f9fafb;
+  border-radius: 0.75rem;
+  transition: all 0.3s;
+}
+
+.chart-icon-wrapper:hover {
+  background-color: #f3f4f6;
+  transform: scale(1.05);
+}
+
+.chart-title {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.25;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Wrapper pour les actions (toggle + export) */
+.chart-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+/* Nouveau Toggle IPE avec Radix UI - styles personnalisés */
+.ipe-toggle-group {
+  display: inline-flex;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.6rem;
+  padding: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  height: 38px;
+}
+
+.ipe-toggle-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #64748b;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ipe-toggle-item:hover {
+  color: #be49ec;
+  background-color: rgba(190, 73, 236, 0.08);
+}
+
+.ipe-toggle-item[data-state="on"] {
+  background-color: #be49ec;
+  color: white;
+  box-shadow: 0 1px 3px rgba(190, 73, 236, 0.3);
+}
+
+.ipe-toggle-item:focus-visible {
+  outline: 2px solid #be49ec;
+  outline-offset: -1px;
+}
+
+/* Responsive design avec espacements cohérents */
+@media (max-width: 768px) {
+  .chart-header-actions {
+    gap: 0.75rem;
+  }
+  
+  .ipe-toggle-group {
+    height: calc(0.8rem * 2 + 1.1rem + 2px + 2px);
+    width: 220px;
+    padding: 2px;
+  }
+  
+  .ipe-toggle-item {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-header-actions {
+    gap: 0.5rem;
+  }
+  
+  .ipe-toggle-group {
+    padding: 2px;
+    height: calc(0.7rem * 2 + 1rem + 2px + 2px);
+    width: 200px;
+  }
+  
+  .ipe-toggle-item {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Séparateur */
+.chart-separator {
+  height: 1px;
+  background-color: #f3f4f6;
+  margin: 0 1.5rem;
+}
+
+.chart-extra-header {
+  padding: 0.5rem 1.5rem 0 1.5rem;
+}
+
+.chart-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  flex-grow: 1;
+}
+
+.chart-section {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: none;
+  border: none;
+  transition: all 0.3s;
+}
+
+.chart-section:hover {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.chart-section-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0.5rem;
+  margin: 0.5rem;
+  background-color: #f9fafb;
+  border-radius: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-state-icon-wrapper {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  margin: 0 auto 1rem auto;
+  width: fit-content;
+}
+
+.empty-state-icon {
+  color: #d1d5db;
+}
+
+.empty-state-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-description {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  max-width: 20rem;
+  margin: 0 auto;
+}
+
+/* Responsive pour le header */
+@media (max-width: 768px) {
+  .chart-header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .chart-title-wrapper {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .chart-header-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .chart-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-title {
+    font-size: 2rem;
+  }
+  
+  .chart-header-actions {
+    gap: 0.5rem;
+  }
+}

@@ -1,0 +1,1190 @@
+:root {
+    /* New Color Palette */
+    --energy-primary-color: #18213e; /* Your primary color */
+    --energy-electric-color: #38a13c;  /* Électricité */
+    --energy-gas-color: #f9be01;     /* Gaz */
+    --energy-water-color: #3293f3;   /* Eau */
+    --energy-air-color: #66d8e6;     /* Air */
+
+    /* Background variants (Optional, simple example using transparency) */
+    --energy-electric-bg: rgba(56, 161, 60, 0.1);
+    --energy-gas-bg: rgba(249, 190, 1, 0.1);
+    --energy-water-bg: rgba(50, 147, 243, 0.1);
+    --energy-air-bg: rgba(102, 216, 230, 0.1);
+
+    /* General UI Colors */
+    --widget-text-color: #1f2937; /* Darker text for better contrast */
+    --widget-secondary-text-color: #6b7280; /* Lighter secondary text */
+    --widget-border-color: #e5e7eb; /* Lighter border */
+    --widget-bg-color: #ffffff;
+    --widget-hover-bg-color: #f9fafb; /* Slightly off-white hover */
+    --widget-focus-color: var(--energy-primary-color); /* Use primary for focus */
+    --widget-focus-shadow: 0 0 0 3px rgba(24, 33, 62, 0.2);
+    --widget-button-color: var(--energy-primary-color);
+    --widget-button-hover-color: #111827; /* Darker primary for hover */
+    --widget-input-height: 40px; /* Slightly smaller inputs */
+    --widget-border-radius: 6px; /* Slightly larger radius */
+
+    /* Mendix colors (keep or update as needed) */
+    --mendix-brand-color: #0595db;
+    --mendix-brand-hover-color: #0477af;
+
+    /* Other UI elements */
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Subtle shadow */
+    --card-border-radius: 8px;
+    --primary-color: var(--energy-primary-color); /* Alias for consistency */
+    --secondary-color: var(--widget-secondary-text-color);
+    --border-color: var(--widget-border-color);
+    --background-color: var(--widget-bg-color);
+    --error-color: #ef4444;
+    --success-color: #22c55e;
+    --info-color: #3b82f6;
+    --info-icon-color: #9ca3af; /* Color for the info icon in history */
+    --hover-bg-color: var(--widget-hover-bg-color);
+    --skeleton-color: #f3f4f6;
+    --skeleton-highlight: #e5e7eb;
+
+    /* Transitions */
+    --transition-fast: 0.15s;
+    --transition-normal: 0.2s;
+    --transition-slow: 0.3s;
+
+    /* Font Sizes (adjust if needed) */
+    --font-size-base: 14px; /* Common base size */
+    --font-size-small: 12px;
+    --font-size-large: 16px;
+    --font-size-xl: 18px;
+    --font-family-base: 'Barlow', sans-serif; /* Set base font */
+}
+
+.widget-saisie {
+    font-family: var(--font-family-base);
+    padding: 20px;
+    background-color: var(--widget-bg-color);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--card-shadow);
+    color: var(--widget-text-color);
+    margin: 20px auto;
+    box-sizing: border-box;
+    width: 100%;
+    font-size: var(--font-size-base);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Apply font to other elements as needed */
+.widget-saisie input,
+.widget-saisie button,
+.widget-saisie select,
+.widget-saisie textarea,
+.widget-saisie-select-trigger,
+.widget-saisie-select-item,
+.widget-saisie-tabs-trigger,
+.widget-saisie-table {
+    font-family: inherit; /* Inherit from .widget-saisie */
+}
+
+.widget-saisie-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--widget-text-color);
+    font-size: calc(var(--font-size-large) * 1.1);
+    font-family: inherit;
+}
+
+/* --- Inputs (Price & Date) --- */
+.widget-saisie input[type="number"],
+.widget-saisie-price-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--widget-border-color);
+    border-radius: var(--widget-border-radius);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    height: var(--widget-input-height);
+}
+
+.widget-saisie input[type="number"]:focus,
+.widget-saisie-price-input:focus {
+    border-color: var(--widget-focus-color);
+    outline: none;
+    box-shadow: var(--widget-focus-shadow);
+}
+
+.widget-saisie input:disabled,
+.widget-saisie-price-input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.widget-saisie-date-range {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.widget-saisie-date-range label {
+     margin-bottom: 0; /* Override default label margin */
+     white-space: nowrap;
+}
+
+.widget-saisie-date-range input[type="date"] {
+    flex-grow: 1;
+    min-width: 120px; /* Ensure date inputs don't get too small */
+}
+
+/* --- Radix Select Dropdown --- */
+.widget-saisie-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--widget-border-color);
+    padding: 0.75rem;
+    border-radius: var(--widget-border-radius);
+    background-color: white;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    height: var(--widget-input-height);
+    font-size: 1rem;
+}
+
+.widget-saisie-select-trigger:hover {
+    border-color: var(--widget-focus-color);
+}
+
+.widget-saisie-select-trigger:focus {
+    border-color: var(--widget-focus-color);
+    outline: none;
+    box-shadow: var(--widget-focus-shadow);
+}
+
+.widget-saisie-select-content {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 100;
+}
+
+.widget-saisie-select-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.widget-saisie-select-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Specific Energy Option Styles */
+.widget-saisie-select-item[data-value="Electricite"] svg {
+    color: var(--energy-electric-color);
+}
+.widget-saisie-select-item[data-value="Gaz"] svg {
+    color: var(--energy-gas-color);
+}
+.widget-saisie-select-item[data-value="Eau"] svg {
+    color: var(--energy-water-color);
+}
+.widget-saisie-select-item[data-value="Air"] svg {
+    color: var(--energy-air-color);
+}
+
+/* --- Button --- */
+.widget-saisie-button {
+    background-color: var(--widget-button-color);
+    color: white;
+    border: none;
+    border-radius: var(--widget-border-radius);
+    padding: 0.9rem 2rem; /* Increased vertical padding */
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    line-height: 1.2; /* Adjust line height for better text centering */
+    position: relative;
+    overflow: hidden;
+    display: inline-block; /* Allow width to fit content */
+    min-width: 150px; /* Optional: Set a minimum width */
+    text-align: center; /* Center text */
+}
+
+.widget-saisie-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s;
+}
+
+.widget-saisie-button:hover {
+    background-color: var(--widget-button-hover-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.widget-saisie-button:hover:before {
+    left: 100%;
+}
+
+.widget-saisie-button:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+.widget-saisie-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+.widget-saisie-button:disabled:before {
+    display: none;
+}
+
+/* --- History Section --- */
+.widget-saisie-history {
+    margin-top: 0; /* Modifié pour utiliser le gap du conteneur parent */
+}
+
+.widget-saisie-history h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--widget-text-color);
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+.widget-saisie-table-container {
+    overflow-x: auto;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--widget-border-color);
+}
+
+.widget-saisie-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.widget-saisie-table th,
+.widget-saisie-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.widget-saisie-table th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    color: #555;
+    position: relative;
+    cursor: pointer;
+}
+
+.widget-saisie-table th:hover {
+    background-color: #f0f0f0;
+}
+
+.widget-saisie-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Energy icons styling */
+.widget-saisie-energy-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 4px;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+/* Scale icon on hover */
+.widget-saisie-select-item:hover .widget-saisie-energy-icon,
+.widget-saisie-table tr:hover .widget-saisie-energy-icon {
+    transform: scale(1.1);
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.widget-saisie-energy-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Energy row styling */
+.widget-saisie-table tr.energy-row-electricite td:first-child {
+    border-left: 3px solid var(--energy-electric-color);
+}
+
+.widget-saisie-table tr.energy-row-gaz td:first-child {
+    border-left: 3px solid var(--energy-gas-color);
+}
+
+.widget-saisie-table tr.energy-row-eau td:first-child {
+    border-left: 3px solid var(--energy-water-color);
+}
+
+.widget-saisie-table tr.energy-row-air td:first-child {
+    border-left: 3px solid var(--energy-air-color);
+}
+
+/* Subtle background on hover for energy rows */
+.widget-saisie-table tr.energy-row-electricite:hover {
+    background-color: var(--energy-electric-bg);
+}
+
+.widget-saisie-table tr.energy-row-gaz:hover {
+    background-color: var(--energy-gas-bg);
+}
+
+.widget-saisie-table tr.energy-row-eau:hover {
+    background-color: var(--energy-water-bg);
+}
+
+.widget-saisie-table tr.energy-row-air:hover {
+    background-color: var(--energy-air-bg);
+}
+
+/* Replace the table icon class with the energy icon class */
+.widget-saisie-table-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+}
+
+.widget-saisie-filter-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.widget-saisie-filter {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    gap: 0.5rem;
+}
+
+.widget-saisie-filter-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.widget-saisie-filter-icon {
+    color: #777;
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.widget-saisie-loading {
+    animation: pulse 1.5s infinite;
+    padding: 1rem;
+    text-align: center;
+    color: #777;
+}
+
+/* No data state */
+.widget-saisie-no-data {
+    padding: 2rem;
+    text-align: center;
+    color: #777;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+/* --- Responsive Design --- */
+
+/* Adjust history grid for smaller screens */
+@media (max-width: 768px) {
+    .widget-saisie-history-list {
+        grid-template-columns: 1fr; /* Stack cards vertically */
+    }
+}
+
+/* Adjust date range layout on very small screens */
+@media (max-width: 480px) {
+    .widget-saisie {
+        padding: 15px;
+    }
+
+    .widget-saisie-date-range {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+    }
+
+     .widget-saisie-date-range label {
+         margin-bottom: 5px;
+         text-align: left;
+    }
+
+    .widget-saisie-date-range input[type="date"] {
+        width: 100%; /* Make date inputs full width */
+    }
+
+    .widget-saisie-history-item-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .widget-saisie-history-icon {
+        margin-bottom: 5px;
+    }
+}
+
+/* Date Range Picker custom styling */
+.widget-saisie .rdrDayDisabled {
+    background-color: #e9ecef; /* Lighter grey background */
+    color: #adb5bd; /* Lighter text color */
+    cursor: not-allowed;
+    opacity: 0.6; /* Make it slightly more faded */
+    position: relative; /* Needed for potential pseudo-elements */
+}
+
+/* Optional: Add a subtle pattern or overlay */
+/*
+.widget-saisie .rdrDayDisabled::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(173, 181, 189, 0.2) 2px,
+        rgba(173, 181, 189, 0.2) 4px
+    );
+    pointer-events: none;
+}
+*/
+
+.widget-saisie .rdrDateRangePickerWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-saisie .rdrDateRangeWrapper {
+    width: 100%;
+}
+
+.widget-saisie .rdrMonthAndYearWrapper,
+.widget-saisie .rdrMonth {
+    width: 100%;
+}
+
+.widget-saisie .rdrDefinedRangesWrapper {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+@media (min-width: 768px) {
+    .widget-saisie .rdrDateRangePickerWrapper {
+        flex-direction: row;
+    }
+    
+    .widget-saisie .rdrDefinedRangesWrapper {
+        min-width: 200px;
+        border-right: 1px solid #e0e0e0;
+        border-bottom: none;
+    }
+}
+
+.widget-saisie .rdrStaticRange {
+    border-bottom: 1px solid #f5f5f5;
+    padding: 10px 20px;
+}
+
+.widget-saisie .rdrStaticRange:hover .rdrStaticRangeLabel,
+.widget-saisie .rdrStaticRange:focus .rdrStaticRangeLabel {
+    background: #f5f5f5;
+}
+
+.widget-saisie .rdrInputRange {
+    padding: 10px 20px;
+}
+
+.widget-saisie .rdrCalendarWrapper {
+    background-color: #fff;
+    color: #333;
+}
+
+/* Tooltip styling */
+.widget-saisie-label-with-tooltip {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.widget-saisie-tooltip-trigger,
+.widget-saisie-tooltip-content,
+.widget-saisie-tooltip-arrow {
+    display: none;
+}
+
+/* Toast notification styling */
+.widget-saisie-toast-viewport {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    gap: 10px;
+    max-width: 100vw;
+    margin: 0;
+    list-style: none;
+    z-index: 2147483647;
+    outline: none;
+}
+
+.widget-saisie-toast {
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
+    padding: 15px;
+    display: grid;
+    grid-template-areas: 'title action' 'description action';
+    grid-template-columns: auto max-content;
+    column-gap: 15px;
+    align-items: center;
+    border-left: 4px solid #aaa;
+    min-width: 300px;
+    max-width: 500px;
+    animation: toast-slide 0.2s ease-out;
+}
+
+.widget-saisie-toast.toast-success {
+    border-left-color: #4CAF50;
+}
+
+.widget-saisie-toast.toast-error {
+    border-left-color: #F44336;
+}
+
+.widget-saisie-toast.toast-info {
+    border-left-color: var(--widget-focus-color);
+}
+
+.widget-saisie-toast-title {
+    grid-area: title;
+    font-weight: 600;
+    color: var(--widget-text-color);
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+
+.widget-saisie-toast-description {
+    grid-area: description;
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.widget-saisie-toast-action {
+    grid-area: action;
+}
+
+.widget-saisie-toast-close {
+    all: unset;
+    cursor: pointer;
+    color: #777;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.widget-saisie-toast-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+@keyframes toast-slide {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Enhanced Radix Select styling */
+.widget-saisie-select-scroll-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    background-color: white;
+    color: #777;
+}
+
+.widget-saisie-select-viewport {
+    padding: 5px;
+}
+
+.widget-saisie-select-label {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #777;
+    font-weight: 600;
+}
+
+.widget-saisie-sort-icon {
+    margin-left: 5px;
+    transition: transform 0.2s;
+}
+
+.widget-saisie-clear-filter {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.widget-saisie-clear-filter:hover {
+    color: #333;
+}
+
+/* Collapsible component styling */
+.widget-saisie-collapsible {
+    width: 100%;
+    border: 1px solid var(--widget-border-color);
+    border-radius: var(--card-border-radius);
+    overflow: hidden;
+    background-color: white;
+    box-shadow: var(--card-shadow);
+}
+
+.widget-saisie-collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid var(--widget-border-color);
+}
+
+.widget-saisie-collapsible-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: var(--font-size-xl);
+    padding: 0;
+    flex: 1;
+    text-align: left;
+}
+
+.widget-saisie-collapsible-trigger h3 {
+    font-size: 28px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.widget-saisie-chevron {
+    margin-right: 10px;
+    transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.widget-saisie-chevron.rotate {
+    transform: rotate(90deg);
+}
+
+.widget-saisie-collapsible-content {
+    overflow: hidden;
+    animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.widget-saisie-collapsible-content[data-state="closed"] {
+    animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.widget-saisie-history {
+    margin-top: 2rem;
+}
+
+.widget-saisie-history h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--widget-text-color);
+    margin: 0;
+}
+
+@keyframes slideDown {
+    from {
+        height: 0;
+    }
+    to {
+        height: var(--radix-collapsible-content-height);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        height: var(--radix-collapsible-content-height);
+    }
+    to {
+        height: 0;
+    }
+}
+
+/* Form content padding */
+.widget-saisie-form-content {
+    padding: 15px;
+}
+
+/* Style pour le Collapsible du formulaire */
+.widget-saisie-form-collapsible {
+    margin-bottom: 0;
+}
+
+/* Add animations to various elements */
+.widget-saisie-unit-select-trigger:hover,
+.widget-saisie-price-input:hover {
+    transform: translateY(-1px);
+}
+
+/* Skeleton loading animation */
+@keyframes pulse {
+    0% {
+        background-color: var(--skeleton-color);
+    }
+    50% {
+        background-color: var(--skeleton-highlight);
+    }
+    100% {
+        background-color: var(--skeleton-color);
+    }
+}
+
+/* Custom animations for Framer Motion */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromBottom {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .widget-saisie {
+        padding: 10px;
+    }
+    
+    .widget-saisie-toast-viewport {
+        right: 10px;
+        left: 10px;
+    }
+}
+
+/* --- Radix Tabs --- */
+.widget-saisie-tabs-list {
+    display: flex;
+    border-bottom: 1px solid var(--widget-border-color);
+    margin-bottom: 0; /* Remove default bottom margin/padding */
+}
+
+.widget-saisie-tabs-trigger {
+    padding: 10px 20px;
+    font-size: var(--font-size-large); /* Use defined font size */
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    color: var(--secondary-color);
+    transition: color var(--transition-fast), border-bottom-color var(--transition-fast);
+    margin-bottom: -1px; /* Align border with list border */
+}
+
+.widget-saisie-tabs-trigger:hover {
+    color: var(--primary-color);
+}
+
+.widget-saisie-tabs-trigger[data-state="active"] {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.widget-saisie-tabs-content {
+    padding-top: 25px; /* Add more top padding to content instead of below list */
+    /* Remove existing padding-top if any */
+}
+
+/* --- Radix Popover for Date Picker --- */
+.widget-saisie-date-trigger {
+    /* Styles defined inline currently, can be moved here */
+    /* Example: */
+    cursor: pointer;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.widget-saisie-date-trigger:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.widget-saisie-popover-content {
+    background-color: var(--widget-bg-color);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--widget-border-color);
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+.widget-saisie-popover-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    border-radius: 50%;
+    transition: background-color var(--transition-fast);
+}
+
+.widget-saisie-popover-close:hover {
+    background-color: var(--hover-bg-color);
+}
+
+.widget-saisie-popover-arrow {
+    fill: var(--widget-border-color);
+}
+
+/* Style for the action area in the date popover */
+.widget-saisie-popover-actions {
+    padding: 10px 15px; /* Add padding */
+    border-top: 1px solid var(--widget-border-color); /* Separator line */
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+    background-color: #f9fafb; /* Slight background tint */
+}
+
+/* Style for the validation button */
+.widget-saisie-button.validation-button {
+    padding: 6px 12px; /* Smaller padding for this button */
+    font-size: 0.85rem; /* Smaller font size */
+    min-width: auto; /* Allow button to shrink */
+    /* Reuse primary button colors/styles by default */
+}
+
+/* Style popover content to not have default padding if actions area handles it */
+.widget-saisie-popover-content.date-popover-content {
+    padding: 0; /* Remove default padding from content */
+}
+
+/* Ensure DateRangePicker itself doesn't have excessive margins */
+/* REMOVE EMPTY RULE 
+.widget-saisie .rdrCalendarWrapper {
+    
+}
+*/
+
+/* --- History Table Enhancements --- */
+.widget-saisie-energy-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px; /* Add space between dot and text */
+    flex-shrink: 0; /* Prevent dot from shrinking */
+}
+
+/* Align items in table cells */
+.widget-saisie-table td {
+    vertical-align: middle;
+}
+
+/* Ensure first column aligns dot and text properly */
+.widget-saisie-table td:first-child div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Style for info icon column */
+.widget-saisie-table td:last-child {
+    text-align: center;
+    width: 50px; /* Adjust width slightly for button */
+}
+
+/* Ensure history content padding */
+.widget-saisie-history-content {
+    padding: 0; /* Adjust as needed, maybe use gap in parent */
+}
+
+/* Adjustments for the new table structure */
+.widget-saisie-table th:last-child { /* Adjust last header column */
+    width: 50px; /* Match the icon column width */
+    text-align: center;
+}
+
+.widget-saisie-info-button {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--info-icon-color, #6c757d);
+    display: inline-flex; /* Align icon nicely */
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.widget-saisie-info-button:hover {
+    background-color: var(--hover-bg-color);
+    color: var(--widget-text-color);
+}
+
+/* --- Radix Dialog --- */
+.widget-saisie-dialog-overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    inset: 0;
+    animation: fadeIn 0.3s ease-out;
+    z-index: 50; /* Ensure it's below content */
+}
+
+.widget-saisie-dialog-content {
+    background-color: white;
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 600px; /* Limit max width */
+    max-height: 85vh;
+    padding: 25px;
+    overflow-y: auto; /* Add scroll if content overflows */
+    animation: scaleIn 0.3s ease-out forwards; /* Add 'forwards' to retain end state */
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes scaleIn {
+    from { 
+        transform: translate(-50%, -50%) scale(0.95); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translate(-50%, -50%) scale(1); 
+        opacity: 1; 
+    }
+}
+
+.widget-saisie-dialog-title {
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    color: var(--widget-text-color);
+    font-size: var(--font-size-xl);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.widget-saisie-dialog-section {
+    margin-bottom: 20px;
+}
+
+.widget-saisie-dialog-section-title {
+    font-size: var(--font-size-large);
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.widget-saisie-dialog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
+    gap: 15px;
+}
+
+.widget-saisie-dialog-item {
+    display: flex;
+    flex-direction: column; /* Stack label and value */
+    gap: 4px;
+}
+
+.widget-saisie-dialog-label {
+    font-weight: 500;
+    color: var(--widget-secondary-text-color);
+    font-size: var(--font-size-small);
+}
+
+.widget-saisie-dialog-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    border-radius: 50%;
+    transition: background-color var(--transition-fast);
+    line-height: 1; /* Ensure icon is centered */
+}
+
+.widget-saisie-dialog-close:hover {
+    background-color: var(--hover-bg-color);
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.widget-saisie-group {
+    margin-bottom: 1.5rem; /* Add more space between form groups */
+}
+
+/* Dialog action buttons styling */
+.widget-saisie-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px; /* Add more space above buttons */
+    padding-top: 15px; /* Add padding above buttons */
+    border-top: 1px solid var(--widget-border-color); /* Separator line */
+}
+
+/* Generic secondary button style (e.g., Cancel) */
+.widget-saisie-button.secondary-button {
+    background-color: white;
+    color: var(--widget-secondary-text-color);
+    border: 1px solid var(--widget-border-color);
+    font-weight: 500;
+}
+
+.widget-saisie-button.secondary-button:hover {
+    background-color: var(--hover-bg-color);
+    border-color: #d1d5db; /* Slightly darker border on hover */
+}
+
+/* Primary button style (e.g., Save/Confirm) - Reuse existing button style */
+/* REMOVE EMPTY RULE 
+.widget-saisie-button.primary-button {
+
+}
+*/
+
+/* Specific style for Delete confirmation button */
+.widget-saisie-button.delete-confirm-button {
+    background-color: var(--error-color);
+    border: 1px solid var(--error-color);
+    color: white;
+}
+
+.widget-saisie-button.delete-confirm-button:hover {
+    background-color: #dc2626; /* Darker red on hover */
+    border-color: #dc2626;
+}
+
+/* Adjust title style for delete confirmation */
+.widget-saisie-dialog-title.delete-title {
+    display: flex;
+    align-items: center;
+    color: var(--error-color);
+}
+
+/* Styling for delete dialog content */
+.widget-saisie-delete-dialog-content {
+    max-width: 500px; /* Make delete dialog slightly smaller */
+}
+
+/* Increase font size for price input inside Edit Dialog */
+.widget-saisie-edit-dialog-content .widget-saisie-price-input {
+    font-size: 1.1rem; /* Slightly larger font */
+}
+
+/* Styling for icon buttons in table */
+/* REMOVE EMPTY RULE 
+.widget-saisie-icon-button {
+
+}
+*/
+
+/* Specific hover colors for edit/delete icons */
+.widget-saisie-icon-button.edit-button:hover {
+    color: var(--energy-primary-color);
+}
+
+.widget-saisie-icon-button.delete-button:hover {
+    color: var(--error-color);
+} 

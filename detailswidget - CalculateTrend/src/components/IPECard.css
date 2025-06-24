@@ -1,0 +1,73 @@
+:root {
+    --primary-color: #18213e;
+    --ipe-color: #be49ec;
+    --text-color: #374151;
+    --text-light: rgba(55, 65, 81, 0.6);
+    --background-white: #ffffff;
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --triple-cards-padding: 1.5rem;
+    --triple-cards-gap: 1rem;
+    --triple-cards-icon-size: 4rem;
+    --triple-cards-border-radius: 1rem;
+    --border-color: #ced0d3;
+}
+
+.ipe-card {
+    flex: 1;
+    background: var(--background-white);
+    border-radius: var(--triple-cards-border-radius);
+    box-shadow: var(--shadow-md);
+    min-height: 90px;
+    transition: 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.ipe-card-content {
+    padding: var(--triple-cards-padding);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--triple-cards-gap);
+}
+
+.ipe-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--triple-cards-gap);
+}
+
+.ipe-card-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    width: var(--triple-cards-icon-size);
+    height: var(--triple-cards-icon-size);
+}
+
+.ipe-card-title {
+    font-size: 1.875rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.ipe-card-value-container {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+}
+
+.ipe-card-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #18213e !important;
+}
+
+.ipe-card-unit {
+    font-size: 1.875rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    color: var(--ipe-color);
+} 

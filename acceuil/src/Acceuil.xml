@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.acceuil.Acceuil" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Acceuil</name>
+    <description>Widget d'accueil pour le pilotage énergétique</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Général">
+            <property key="titleImage" type="image" required="false">
+                <caption>Image du titre</caption>
+                <description>Image à afficher comme titre principal</description>
+            </property>
+            <property key="title" type="string" required="false">
+                <caption>Titre (texte alternatif)</caption>
+                <description>Texte alternatif pour l'image du titre</description>
+            </property>
+            <property key="subtitle" type="string" required="false">
+                <caption>Sous-titre</caption>
+                <description>Sous-titre du widget</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="KPIs">
+            <property key="electricityDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Électricité</caption>
+                <description>Source de données pour les KPIs d'électricité (unité: kWh)</description>
+            </property>
+            <property key="electricityValueAttribute" type="attribute" required="false" dataSource="electricityDataSource">
+                <caption>Valeur Électricité</caption>
+                <description>Attribut pour la valeur d'électricité</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="electricityUnit" type="enumeration" defaultValue="kWh" required="true">
+                <caption>Unité Électricité</caption>
+                <description>Unité de mesure pour l'électricité</description>
+                <enumerationValues>
+                    <enumerationValue key="kWh">kWh</enumerationValue>
+                    <enumerationValue key="m3">m³</enumerationValue>
+                </enumerationValues>
+            </property>
+
+            <property key="gasDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Gaz</caption>
+                <description>Source de données pour les KPIs de gaz (unité: m³)</description>
+            </property>
+            <property key="gasValueAttribute" type="attribute" required="false" dataSource="gasDataSource">
+                <caption>Valeur Gaz</caption>
+                <description>Attribut pour la valeur de gaz</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="gasUnit" type="enumeration" defaultValue="m3" required="true">
+                <caption>Unité Gaz</caption>
+                <description>Unité de mesure pour le gaz</description>
+                <enumerationValues>
+                    <enumerationValue key="kWh">kWh</enumerationValue>
+                    <enumerationValue key="m3">m³</enumerationValue>
+                </enumerationValues>
+            </property>
+
+            <property key="waterDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Eau</caption>
+                <description>Source de données pour les KPIs d'eau (unité: m³)</description>
+            </property>
+            <property key="waterValueAttribute" type="attribute" required="false" dataSource="waterDataSource">
+                <caption>Valeur Eau</caption>
+                <description>Attribut pour la valeur d'eau</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="waterUnit" type="enumeration" defaultValue="m3" required="true">
+                <caption>Unité Eau</caption>
+                <description>Unité de mesure pour l'eau</description>
+                <enumerationValues>
+                    <enumerationValue key="kWh">kWh</enumerationValue>
+                    <enumerationValue key="m3">m³</enumerationValue>
+                </enumerationValues>
+            </property>
+
+            <property key="airDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Air</caption>
+                <description>Source de données pour les KPIs d'air (unité: m³)</description>
+            </property>
+            <property key="airValueAttribute" type="attribute" required="false" dataSource="airDataSource">
+                <caption>Valeur Air</caption>
+                <description>Attribut pour la valeur d'air</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="airUnit" type="enumeration" defaultValue="m3" required="true">
+                <caption>Unité Air</caption>
+                <description>Unité de mesure pour l'air</description>
+                <enumerationValues>
+                    <enumerationValue key="kWh">kWh</enumerationValue>
+                    <enumerationValue key="m3">m³</enumerationValue>
+                </enumerationValues>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Vue Synthétique">
+            <property key="syntheticViewDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Vue Synthétique</caption>
+                <description>Source de données pour la vue synthétique</description>
+            </property>
+            <property key="syntheticViewTitle" type="string" required="false">
+                <caption>Titre</caption>
+                <description>Titre de la vue synthétique</description>
+            </property>
+            <property key="syntheticViewDescription" type="string" required="false">
+                <caption>Description</caption>
+                <description>Description de la vue synthétique</description>
+            </property>
+            <property key="syntheticViewButtonText" type="string" required="false">
+                <caption>Texte du bouton</caption>
+                <description>Texte affiché sur le bouton d'action</description>
+            </property>
+            <property key="syntheticViewIcon" type="widgets" required="false">
+                <caption>Icône</caption>
+                <description>Icône pour la section Vue Synthétique</description>
+            </property>
+            <property key="onSyntheticViewClick" type="action" required="false">
+                <caption>Action Vue Synthétique</caption>
+                <description>Action à exécuter lors du clic sur Vue Synthétique</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Vue Globale">
+            <property key="globalViewDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Vue Globale</caption>
+                <description>Source de données pour la vue globale</description>
+            </property>
+            <property key="globalViewTitle" type="string" required="false">
+                <caption>Titre</caption>
+                <description>Titre de la vue globale</description>
+            </property>
+            <property key="globalViewDescription" type="string" required="false">
+                <caption>Description</caption>
+                <description>Description de la vue globale</description>
+            </property>
+            <property key="globalViewIcon" type="widgets" required="false">
+                <caption>Icône</caption>
+                <description>Icône pour la section Vue Globale</description>
+            </property>
+            <property key="onGlobalViewClick" type="action" required="false">
+                <caption>Action Vue Globale</caption>
+                <description>Action à exécuter lors du clic sur Vue Globale</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Vue Détaillée">
+            <property key="detailedViewDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Vue Détaillée</caption>
+                <description>Source de données pour la vue détaillée</description>
+            </property>
+            <property key="detailedViewTitle" type="string" required="false">
+                <caption>Titre</caption>
+                <description>Titre de la vue détaillée</description>
+            </property>
+            <property key="detailedViewDescription" type="string" required="false">
+                <caption>Description</caption>
+                <description>Description de la vue détaillée</description>
+            </property>
+            <property key="detailedViewIcon" type="widgets" required="false">
+                <caption>Icône</caption>
+                <description>Icône pour la section Vue Détaillée</description>
+            </property>
+            <property key="onDetailedViewClick" type="action" required="false">
+                <caption>Action Vue Détaillée</caption>
+                <description>Action à exécuter lors du clic sur Vue Détaillée</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Rapports">
+            <property key="reportsDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Rapports</caption>
+                <description>Source de données pour les rapports</description>
+            </property>
+            <property key="reportsTitle" type="string" required="false">
+                <caption>Titre</caption>
+                <description>Titre de la section rapports</description>
+            </property>
+            <property key="reportsDescription" type="string" required="false">
+                <caption>Description</caption>
+                <description>Description de la section rapports</description>
+            </property>
+            <property key="reportsIcon" type="widgets" required="false">
+                <caption>Icône</caption>
+                <description>Icône pour la section Rapports</description>
+            </property>
+            <property key="onReportsClick" type="action" required="false">
+                <caption>Action Rapports</caption>
+                <description>Action à exécuter lors du clic sur Rapports</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Saisie de Données">
+            <property key="dataEntryDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données Saisie</caption>
+                <description>Source de données pour la saisie de données</description>
+            </property>
+            <property key="dataEntryTitle" type="string" required="false">
+                <caption>Titre</caption>
+                <description>Titre de la section saisie de données</description>
+            </property>
+            <property key="dataEntryDescription" type="string" required="false">
+                <caption>Description</caption>
+                <description>Description de la section saisie de données</description>
+            </property>
+            <property key="dataEntryIcon" type="widgets" required="false">
+                <caption>Icône</caption>
+                <description>Icône pour la section Saisie de Données</description>
+            </property>
+            <property key="onDataEntryClick" type="action" required="false">
+                <caption>Action Saisie de Données</caption>
+                <description>Action à exécuter lors du clic sur Saisie de Données</description>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

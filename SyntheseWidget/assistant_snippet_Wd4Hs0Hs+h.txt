@@ -1,0 +1,52 @@
+1|series: [
+2|    {
+3|        name: 'Période précédente',
+4|        type: 'bar',
+5|        data: previousValues,
+6|        itemStyle: {
+7|            color: '#18213e',
+8|            opacity: 0.3
+9|        },
+10|        barWidth: '30%',
+11|        z: 1
+12|    },
+13|    {
+14|        name: 'Période actuelle',
+15|        type: 'bar',
+16|        data: currentValues,
+17|        itemStyle: {
+18|            color: '#18213e'
+19|        },
+20|        barWidth: '30%',
+21|        barGap: '10%',
+22|        z: 2
+23|    }
+24|]
+25|legend: {
+26|    data: ['Période précédente', 'Période actuelle'],
+27|    top: 40,
+28|    textStyle: {
+29|        fontSize: 14,
+30|        fontWeight: 500
+31|    }
+32|}
+33|tooltip: {
+34|    trigger: 'axis',
+35|    formatter: (params: any[]) => {
+36|        const currentValue = params[1].value;
+37|        const previousValue = params[0].value;
+38|        const variation = calculateVariation(currentValue, previousValue);
+39|        const color = variation > 8 ? '#ef4444' : variation < 0 ? '#22c55e' : '#64748b';
+40|        
+41|        return `
+42|            <div class="font-medium">
+43|                <div class="text-lg mb-2">${params[0].name}</div>
+44|                <div>Période actuelle: ${currentValue.toFixed(1)} ${unit}</div>
+45|                <div>Période précédente: ${previousValue.toFixed(1)} ${unit}</div>
+46|                <div style="color: ${color}">
+47|                    Variation: ${variation > 0 ? '+' : ''}${variation.toFixed(1)}%
+48|                </div>
+49|            </div>
+50|        `;
+51|    }
+52|} 

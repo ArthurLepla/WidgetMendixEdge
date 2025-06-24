@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.eslintrc.js
+prettier.config.js
+scripts/
+*.config.js
+**/resources/ 

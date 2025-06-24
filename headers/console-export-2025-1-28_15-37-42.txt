@@ -1,0 +1,165 @@
+[Client] [MultiSelect] Début de la synchronisation des sélections mxui.js:59:42151
+[Client] Sélections demandées: 
+Array [ "", "CMZ" ]
+mxui.js:59:42151
+[Client] [MultiSelect] Entités existantes: 1 mxui.js:59:42151
+[Client] [MultiSelect] Entité 31243722416867209 - attr_qga_20: mxui.js:59:42151
+[Client] [MultiSelect] Opérations nécessaires: 
+Object { toAdd: 1, toRemove: 0 }
+mxui.js:59:42151
+[Client] [MultiSelect] Début de la création des entités mxui.js:59:42151
+[Client] [MultiSelect] Création entité pour: CMZ mxui.js:59:42151
+[Client] [MultiSelect] Nom de l'entité: undefined mxui.js:59:42151
+[Client] [MultiSelect] Erreur globale création: Error: entity is not a string
+    i mxui.js:61
+    create mxui.js:59
+    newObject multi-select.tsx:229
+    handleSelectionChange multi-select.tsx:228
+    handleSelect multi-select.tsx:152
+    onClick multi-select.tsx:393
+    Pe mxui.js:29
+    Ve mxui.js:29
+    Li mxui.js:29
+    Li mxui.js:29
+    $i mxui.js:29
+    Wi mxui.js:29
+    ul mxui.js:29
+    Ne mxui.js:29
+    Wi mxui.js:29
+    Gt mxui.js:29
+    qt mxui.js:29
+    zi mxui.js:29
+    Bi mxui.js:29
+    Ui mxui.js:29
+    Ui mxui.js:29
+    createRoot mxui.js:29
+    buildRendering mxui.js:5
+    create mxui.js:5
+    postscript mxui.js:5
+    E mxui.js:5
+    c mxui.js:5
+    forEach mxui.js:5
+    c mxui.js:5
+    parse mxui.js:5
+    loadWidgetsIn mxui.js:5
+    w mxui.js:5
+    _pendingRequest mxui.js:5
+    _pendingRequest mxui.js:5
+    c mxui.js:5
+    s mxui.js:5
+    resolve mxui.js:5
+    u mxui.js:5
+    l mxui.js:5
+    c mxui.js:5
+    then mxui.js:5
+    c mxui.js:5
+    s mxui.js:5
+    resolve mxui.js:5
+    u mxui.js:5
+<anonymous code>:1:145535
+[Client] [MultiSelect] Début de la suppression des entités mxui.js:59:42151
+[Client] [MultiSelect] Suppression entité: <empty string> mxui.js:59:42151
+[Client] [MultiSelect] Erreur suppression: TypeError: t is undefined
+    b mxui.js:61
+    b mxui.js:61
+    remove mxui.js:5
+    remove mxui.js:59
+    handleSelectionChange multi-select.tsx:270
+    handleSelectionChange multi-select.tsx:269
+    handleSelect multi-select.tsx:152
+    onClick multi-select.tsx:393
+    Pe mxui.js:29
+    Ve mxui.js:29
+    Li mxui.js:29
+    Li mxui.js:29
+    $i mxui.js:29
+    Wi mxui.js:29
+    ul mxui.js:29
+    Ne mxui.js:29
+    Wi mxui.js:29
+    Gt mxui.js:29
+    qt mxui.js:29
+    zi mxui.js:29
+    Bi mxui.js:29
+    Ui mxui.js:29
+    Ui mxui.js:29
+    createRoot mxui.js:29
+    buildRendering mxui.js:5
+    create mxui.js:5
+    postscript mxui.js:5
+    E mxui.js:5
+    c mxui.js:5
+    forEach mxui.js:5
+    c mxui.js:5
+    parse mxui.js:5
+    loadWidgetsIn mxui.js:5
+    w mxui.js:5
+    _pendingRequest mxui.js:5
+    _pendingRequest mxui.js:5
+    c mxui.js:5
+    s mxui.js:5
+    resolve mxui.js:5
+    u mxui.js:5
+    l mxui.js:5
+    c mxui.js:5
+    then mxui.js:5
+    c mxui.js:5
+    s mxui.js:5
+    resolve mxui.js:5
+    u mxui.js:5
+<anonymous code>:1:145535
+[Client] [MultiSelect] Erreur globale suppression: TypeError: t is undefined
+    b mxui.js:61
+    b mxui.js:61
+    remove mxui.js:5
+    remove mxui.js:59
+    handleSelectionChange multi-select.tsx:270
+    handleSelectionChange multi-select.tsx:269
+    handleSelect multi-select.tsx:152
+    onClick multi-select.tsx:393
+    Pe mxui.js:29
+    Ve mxui.js:29
+    Li mxui.js:29
+    Li mxui.js:29
+    $i mxui.js:29
+    Wi mxui.js:29
+    ul mxui.js:29
+    Ne mxui.js:29
+    Wi mxui.js:29
+    Gt mxui.js:29
+    qt mxui.js:29
+    zi mxui.js:29
+    Bi mxui.js:29
+    Ui mxui.js:29
+    Ui mxui.js:29
+    createRoot mxui.js:29
+    buildRendering mxui.js:5
+    create mxui.js:5
+    postscript mxui.js:5
+    E mxui.js:5
+    c mxui.js:5
+    forEach mxui.js:5
+    c mxui.js:5
+    parse mxui.js:5
+    loadWidgetsIn mxui.js:5
+    w mxui.js:5
+    _pendingRequest mxui.js:5
+    _pendingRequest mxui.js:5
+    c mxui.js:5
+    s mxui.js:5
+    resolve mxui.js:5
+    u mxui.js:5
+    l mxui.js:5
+    c mxui.js:5
+    then mxui.js:5
+    c mxui.js:5
+    s mxui.js:5
+    resolve mxui.js:5
+    u mxui.js:5
+<anonymous code>:1:145535
+[Client] [MultiSelect] Synchronisation terminée mxui.js:59:42151
+Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: http://192.168.1.12:60000/%3Canonymous%20code%3E
+Source Map URL: installHook.js.map

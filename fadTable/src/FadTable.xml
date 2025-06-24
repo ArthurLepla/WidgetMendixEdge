@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.fadtable.FadTable" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>FAD Table</name>
+    <description>Affiche la consommation énergétique mensuelle par Machine/Atelier/Secteur sous forme de tableau avec hiérarchie flexible.</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Data Source (Pré-traitée)">
+            <property key="dsGridData" type="datasource" isList="true" required="true">
+                <caption>Source de données (NPE)</caption>
+                <description>Source de données (Microflow/Nanoflow `DS_GetFadTableData`) retournant une liste d'objets Non-Persistants (`FadTableRowData_NPE`) contenant les données agrégées et pivotées par machine pour l'année.</description>
+            </property>
+
+            <!-- NOUVEAU : Configuration Hiérarchique Flexible -->
+            <property key="useFlexibleHierarchy" type="boolean" defaultValue="false">
+                <caption>Utiliser la hiérarchie flexible</caption>
+                <description>Activer la configuration hiérarchique flexible (x niveaux) au lieu de la structure fixe Secteur/Atelier/Machine.</description>
+            </property>
+
+            <!-- Niveau Terminal (Obligatoire) - Équivalent aux "Machines" -->
+            <property key="attrLeafNodeName" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Nom Nœud Terminal (NPE)</caption>
+                <description>Attribut de l'NPE contenant le nom du nœud terminal (Machine, Capteur, Compteur, etc.).</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            
+            <!-- ANCIENS ATTRIBUTS - Maintenus pour rétrocompatibilité -->
+            <property key="attrMachineName" type="attribute" dataSource="dsGridData" required="false">
+                <caption>[DÉPRÉCIÉ] Nom Machine (NPE)</caption>
+                <description>DÉPRÉCIÉ : Utilisez 'attrLeafNodeName' à la place. Attribut de l'NPE contenant le nom de la Machine.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="attrAtelierName" type="attribute" dataSource="dsGridData" required="false">
+                <caption>[DÉPRÉCIÉ] Nom Atelier (NPE)</caption>
+                <description>DÉPRÉCIÉ : Utilisez la configuration flexible. Attribut de l'NPE contenant le nom de l'Atelier.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="attrSecteurName" type="attribute" dataSource="dsGridData" required="false">
+                <caption>[DÉPRÉCIÉ] Nom Secteur (NPE)</caption>
+                <description>DÉPRÉCIÉ : Utilisez la configuration flexible. Attribut de l'NPE contenant le nom du Secteur.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+
+            <!-- Configuration des Niveaux Hiérarchiques (jusqu'à 10 niveaux) -->
+            <property key="hierarchyLevel1Name" type="string" required="false">
+                <caption>Niveau 1 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 1 (ex: "Secteur", "Site", "Bâtiment").</description>
+            </property>
+            <property key="hierarchyLevel1Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 1 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 1.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel1Required" type="boolean" defaultValue="false">
+                <caption>Niveau 1 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel2Name" type="string" required="false">
+                <caption>Niveau 2 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 2 (ex: "Atelier", "Étage", "Zone").</description>
+            </property>
+            <property key="hierarchyLevel2Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 2 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 2.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel2Required" type="boolean" defaultValue="false">
+                <caption>Niveau 2 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel3Name" type="string" required="false">
+                <caption>Niveau 3 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 3.</description>
+            </property>
+            <property key="hierarchyLevel3Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 3 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 3.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel3Required" type="boolean" defaultValue="false">
+                <caption>Niveau 3 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel4Name" type="string" required="false">
+                <caption>Niveau 4 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 4.</description>
+            </property>
+            <property key="hierarchyLevel4Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 4 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 4.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel4Required" type="boolean" defaultValue="false">
+                <caption>Niveau 4 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel5Name" type="string" required="false">
+                <caption>Niveau 5 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 5.</description>
+            </property>
+            <property key="hierarchyLevel5Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 5 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 5.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel5Required" type="boolean" defaultValue="false">
+                <caption>Niveau 5 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel6Name" type="string" required="false">
+                <caption>Niveau 6 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 6.</description>
+            </property>
+            <property key="hierarchyLevel6Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 6 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 6.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel6Required" type="boolean" defaultValue="false">
+                <caption>Niveau 6 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel7Name" type="string" required="false">
+                <caption>Niveau 7 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 7.</description>
+            </property>
+            <property key="hierarchyLevel7Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 7 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 7.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel7Required" type="boolean" defaultValue="false">
+                <caption>Niveau 7 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel8Name" type="string" required="false">
+                <caption>Niveau 8 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 8.</description>
+            </property>
+            <property key="hierarchyLevel8Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 8 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 8.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel8Required" type="boolean" defaultValue="false">
+                <caption>Niveau 8 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel9Name" type="string" required="false">
+                <caption>Niveau 9 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 9.</description>
+            </property>
+            <property key="hierarchyLevel9Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 9 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 9.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel9Required" type="boolean" defaultValue="false">
+                <caption>Niveau 9 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <property key="hierarchyLevel10Name" type="string" required="false">
+                <caption>Niveau 10 - Nom</caption>
+                <description>Nom d'affichage pour le niveau 10.</description>
+            </property>
+            <property key="hierarchyLevel10Attr" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Niveau 10 - Attribut</caption>
+                <description>Attribut NPE pour le niveau 10.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="hierarchyLevel10Required" type="boolean" defaultValue="false">
+                <caption>Niveau 10 - Obligatoire</caption>
+                <description>Ce niveau est-il obligatoire pour tous les enregistrements ?</description>
+            </property>
+
+            <!-- Configuration des Styles par Niveau -->
+            <property key="hierarchyLevel1Color" type="string" required="false">
+                <caption>Niveau 1 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 1 (hex, ex: #38a13c).</description>
+            </property>
+            <property key="hierarchyLevel2Color" type="string" required="false">
+                <caption>Niveau 2 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 2 (hex, ex: #3b82f6).</description>
+            </property>
+            <property key="hierarchyLevel3Color" type="string" required="false">
+                <caption>Niveau 3 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 3 (hex, ex: #f59e0b).</description>
+            </property>
+            <property key="hierarchyLevel4Color" type="string" required="false">
+                <caption>Niveau 4 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 4.</description>
+            </property>
+            <property key="hierarchyLevel5Color" type="string" required="false">
+                <caption>Niveau 5 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 5.</description>
+            </property>
+            <property key="hierarchyLevel6Color" type="string" required="false">
+                <caption>Niveau 6 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 6.</description>
+            </property>
+            <property key="hierarchyLevel7Color" type="string" required="false">
+                <caption>Niveau 7 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 7.</description>
+            </property>
+            <property key="hierarchyLevel8Color" type="string" required="false">
+                <caption>Niveau 8 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 8.</description>
+            </property>
+            <property key="hierarchyLevel9Color" type="string" required="false">
+                <caption>Niveau 9 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 9.</description>
+            </property>
+            <property key="hierarchyLevel10Color" type="string" required="false">
+                <caption>Niveau 10 - Couleur</caption>
+                <description>Couleur de bordure pour le niveau 10.</description>
+            </property>
+
+            <!-- Type d'énergie - Conservé -->
+            <property key="attrTypeEnergie" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Type d'énergie (NPE)</caption>
+                <description>Attribut de l'NPE contenant le type d'énergie ('Elec', 'Gaz', 'Eau', 'Air'). Requis pour le filtrage par type.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+
+            <!-- Valeurs mensuelles pour l'année N -->
+            <property key="attrJanValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Janvier (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Janvier.</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrFebValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Février (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Février.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+             <property key="attrMarValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Mars (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Mars.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrAprValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Avril (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Avril.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+             <property key="attrMayValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Mai (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Mai.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrJunValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Juin (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Juin.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+             <property key="attrJulValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Juillet (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Juillet.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrAugValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Août (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Août.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrSepValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Septembre (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Septembre.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrOctValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Octobre (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Octobre.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrNovValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Novembre (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Novembre.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrDecValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Valeur Décembre (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Décembre.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrTotalYearValue" type="attribute" dataSource="dsGridData" required="true">
+                <caption>Total Annuel (N - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation totale pour l'année N.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Behavior">
+            <property key="selectedEnergyType" type="enumeration" defaultValue="Elec" required="true">
+                <caption>Type d'énergie à afficher</caption>
+                <description>Sélectionnez le type d'énergie à afficher dans le tableau. Le widget filtrera les données de la source basées sur l'attribut 'TypeEnergie' correspondant. Assurez-vous que l'entité fournie par la source de données contient l'attribut 'TypeEnergie' (String) avec les valeurs 'Elec', 'Gaz', 'Eau' ou 'Air'.</description>
+                <enumerationValues>
+                    <enumerationValue key="Elec">Électricité (kWh)</enumerationValue>
+                    <enumerationValue key="Gaz">Gaz (m³)</enumerationValue>
+                    <enumerationValue key="Eau">Eau (m³)</enumerationValue>
+                    <enumerationValue key="Air">Air (m³)</enumerationValue>
+                </enumerationValues>
+            </property>
+
+             <property key="showTotals" type="boolean" defaultValue="true">
+                <caption>Afficher les totaux</caption>
+                <description>Afficher les lignes de totaux agrégés par niveau hiérarchique.</description>
+            </property>
+             <property key="enableExport" type="boolean" defaultValue="true">
+                <caption>Activer l'export</caption>
+                <description>Afficher les boutons d'exportation PDF/Excel.</description>
+            </property>
+            <property key="enableFilter" type="boolean" defaultValue="true">
+                <caption>Activer le filtrage</caption>
+                <description>Afficher les contrôles de filtrage/recherche.</description>
+            </property>
+            <property key="enableSort" type="boolean" defaultValue="true">
+                <caption>Activer le tri</caption>
+                <description>Permettre le tri en cliquant sur les en-têtes de colonnes.</description>
+            </property>
+            <property key="loadingStrategy" type="enumeration" defaultValue="loadAll">
+                <caption>Stratégie de chargement</caption>
+                <description>Choisir comment charger les données si le volume est important (affecte la performance).</description>
+                <enumerationValues>
+                    <enumerationValue key="loadAll">Charger tout</enumerationValue>
+                    <enumerationValue key="pagination">Pagination</enumerationValue>
+                    <enumerationValue key="lazyLoad">Chargement différé (Scroll)</enumerationValue>
+                </enumerationValues>
+            </property>
+             <property key="pageSize" type="integer" defaultValue="50" required="true">
+                <caption>Taille de page (si Pagination)</caption>
+                <description>Nombre de lignes à afficher par page si la stratégie 'Pagination' est choisie.</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Comparison (N-1)">
+            <property key="enableComparison" type="boolean" defaultValue="false">
+                <caption>Activer la comparaison N-1</caption>
+                <description>Afficher les données de l'année précédente pour comparaison.</description>
+            </property>
+            <property key="attrPrevJanValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Janvier (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Janvier N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+             <property key="attrPrevFebValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Février (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Février N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevMarValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Mars (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Mars N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevAprValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Avril (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Avril N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevMayValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Mai (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Mai N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevJunValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Juin (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Juin N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevJulValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Juillet (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Juillet N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevAugValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Août (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Août N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevSepValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Septembre (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Septembre N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevOctValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Octobre (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Octobre N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevNovValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Novembre (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Novembre N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+            <property key="attrPrevDecValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Valeur Décembre (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation pour Décembre N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+             <property key="attrPrevTotalYearValue" type="attribute" dataSource="dsGridData" required="false">
+                <caption>Total Annuel (N-1 - NPE)</caption>
+                <description>Attribut de l'NPE contenant la consommation totale pour l'année N-1.</description>
+                 <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Appearance">
+             <property key="theme" type="string" required="false">
+                 <caption>Thème (Optionnel)</caption>
+                 <description>Nom d'un thème spécifique à appliquer (laisser vide pour défaut).</description>
+             </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Common">
+            <systemProperty key="Name"/>
+            <systemProperty key="TabIndex"/>
+            <systemProperty key="Visibility"/>
+        </propertyGroup>
+    </properties>
+</widget>

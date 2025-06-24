@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.etatcapteur.EtatCapteur" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>État Capteur</name>
+    <description>Widget pour afficher l'état des capteurs sous forme de tableau</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Source de données">
+            <property key="sensorDataSource" type="datasource" isList="true" required="true">
+                <caption>Liste des capteurs</caption>
+                <description>Sélectionnez l'entité contenant les informations des capteurs</description>
+            </property>
+            <property key="nameAttribute" type="attribute" dataSource="sensorDataSource" required="true">
+                <caption>Attribut nom du capteur</caption>
+                <description>Sélectionnez l'attribut contenant le nom du capteur</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="statusAttribute" type="attribute" dataSource="sensorDataSource" required="true">
+                <caption>Attribut état du capteur</caption>
+                <description>Sélectionnez l'attribut indiquant l'état du capteur ('true' pour connecté, 'false' pour déconnecté)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="lastUpdateAttribute" type="attribute" dataSource="sensorDataSource" required="false">
+                <caption>Attribut dernière mise à jour</caption>
+                <description>Sélectionnez l'attribut contenant la date de dernière mise à jour (format texte)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Actions">
+            <property key="refreshAction" type="action" required="false">
+                <caption>Action d'actualisation</caption>
+                <description>Microflow à exécuter pour actualiser les états des capteurs</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Apparence">
+            <property key="tableTitle" type="string" required="false">
+                <caption>Titre du tableau</caption>
+                <description>Titre à afficher au-dessus du tableau</description>
+            </property>
+            <property key="showIcons" type="boolean" defaultValue="true">
+                <caption>Afficher les icônes</caption>
+                <description>Afficher des icônes pour représenter l'état des capteurs</description>
+            </property>
+            <property key="showLastUpdate" type="boolean" defaultValue="true">
+                <caption>Afficher dernière mise à jour</caption>
+                <description>Afficher la date de dernière mise à jour des capteurs</description>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

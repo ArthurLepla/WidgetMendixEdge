@@ -1,0 +1,711 @@
+# Guide d'implémentation du Loader pour Widgets Mendix
+
+Ce document explique comment implémenter le loader animé dans vos widgets Mendix. Ce loader présente une animation élégante avec des icônes qui changent de couleur et apparaissent/disparaissent en séquence.
+
+## Table des matières
+1. Aperçu du loader
+2. Fichiers nécessaires
+3. Implémentation étape par étape
+4. Personnalisation
+5. Intégration dans un widget Mendix
+6. Version alternative avec dégradés animés
+   - 6.1. Version exacte du CSS original
+   - 6.2. Composant React pour le loader original
+   - 6.3. Personnalisation des couleurs du loader original
+   - 6.4. Explication du fonctionnement
+7. Intégration spécifique dans un widget Mendix
+   - 7.1. Structure d'un projet de widget Mendix
+   - 7.2. Étapes d'intégration
+   - 7.3. Utilisation avec les actions Mendix
+   - 7.4. Exemple complet d'un widget avec loader
+8. Conclusion
+
+## 1. Aperçu du loader
+
+Le loader est composé d'un carré qui change de couleur et affiche différentes icônes en séquence (électricité, gaz, eau, air). Chaque icône est associée à une couleur spécifique et apparaît/disparaît avec une animation fluide.
+
+## 2. Fichiers nécessaires
+
+Pour implémenter ce loader, vous aurez besoin de :
+
+1. **Un composant React** (LoadingOverlay.tsx)
+2. **Un fichier CSS** (loader.css)
+3. **Des icônes** (via une bibliothèque comme lucide-react ou feather-icons)
+
+## 3. Implémentation étape par étape
+
+### 3.1. Créer le fichier CSS (loader.css)
+
+```css
+/* Container du loader */
+.loader {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border-radius: 12px;
+    background: #38a13c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: colorTransition 3.332s infinite;
+}
+
+.loader .icon {
+    width: 40px;
+    height: 40px;
+    color: white;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Animation de transition des couleurs */
+@keyframes colorTransition {
+    0%, 24.99% {
+        background-color: #38a13c; /* Électricité - 0.833s */
+    }
+    25%, 49.99% {
+        background-color: #F9BE01; /* Gaz - 0.833s */
+    }
+    50%, 74.99% {
+        background-color: #3293f3; /* Eau - 0.833s */
+    }
+    75%, 100% {
+        background-color: #66D8E6; /* Air - 0.833s */
+    }
+}
+
+/* Animations pour les icônes */
+.loader .icon.electricity {
+    opacity: 0;
+    animation: showElectricity 3.332s infinite;
+}
+
+.loader .icon.gas {
+    opacity: 0;
+    animation: showGas 3.332s infinite;
+}
+
+.loader .icon.water {
+    opacity: 0;
+    animation: showWater 3.332s infinite;
+}
+
+.loader .icon.air {
+    opacity: 0;
+    animation: showAir 3.332s infinite;
+}
+
+@keyframes showElectricity {
+    0%, 24.99% {
+        opacity: 1;
+    }
+    25%, 100% {
+        opacity: 0;
+    }
+}
+
+@keyframes showGas {
+    0%, 24.99% {
+        opacity: 0;
+    }
+    25%, 49.99% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0;
+    }
+}
+
+@keyframes showWater {
+    0%, 49.99% {
+        opacity: 0;
+    }
+    50%, 74.99% {
+        opacity: 1;
+    }
+    75%, 100% {
+        opacity: 0;
+    }
+}
+
+@keyframes showAir {
+    0%, 74.99% {
+        opacity: 0;
+    }
+    75%, 100% {
+        opacity: 1;
+    }
+}
+```
+
+### 3.2. Créer le composant LoadingOverlay (LoadingOverlay.tsx)
+
+```tsx
+import { ReactElement, createElement } from "react";
+import { Zap, Flame, Droplet, Wind } from "lucide-react";
+import "./loader.css"; // Assurez-vous d'importer le fichier CSS
+
+interface LoadingOverlayProps {
+    isLoading: boolean;
+}
+
+export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps): ReactElement | null => {
+    if (!isLoading) return null;
+
+    return (
+        <div className="fixed inset-0 bg-white/60 backdrop-blur-[2px] z-50 flex items-center justify-center transition-all duration-300">
+            <div className="flex flex-col items-center gap-6">
+                <div className="loader">
+                    <Zap className="icon electricity" />
+                    <Flame className="icon gas" />
+                    <Droplet className="icon water" />
+                    <Wind className="icon air" />
+                </div>
+                <span className="text-lg font-medium text-[#18213e]">
+                    Chargement en cours
+                </span>
+            </div>
+        </div>
+    );
+};
+```
+
+## 4. Personnalisation
+
+### 4.1. Changer les couleurs
+
+Vous pouvez personnaliser les couleurs en modifiant les valeurs dans l'animation `colorTransition` :
+
+```css
+@keyframes colorTransition {
+    0%, 24.99% {
+        background-color: #VOTRE_COULEUR_1; /* Électricité */
+    }
+    25%, 49.99% {
+        background-color: #VOTRE_COULEUR_2; /* Gaz */
+    }
+    50%, 74.99% {
+        background-color: #VOTRE_COULEUR_3; /* Eau */
+    }
+    75%, 100% {
+        background-color: #VOTRE_COULEUR_4; /* Air */
+    }
+}
+```
+
+### 4.2. Changer les icônes
+
+Vous pouvez remplacer les icônes par celles de votre choix. Si vous utilisez une autre bibliothèque d'icônes, assurez-vous d'importer les icônes correspondantes :
+
+```tsx
+import { IconElectricite, IconGaz, IconEau, IconAir } from "votre-bibliotheque-icones";
+
+// Puis dans le JSX :
+<div className="loader">
+    <IconElectricite className="icon electricity" />
+    <IconGaz className="icon gas" />
+    <IconEau className="icon water" />
+    <IconAir className="icon air" />
+</div>
+```
+
+### 4.3. Ajuster la vitesse d'animation
+
+Pour modifier la vitesse d'animation, changez la durée dans les animations CSS. Par exemple, pour accélérer l'animation, réduisez la valeur `3.332s` :
+
+```css
+.loader {
+    animation: colorTransition 2.5s infinite; /* Plus rapide */
+}
+
+.loader .icon.electricity {
+    animation: showElectricity 2.5s infinite; /* Plus rapide */
+}
+
+/* Et ainsi de suite pour les autres animations */
+```
+
+## 5. Intégration dans un widget Mendix
+
+### 5.1. Structure des fichiers
+
+Dans votre widget Mendix, ajoutez les fichiers suivants :
+
+```
+/src
+  /components
+    /LoadingOverlay.tsx
+  /styles
+    /loader.css
+```
+
+### 5.2. Importer les dépendances
+
+Assurez-vous d'installer les dépendances nécessaires :
+
+```bash
+npm install lucide-react
+```
+
+### 5.3. Utilisation dans votre widget
+
+Dans votre composant principal de widget, importez et utilisez le LoadingOverlay :
+
+```tsx
+import { Component, ReactNode, createElement } from "react";
+import { LoadingOverlay } from "./components/LoadingOverlay";
+
+export class YourWidget extends Component {
+    state = {
+        isLoading: false
+    };
+
+    // Exemple de méthode qui déclenche le chargement
+    startLoading(): void {
+        this.setState({ isLoading: true });
+        
+        // Simuler une opération asynchrone
+        setTimeout(() => {
+            this.setState({ isLoading: false });
+        }, 3000);
+    }
+
+    render(): ReactNode {
+        return (
+            <div>
+                {/* Votre contenu de widget ici */}
+                <button onClick={() => this.startLoading()}>
+                    Déclencher le chargement
+                </button>
+                
+                {/* Loader qui s'affiche lorsque isLoading est true */}
+                <LoadingOverlay isLoading={this.state.isLoading} />
+            </div>
+        );
+    }
+}
+```
+
+### 5.4. Intégration avec les actions Mendix
+
+Pour utiliser le loader avec des actions Mendix, vous pouvez activer l'état de chargement avant d'exécuter une action et le désactiver une fois l'action terminée :
+
+```tsx
+executeAction(): void {
+    // Activer le loader
+    this.setState({ isLoading: true });
+    
+    // Exécuter l'action Mendix
+    this.props.mxObject.get("yourAction").execute(() => {
+        // Désactiver le loader une fois l'action terminée
+        this.setState({ isLoading: false });
+    });
+}
+```
+
+## 6. Version alternative avec dégradés animés
+
+Si vous préférez une version plus proche du CSS original que vous avez partagé, voici une implémentation alternative qui utilise des dégradés animés :
+
+### 6.1. Version exacte du CSS original
+
+Voici l'implémentation exacte du CSS que vous avez partagé :
+
+```css
+/* Version exacte du loader original */
+.loader-original {
+  width: 40px;
+  aspect-ratio: 1;
+  background:
+    linear-gradient(45deg, #0000 50%, #00AAFF 0),
+    linear-gradient(-45deg, #0000 50%, #FF00AA 0),
+    #00AAFF;
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  animation: l2 1.5s infinite; 
+}
+@keyframes l2 {
+  0%   {background-position: bottom left, bottom right}
+  30%,
+  50%  {background-position: bottom left, top left}
+  80%,
+  100% {background-position: top right, top left}
+}
+```
+
+Pour utiliser cette version exacte, ajoutez simplement ce CSS à votre fichier de styles et utilisez la classe `loader-original` dans votre composant :
+
+```tsx
+<div className="loader-original"></div>
+```
+
+### 6.2. Composant React pour le loader original
+
+Voici un composant React simple qui utilise le loader original :
+
+```tsx
+import { ReactElement, createElement } from "react";
+import "./loader.css"; // Assurez-vous d'importer le fichier CSS avec le code ci-dessus
+
+interface OriginalLoaderProps {
+    isLoading: boolean;
+}
+
+export const OriginalLoader = ({ isLoading }: OriginalLoaderProps): ReactElement | null => {
+    if (!isLoading) return null;
+
+    return (
+        <div className="fixed inset-0 bg-white/60 backdrop-blur-[2px] z-50 flex items-center justify-center transition-all duration-300">
+            <div className="flex flex-col items-center gap-6">
+                <div className="loader-original"></div>
+                <span className="text-lg font-medium text-[#18213e]">
+                    Chargement en cours
+                </span>
+            </div>
+        </div>
+    );
+};
+```
+
+### 6.3. Personnalisation des couleurs du loader original
+
+Pour personnaliser les couleurs du loader original, modifiez les valeurs hexadécimales dans le CSS :
+
+```css
+.loader-original {
+  width: 40px;
+  aspect-ratio: 1;
+  background:
+    linear-gradient(45deg, #0000 50%, #VOTRE_COULEUR_1 0),
+    linear-gradient(-45deg, #0000 50%, #VOTRE_COULEUR_2 0),
+    #VOTRE_COULEUR_3;
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  animation: l2 1.5s infinite; 
+}
+```
+
+Où :
+- `#VOTRE_COULEUR_1` remplace `#00AAFF` dans le premier dégradé
+- `#VOTRE_COULEUR_2` remplace `#FF00AA` dans le second dégradé
+- `#VOTRE_COULEUR_3` remplace `#00AAFF` dans la couleur de fond
+
+### 6.4. Explication du fonctionnement
+
+Ce loader fonctionne grâce à :
+
+1. **Deux dégradés linéaires** à 45° et -45° qui créent un effet de coin qui se déplace
+2. **Une animation de position de fond** qui fait bouger ces dégradés
+3. **Une couleur de fond** qui sert de base
+
+L'animation `l2` déplace les positions des dégradés pour créer un effet de rotation fluide :
+- Au début (0%), les dégradés sont positionnés en bas à gauche et en bas à droite
+- À 30-50%, ils se déplacent vers le haut à gauche
+- À 80-100%, ils finissent en haut à droite et en haut à gauche
+
+Cette séquence crée l'illusion d'un mouvement de rotation fluide sans utiliser de transformation réelle.
+
+## 7. Intégration spécifique dans un widget Mendix
+
+### 7.1. Structure d'un projet de widget Mendix
+
+Un widget Mendix typique a la structure suivante :
+
+```
+/mywidget
+  /src
+    /components
+    /styles
+    MyWidget.tsx
+    MyWidget.xml
+  package.json
+  webpack.config.js
+  tsconfig.json
+```
+
+### 7.2. Étapes d'intégration
+
+1. **Créez les fichiers nécessaires** :
+   - Créez `src/components/LoadingOverlay.tsx`
+   - Créez `src/styles/loader.css`
+
+2. **Modifiez votre fichier principal de widget** pour importer et utiliser le loader :
+
+```tsx
+// MyWidget.tsx
+import { Component, ReactNode, createElement } from "react";
+import { LoadingOverlay } from "./components/LoadingOverlay";
+
+export default class MyWidget extends Component {
+    // Propriétés et état du widget
+    state = {
+        isLoading: false
+    };
+
+    // Méthode pour exécuter une action Mendix
+    executeAction(): void {
+        const { mxObject, mxform } = this.props;
+        
+        if (mxObject && mxform) {
+            // Activer le loader
+            this.setState({ isLoading: true });
+            
+            // Exemple d'exécution d'une microflow
+            window.mx.data.action({
+                params: {
+                    actionname: this.props.microflowName,
+                    applyto: "selection",
+                    guids: [mxObject.getGuid()]
+                },
+                origin: mxform,
+                callback: () => {
+                    // Désactiver le loader une fois l'action terminée
+                    this.setState({ isLoading: false });
+                },
+                error: (error) => {
+                    console.error("Error executing microflow:", error);
+                    this.setState({ isLoading: false });
+                }
+            });
+        }
+    }
+
+    render(): ReactNode {
+        return (
+            <div className="widget-container">
+                {/* Contenu de votre widget */}
+                <button onClick={() => this.executeAction()}>
+                    Exécuter l'action
+                </button>
+                
+                {/* Loader qui s'affiche pendant le chargement */}
+                <LoadingOverlay isLoading={this.state.isLoading} />
+            </div>
+        );
+    }
+}
+```
+
+3. **Assurez-vous que votre webpack.config.js gère les fichiers CSS** :
+
+```js
+const webpack = require("webpack");
+const path = require("path");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+module.exports = {
+    // ... autres configurations
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: "ts-loader"
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    "css-loader"
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: "./widgets/[name]/[name].css"
+        }),
+        // ... autres plugins
+    ]
+};
+```
+
+4. **Installez les dépendances nécessaires** :
+
+```bash
+npm install --save lucide-react
+npm install --save-dev css-loader mini-css-extract-plugin
+```
+
+### 7.3. Utilisation avec les actions Mendix
+
+Pour utiliser le loader avec différentes actions Mendix :
+
+#### Avec un microflow
+
+```tsx
+executeMicroflow(microflowName: string): void {
+    const { mxObject, mxform } = this.props;
+    
+    if (mxObject && mxform) {
+        this.setState({ isLoading: true });
+        
+        window.mx.data.action({
+            params: {
+                actionname: microflowName,
+                applyto: "selection",
+                guids: [mxObject.getGuid()]
+            },
+            origin: mxform,
+            callback: () => {
+                this.setState({ isLoading: false });
+            },
+            error: (error) => {
+                console.error("Error executing microflow:", error);
+                this.setState({ isLoading: false });
+            }
+        });
+    }
+}
+```
+
+#### Avec une nanoflow
+
+```tsx
+executeNanoflow(nanoflowName: string): void {
+    const { mxObject, mxform } = this.props;
+    
+    if (mxObject && mxform) {
+        this.setState({ isLoading: true });
+        
+        window.mx.data.callNanoflow({
+            nanoflow: nanoflowName,
+            origin: mxform,
+            context: {
+                mxObject: mxObject
+            },
+            callback: () => {
+                this.setState({ isLoading: false });
+            },
+            error: (error) => {
+                console.error("Error executing nanoflow:", error);
+                this.setState({ isLoading: false });
+            }
+        });
+    }
+}
+```
+
+#### Avec une requête de données
+
+```tsx
+fetchData(): void {
+    this.setState({ isLoading: true });
+    
+    window.mx.data.get({
+        xpath: `//MyModule.MyEntity[ID = ${this.props.objectId}]`,
+        callback: (objects) => {
+            // Traiter les données
+            this.setState({ 
+                data: objects,
+                isLoading: false 
+            });
+        },
+        error: (error) => {
+            console.error("Error fetching data:", error);
+            this.setState({ isLoading: false });
+        }
+    });
+}
+```
+
+### 7.4. Exemple complet d'un widget avec loader
+
+Voici un exemple complet d'un widget Mendix qui utilise le loader :
+
+```tsx
+// MyWidget.tsx
+import { Component, ReactNode, createElement } from "react";
+import { LoadingOverlay } from "./components/LoadingOverlay";
+import "./styles/loader.css";
+
+export interface MyWidgetProps {
+    microflowName: string;
+    mxObject?: mendix.lib.MxObject;
+    mxform?: mendix.lib.MxForm;
+}
+
+export default class MyWidget extends Component<MyWidgetProps> {
+    state = {
+        isLoading: false,
+        data: null
+    };
+
+    componentDidMount(): void {
+        // Initialisation du widget
+    }
+
+    executeAction = (): void => {
+        const { mxObject, mxform, microflowName } = this.props;
+        
+        if (mxObject && mxform && microflowName) {
+            this.setState({ isLoading: true });
+            
+            window.mx.data.action({
+                params: {
+                    actionname: microflowName,
+                    applyto: "selection",
+                    guids: [mxObject.getGuid()]
+                },
+                origin: mxform,
+                callback: () => {
+                    this.setState({ isLoading: false });
+                },
+                error: (error) => {
+                    console.error("Error executing microflow:", error);
+                    this.setState({ isLoading: false });
+                }
+            });
+        }
+    };
+
+    render(): ReactNode {
+        return (
+            <div className="my-widget">
+                <button 
+                    className="btn btn-primary" 
+                    onClick={this.executeAction}
+                >
+                    Exécuter l'action
+                </button>
+                
+                <LoadingOverlay isLoading={this.state.isLoading} />
+            </div>
+        );
+    }
+}
+```
+
+## Conclusion
+
+Ce guide vous a fourni toutes les informations nécessaires pour implémenter le loader animé dans vos widgets Mendix. Vous avez maintenant plusieurs options :
+
+1. **Loader avec icônes changeantes** : Un loader moderne qui affiche différentes icônes en séquence avec des transitions de couleur fluides.
+2. **Loader avec dégradés animés** : Une version plus proche du CSS original avec des dégradés qui créent un effet de rotation fluide.
+
+### Résumé des étapes clés
+
+1. Créez les fichiers nécessaires (CSS et composant React)
+2. Intégrez le loader dans votre widget Mendix
+3. Configurez l'état de chargement pour qu'il s'active pendant les opérations asynchrones
+4. Personnalisez les couleurs et les animations selon vos besoins
+
+### Bonnes pratiques
+
+- Utilisez le loader pour toutes les opérations qui prennent plus de 300ms
+- Assurez-vous de désactiver le loader une fois l'opération terminée, même en cas d'erreur
+- Adaptez les couleurs pour qu'elles correspondent à votre charte graphique
+- Testez le loader sur différents navigateurs pour vous assurer de sa compatibilité
+
+### Ressources supplémentaires
+
+- [Documentation Mendix sur les widgets personnalisés](https://docs.mendix.com/howto/extensibility/widget-development/)
+- [Bibliothèque d'icônes Lucide React](https://lucide.dev/)
+- [Animations CSS avancées](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_animations/Using_CSS_animations)
+
+Pour toute question ou assistance supplémentaire, n'hésitez pas à contacter l'équipe de développement.
+
+---
+
+© 2023 - Guide d'implémentation du Loader pour Widgets Mendix 

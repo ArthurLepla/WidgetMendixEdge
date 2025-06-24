@@ -1,0 +1,11 @@
+{
+  "extends": "@mendix/pluggable-widgets-tools/configs/tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "rootDir": "./",
+    "jsx": "react",
+    "skipLibCheck": true
+  },
+  "include": ["./src", "./typings"],
+  "exclude": ["node_modules", "dist"]
+}
