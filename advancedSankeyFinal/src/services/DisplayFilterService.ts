@@ -66,10 +66,22 @@ export class DisplayFilterService {
         console.log(`🔄 R4: Navigation - pas d'orphelins ajoutés.`);
     }
 
-    // 5. Retourner les nœuds et SEULEMENT les liens directs
-    console.log(`✅ R4: ${visibleNodes.length} nœuds visibles, ${directLinks.length} liens.`);
+    // 🔧 CORRECTION CRITIQUE: Inclure TOUS les liens entre les nœuds visibles
+    // Pas seulement les liens directs depuis la racine
+    const allRelevantLinks = allLinks.filter(link => {
+      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+      
+      // Inclure le lien si source ET target sont dans les nœuds visibles
+      return visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId);
+    });
     
-    return { nodes: visibleNodes, links: directLinks };
+    console.log(`🔧 CORRECTION LIENS: Liens directs depuis racine: ${directLinks.length}, Tous liens pertinents: ${allRelevantLinks.length}`);
+
+    // 5. Retourner les nœuds et TOUS les liens pertinents
+    console.log(`✅ R4: ${visibleNodes.length} nœuds visibles, ${allRelevantLinks.length} liens.`);
+    
+    return { nodes: visibleNodes, links: allRelevantLinks };
   }
   
   /**

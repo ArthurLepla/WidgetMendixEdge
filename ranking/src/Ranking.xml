@@ -48,9 +48,13 @@
                     <attributeType name="Long"/>
                 </attributeTypes>
             </property>
-            <property key="consumptionUnit" type="string" required="false">
-                <caption>Consumption Unit</caption>
-                <description>The unit of measurement for consumption (defaults to selected energy mode unit if left empty)</description>
+            <property key="baseUnit" type="enumeration" defaultValue="kWh">
+                <caption>Unité de base</caption>
+                <description>Choisissez l'unité de base pour les mesures de consommation</description>
+                <enumerationValues>
+                    <enumerationValue key="kWh">Kilowatt-heures (kWh)</enumerationValue>
+                    <enumerationValue key="m3">Mètres cubes (m³)</enumerationValue>
+                </enumerationValues>
             </property>
         </propertyGroup>
         <propertyGroup caption="Behavior">

@@ -13,7 +13,7 @@ export function preview(props: AdvancedSankeyV2PreviewProps): ReactElement {
             fontSize: "14px"
         }
     }, [
-        createElement("div", null, "Advanced Sankey Diagram Preview"),
+        createElement("div", null, "Advanced Sankey Diagram Preview (V2)"),    
         createElement("div", null, props.title || "Diagramme Sankey")
     ]);
 }

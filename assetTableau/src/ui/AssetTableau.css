@@ -192,6 +192,260 @@
     min-height: 80px;
 }
 
+/* ==== MODERN TOOLBAR COMPACT ==== */
+.modern-toolbar-compact {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--at-spacing-md) var(--at-spacing-lg);
+    border-bottom: 1px solid var(--at-color-border);
+    background: linear-gradient(135deg, var(--at-color-bg) 0%, var(--at-color-bg-secondary) 100%);
+    gap: var(--at-spacing-lg);
+    flex-shrink: 0;
+    min-height: 75px;
+}
+
+.toolbar-main-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--at-spacing-md);
+    flex: 1;
+    min-width: 0; /* Permet la compression si nécessaire */
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    gap: var(--at-spacing-md);
+}
+
+.dashboard-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--at-color-primary) 0%, var(--at-color-electric) 100%);
+    border-radius: var(--at-border-radius);
+    color: white;
+    box-shadow: var(--at-shadow-sm);
+}
+
+.dashboard-icon .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.dashboard-info {
+    flex: 1;
+}
+
+.dashboard-title {
+    font-size: var(--at-font-size-lg);
+    font-weight: 700;
+    color: var(--at-color-primary);
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.dashboard-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--at-font-size-sm);
+    color: var(--at-color-text-muted);
+    font-weight: 500;
+}
+
+.nav-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--at-color-electric);
+}
+
+.toolbar-actions-compact {
+    display: flex;
+    align-items: center;
+    gap: var(--at-spacing-sm);
+    flex-shrink: 0;
+}
+
+/* Enhanced Search Container avec stats intégrées */
+.enhanced-search-container {
+    display: flex;
+    align-items: center;
+    gap: var(--at-spacing-md);
+    flex: 1;
+    max-width: 600px;
+}
+
+.inline-stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--at-color-bg);
+    border: 1px solid var(--at-color-border);
+    border-radius: var(--at-border-radius-sm);
+    font-size: var(--at-font-size-sm);
+    color: var(--at-color-text-muted);
+    white-space: nowrap;
+    box-shadow: var(--at-shadow-sm);
+}
+
+.stats-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--at-color-electric);
+}
+
+.stats-compact {
+    font-weight: 500;
+}
+
+/* Actions Compactes */
+.action-btn-compact {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--at-color-bg);
+    border: 1px solid var(--at-color-border);
+    border-radius: var(--at-border-radius-sm);
+    font-size: var(--at-font-size-sm);
+    font-weight: 500;
+    color: var(--at-color-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    min-width: auto;
+}
+
+.action-btn-compact:hover:not(:disabled) {
+    background: var(--at-color-bg-secondary);
+    border-color: var(--at-color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--at-shadow-md);
+}
+
+.action-btn-compact:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-text-compact {
+    font-weight: 500;
+}
+
+.badge-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    background: var(--at-color-electric);
+    color: white;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 4px;
+    margin-left: 2px;
+}
+
+.filter-toggle-active .badge-count {
+    background: white;
+    color: var(--at-color-electric);
+}
+
+.toolbar-loading-compact {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+}
+
+/* Responsive Design pour la toolbar compacte */
+@media (max-width: 768px) {
+    .modern-toolbar-compact {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--at-spacing-md);
+        min-height: auto;
+        padding: var(--at-spacing-md);
+    }
+    
+    .toolbar-main-section {
+        gap: var(--at-spacing-sm);
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--at-spacing-sm);
+    }
+    
+    .dashboard-info {
+        width: 100%;
+    }
+    
+    .dashboard-subtitle {
+        flex-wrap: wrap;
+    }
+    
+    .enhanced-search-container {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: none;
+        gap: var(--at-spacing-sm);
+    }
+    
+    .inline-stats {
+        justify-content: center;
+    }
+    
+    .toolbar-actions-compact {
+        justify-content: space-between;
+    }
+    
+    .action-btn-compact {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-title {
+        font-size: var(--at-font-size-base);
+    }
+    
+    .dashboard-subtitle {
+        font-size: 12px;
+    }
+    
+    .toolbar-actions-compact {
+        flex-direction: column;
+        gap: var(--at-spacing-sm);
+    }
+    
+    .action-btn-compact {
+        width: 100%;
+    }
+}
+
+/* ==== MODERN TOOLBAR ==== */
+.modern-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--at-spacing-lg);
+    border-bottom: 1px solid var(--at-color-border);
+    background: var(--at-color-bg);
+    gap: var(--at-spacing-lg);
+    flex-shrink: 0;
+    min-height: 80px;
+}
+
 .toolbar-section {
     display: flex;
     align-items: center;
@@ -228,8 +482,6 @@
     border-color: var(--at-color-primary);
     box-shadow: 0 0 0 3px rgba(24, 33, 62, 0.1);
 }
-
-
 
 .enhanced-search-input {
     flex: 1;
@@ -1307,8 +1559,6 @@
     border: 2px solid white;
     box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3);
 }
-
-
 
 .asset-debug-info {
     margin-top: var(--at-spacing-md);

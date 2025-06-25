@@ -1,5 +1,5 @@
 import { ReactElement, createElement } from "react";
-import { Download, Filter, X } from "lucide-react";
+import { Download, Filter, X, BarChart3, TrendingUp, Navigation } from "lucide-react";
 import { logger } from "./observability";
 
 interface ModernToolbarProps {
@@ -76,9 +76,25 @@ export function ModernToolbar({
     };
     
     return (
-        <div className="modern-toolbar">
-            <div className="toolbar-section toolbar-left">
-                {/* Enhanced Search Bar */}
+        <div className="modern-toolbar-compact">
+            {/* Section principale fusionnée */}
+            <div className="toolbar-main-section">
+                {/* Dashboard Header avec icône */}
+                <div className="dashboard-header">
+                    <div className="dashboard-icon">
+                        <BarChart3 className="icon" />
+                    </div>
+                    <div className="dashboard-info">
+                        <h2 className="dashboard-title">Dashboard Énergétique</h2>
+                        <div className="dashboard-subtitle">
+                            <Navigation className="nav-icon" />
+                            Navigation hiérarchique • {totalItems} assets
+                            {modifiedItems > 0 && ` • ${modifiedItems} modifiés`}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Enhanced Search Bar avec stats intégrées */}
                 <div className="enhanced-search-container">
                     <div className="search-input-group">
                         <input
@@ -100,46 +116,46 @@ export function ModernToolbar({
                             </button>
                         )}
                     </div>
+                    {/* Stats rapides intégrées */}
+                    <div className="inline-stats">
+                        <TrendingUp className="stats-icon" />
+                        <span className="stats-compact">
+                            {totalItems} total{modifiedItems > 0 && ` • ${modifiedItems} modifiés`}
+                        </span>
+                    </div>
                 </div>
             </div>
             
-            {/* Actions Section */}
-            <div className="toolbar-section toolbar-right">
-                {/* Stats Counter */}
-                <div className="toolbar-stats">
-                    <span className="stats-text">
-                        {totalItems} assets{modifiedItems > 0 && ` • ${modifiedItems} modifiés`}
-                    </span>
-                </div>
-
+            {/* Actions compactes */}
+            <div className="toolbar-actions-compact">
                 {/* Modified Filter Button */}
                 <button
                     onClick={handleFilterToggle}
-                    className={`action-btn filter-toggle-btn ${showModifiedOnly ? 'filter-toggle-active' : ''}`}
+                    className={`action-btn-compact filter-toggle-btn ${showModifiedOnly ? 'filter-toggle-active' : ''}`}
                     disabled={isLoading}
                     title={`Afficher uniquement les éléments modifiés (${modifiedItems})`}
                 >
                     <Filter className="btn-icon" />
-                    <span className="btn-text">Modifiés {modifiedItems > 0 && `(${modifiedItems})`}</span>
+                    <span className="btn-text-compact">Modifiés</span>
+                    {modifiedItems > 0 && <span className="badge-count">{modifiedItems}</span>}
                     {showModifiedOnly && <div className="active-indicator"></div>}
                 </button>
                 
-                {/* Export Button */}
+                {/* Export Button avec fonctionnalité étendue */}
                 <button 
                     onClick={handleExport}
-                    className="action-btn export-btn-enhanced" 
-                    title="Exporter les données"
+                    className="action-btn-compact export-btn-enhanced" 
+                    title="Exporter les données (CSV, Excel)"
                     disabled={isLoading}
                 >
                     <Download className="btn-icon" />
-                    <span className="btn-text">Exporter</span>
+                    <span className="btn-text-compact">Export</span>
                 </button>
                 
                 {/* Loading Indicator */}
                 {isLoading && (
-                    <div className="toolbar-loading">
+                    <div className="toolbar-loading-compact">
                         <div className="loading-spinner-sm"></div>
-                        <span className="loading-text-sm">Chargement...</span>
                     </div>
                 )}
             </div>

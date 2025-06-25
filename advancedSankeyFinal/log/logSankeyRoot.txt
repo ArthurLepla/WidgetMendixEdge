@@ -1,0 +1,64 @@
+
+[Client] [LoadingService] Significant DOM changes detected 2 mxui.js:5:164803
+[Client] 🔍 R7: Chevauchement détecté entre Usine_Usine-Secteur_Moulage et Usine_Usine-Secteur_Reseau_Electrique: 928.7px mxui.js:5:164803
+[Client] ⚠️ R7: Non-conformité - 310.49% > 3% <anonymous code>:1:145535
+[Client] 📊 R6: Tri par poids: Traitement_thermique(2529263.6114039) vs Compresseurs(24839.34247971) = -2504424.26892419 mxui.js:5:164803
+[Client] 📊 R6: Tri par poids: Compresseurs(24839.34247971) vs Hall_Mecanique(20813.01676214) = -4026.325717570002 mxui.js:5:164803
+[Client] 📊 R6: Tri par poids: Hall_Mecanique(20813.01676214) vs Moulage(10853.79999573) = -9959.21676641 mxui.js:5:164803
+[Client] 📊 R6: Tri par poids: Moulage(10853.79999573) vs Reseau_Electrique(9286.50006735) = -1567.29992838 mxui.js:5:164803
+[Client] 📊 R6: Tri par poids: Reseau_Electrique(9286.50006735) vs Acierie(7005.20998362) = -2281.2900837300003 mxui.js:5:164803
+[Client] 📊 R6: Tri par poids: Acierie(7005.20998362) vs Autres(469.59462556) = -6535.615358059999 mxui.js:5:164803
+[Client] ✅ R6: Conformité validée pour tous les niveaux mxui.js:5:164803
+[Client] 🎯 R2: Racine initiale sélectionnée: Usine_Usine (index: 0) mxui.js:5:164803
+[Client] 🎯 D3: Vue racine - tous les nœuds traités comme connectés: 12 mxui.js:5:164803
+[Client] 🔍 DEBUG LIENS: Total liens à rendre: 11 mxui.js:5:164803
+[Client] 🔍 DEBUG LIENS: Nœuds connectés: 12, Liens disponibles: 
+Array(11) [ "Secteur_Traitement_thermique → Machine_Four_2_Elec (4378.22501155)", "Secteur_Traitement_thermique → Machine_Four_3_ET_12_Ventilateurs (0)", "Secteur_Traitement_thermique → Machine_Four_ALC (0.275)", "Secteur_Traitement_thermique → Machine_Etuve_ALC_Elec (2515783.5)", "Secteur_Traitement_thermique → Machine_Four_CFI_Elec (661.96999898)", "Secteur_Traitement_thermique → Machine_Potence_ESAB (547.79710013)", "Secteur_Traitement_thermique → Machine_PC_Soudure_Roche (2616.14253521)", "Secteur_Traitement_thermique → Machine_Depart_102 (996.32500333)", "Secteur_Traitement_thermique → Machine_Wonder_PLUS_Chalumeau (324.57499913)", "Secteur_Traitement_thermique → Machine_Pc_400V_Ebarbage (56.40000034)", … ]
+mxui.js:5:164803
+[Client] 🎨 Vue simple détectée, D3 optimisera l'ordre des nœuds pour éviter les croisements. mxui.js:5:164803
+[Client] 🎛️ Configuration Sankey: padding=75.0, width=46.4, taille=580x720 mxui.js:5:164803
+[Client] 📊 Normalisation (sqrt) appliquée aux liens (ratio original: 9148304:1) mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Traitement_thermique - D3: 330.3787065735407 → Original: 2529263.6114039 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Etuve_ALC_Elec - D3: 297.86329066177115 → Original: 2515783.5 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Four_2_Elec - D3: 6.601393203669561 → Original: 4378.22501155 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Grenailleuse_et_son_filtre_aspiration - D3: 6.103387222139023 → Original: 3739.25000553 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: PC_Soudure_Roche - D3: 5.1388643635675795 → Original: 2616.14253521 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Depart_102 - D3: 3.3708059351579704 → Original: 996.32500333 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Four_CFI_Elec - D3: 2.879275128556595 → Original: 661.96999898 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Potence_ESAB - D3: 2.688663025468204 → Original: 547.79710013 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Wonder_PLUS_Chalumeau - D3: 2.258623793719513 → Original: 324.57499913 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Pc_400V_Ebarbage - D3: 1.474403239491158 → Original: 56.40000034 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Four_ALC - D3: 1 → Original: 0.275 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Four_3_ET_12_Ventilateurs - D3: 1 → Original: 0 mxui.js:5:164803
+[Client] 📐 ViewBox appliqué pour centrage: 60 0 660 800 mxui.js:5:164803
+[Client] [LoadingService] Significant DOM changes detected 4 mxui.js:5:164803
+[Client] 🎯 R2: Racine initiale sélectionnée: Usine_Usine (index: 0) mxui.js:5:164803
+[Client] 🧹 Cleanup resize listener: resize.sankey-container mxui.js:5:164803
+[Client] 🎯 D3: Vue racine - tous les nœuds traités comme connectés: 8 mxui.js:5:164803
+[Client] 🔍 DEBUG LIENS: Total liens à rendre: 7 mxui.js:5:164803
+[Client] 🔍 DEBUG LIENS: Nœuds connectés: 8, Liens disponibles: 
+Array(7) [ "Usine_Usine → Secteur_Acierie (7005.20998362)", "Usine_Usine → Secteur_Hall_Mecanique (20813.01676214)", "Usine_Usine → Secteur_Traitement_thermique (2529263.6114039)", "Usine_Usine → Secteur_Autres (469.59462556)", "Usine_Usine → Secteur_Compresseurs (24839.34247971)", "Usine_Usine → Secteur_Moulage (10853.79999573)", "Usine_Usine → Secteur_Reseau_Electrique (9286.50006735)" ]
+mxui.js:5:164803
+[Client] 🎨 Vue simple détectée, D3 optimisera l'ordre des nœuds pour éviter les croisements. mxui.js:5:164803
+[Client] 🎛️ Configuration Sankey: padding=75.0, width=46.4, taille=580x720 mxui.js:5:164803
+[Client] 📊 Normalisation (sqrt) appliquée aux liens (ratio original: 5386:1) mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Usine - D3: 348.7199051690788 → Original: 2608287.23216017 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Traitement_thermique - D3: 297.86329066177115 → Original: 2529263.6114039 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Compresseurs - D3: 14.555356495754946 → Original: 24839.34247971 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Hall_Mecanique - D3: 12.956619968545077 → Original: 20813.01676214 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Moulage - D3: 8.431994032690953 → Original: 10853.79999573 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Reseau_Electrique - D3: 7.604915112443368 → Original: 9286.50006735 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Acierie - D3: 6.30772889787326 → Original: 7005.20998362 mxui.js:5:164803
+[Client] 🔧 VALEUR RESTAURÉE: Autres - D3: 1 → Original: 469.59462556 mxui.js:5:164803
+[Client] 📐 ViewBox appliqué pour centrage: 60 0 660 800 mxui.js:5:164803
+[Client] [LoadingService] Significant DOM changes detected 4 mxui.js:5:164803
+Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: https://192.168.220.202/fad/%3Canonymous%20code%3E
+Source Map URL: installHook.js.map
+
+[Client] [LoadingService] Significant DOM changes detected 2 mxui.js:5:164803
+
+​
+

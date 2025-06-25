@@ -355,4 +355,16 @@ Création du fichier de traçabilité et analyse de l'architecture existante du 
 
 ---
 
+## 🕐 2025-01-XX - Correction décalage horaire exports (-2h)
+
+### ⌛ Changement :
+Remplacement de `toISOString()` par une fonction `formatDateForExport()` utilisant `Intl.DateTimeFormat("fr-FR")` avec `timeZone: "Europe/Paris"` explicite dans `ExportLogic.ts` pour garantir la cohérence avec les graphiques.
+
+### 🤔 Analyse :
+Le décalage de -2h venait de la conversion automatique en UTC via `toISOString()`. La nouvelle solution utilise `Intl.DateTimeFormat` avec le fuseau horaire européen explicite, assurant une parfaite synchronisation avec les graphiques qui utilisent le même formatage français. Cette approche est plus robuste que l'heure locale car elle gère automatiquement l'heure d'été/hiver et reste cohérente quel que soit le fuseau du navigateur.
+
+### 🔜 Prochaines étapes :
+- Tester les exports pour vérifier la synchronisation parfaite avec les graphiques
+- La solution est maintenant totalement alignée avec les standards de formatage français
+
 *Dernière mise à jour : 2024-12-21* 

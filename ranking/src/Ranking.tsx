@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, createElement } from "react";
-import { RankingContainerProps } from "../typings/RankingProps";
+import { RankingContainerProps, BaseUnitEnum } from "../typings/RankingProps";
 import { ValueStatus } from "mendix";
 import { 
     TrendingUpIcon, 
@@ -53,6 +53,32 @@ export const ENERGY_CONFIG = {
     }
 } as const;
 
+// Interface pour les unités converties
+interface ConvertedUnit {
+    value: number;
+    unit: string;
+}
+
+/**
+ * Convertit automatiquement les kWh vers l'unité la plus appropriée (kWh, MWh, GWh, TWh)
+ * Les m³ restent inchangés
+ */
+function convertToAppropriateUnit(value: number, baseUnit: BaseUnitEnum): ConvertedUnit {
+    if (baseUnit === "m3") {
+        return { value, unit: "m³" };
+    }
+    
+    // Conversion automatique des kWh
+    if (value >= 1_000_000_000) { // >= 1 billion kWh = TWh
+        return { value: value / 1_000_000_000, unit: "TWh" };
+    } else if (value >= 1_000_000) { // >= 1 million kWh = GWh
+        return { value: value / 1_000_000, unit: "GWh" };
+    } else if (value >= 1_000) { // >= 1 thousand kWh = MWh
+        return { value: value / 1_000, unit: "MWh" };
+    } else {
+        return { value, unit: "kWh" };
+    }
+}
 
 // Labels pour les statuts
 const statusLabels = {
@@ -305,7 +331,7 @@ export function Ranking({
     machineGroupEntity, 
     machineNameAttribute, 
     consumptionAttribute, 
-    consumptionUnit,
+    baseUnit,
     limitResults,
     highConsumptionColor,
     mediumConsumptionColor,
@@ -521,20 +547,23 @@ export function Ranking({
                 key: 'consumption',
                 width: showExplanations ? '20%' : '25%',
                 align: 'right',
-                render: (consumption: number) => (
-                    <Space>
-                        <IconComponent 
-                            size={18} 
-                            style={{ color: energyConfig.iconColor }}
-                        />
-                        <Typography.Text strong>
-                            {consumption.toFixed(2)}
-                        </Typography.Text>
-                        <Typography.Text type="secondary">
-                            {consumptionUnit?.trim() || energyConfig.unit}
-                        </Typography.Text>
-                    </Space>
-                ),
+                render: (consumption: number) => {
+                    const converted = convertToAppropriateUnit(consumption, baseUnit);
+                    return (
+                        <Space>
+                            <IconComponent 
+                                size={18} 
+                                style={{ color: energyConfig.iconColor }}
+                            />
+                            <Typography.Text strong>
+                                {converted.value.toFixed(2)}
+                            </Typography.Text>
+                            <Typography.Text type="secondary">
+                                {converted.unit}
+                            </Typography.Text>
+                        </Space>
+                    );
+                },
             },
             {
                 title: 'Statut',
@@ -577,7 +606,7 @@ export function Ranking({
         }
 
         return baseColumns;
-    }, [showExplanations, energyConfig, consumptionUnit, highConsumptionColor, mediumConsumptionColor, lowConsumptionColor]);
+    }, [showExplanations, energyConfig, baseUnit, highConsumptionColor, mediumConsumptionColor, lowConsumptionColor]);
 
     // Résumé des consommations pour le panneau d'information
     const consumptionSummary = useMemo(() => {
@@ -675,7 +704,7 @@ export function Ranking({
                     columns={columns}
                     dataSource={machinesWithStatus}
                     rowKey="key"
-                    pagination={{ pageSize: 10 }}
+                    pagination={false}
                     loading={isLoading}
                     rowClassName={(record) => record.status === "critical" ? "critical-row" : ""}
                 />

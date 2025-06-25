@@ -405,3 +405,92 @@ Le nœud sélectionné comme racine (même orphelin) est maintenant affiché à 
 
 ### 🤔 Analyse :
 Avec ces ajustements, le calcul des coûts s'active dès qu'un prix est disponible, même quand les dates de la période ou la casse diffèrent. Les libellés passent correctement de « kWh »/« m³ » à « € » dès qu'une consommation non nulle est détectée.
+
+## 21 juin 2025 - Correction Critique Navigation - Liens Manquants
+
+### ⌛ Changement :
+**CORRECTION CRITIQUE NAVIGATION-PROPORTIONNALITÉ** : Résolution définitive du problème où les nœuds perdaient leur proportionnalité lors de la navigation dans le Sankey.
+
+**Cause racine identifiée** :
+Dans `DisplayFilterService.filterVisibleNodes()`, seuls les **liens directs depuis la racine** étaient retournés :
+```typescript
+// AVANT (problématique)
+const directLinks = allLinks.filter(link => link.source === rootId);
+return { nodes: visibleNodes, links: directLinks };
+```
+
+**Problème** : En navigation (ex: clic sur "Traitement_thermique"), cette logique ne retournait que les liens où "Secteur_Traitement_thermique" est source, mais excluait tous les liens **entre les enfants visibles** (machines, équipements, etc.).
+
+**Résultat** : `links.length === 0` → D3 activait le mode "positionnement en grille" avec tailles fixes identiques ❌
+
+### 🔧 Solution Appliquée :
+```typescript
+// APRÈS (correct)
+const allRelevantLinks = allLinks.filter(link => {
+  const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+  const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+  
+  // Inclure le lien si source ET target sont dans les nœuds visibles
+  return visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId);
+});
+```
+
+**Logs de debug ajoutés** :
+- `🔍 DEBUG LIENS: Total liens à rendre: X`
+- `🔧 CORRECTION LIENS: Liens directs depuis racine: X, Tous liens pertinents: Y`
+
+### 🤔 Analyse :
+Cette correction garantit que D3 Sankey reçoit **tous les liens pertinents** pour calculer les tailles proportionnelles des nœuds et liens, exactement comme en vue root. La navigation conserve maintenant le même rendu qualitatif que la page d'accueil.
+
+### 🔜 Prochaines étapes :
+- Tester la navigation sur différents niveaux
+- Valider que les proportions sont cohérentes
+- Nettoyer les logs de debug si confirmé
+
+---
+
+## 21 juin 2025 - Correction Proportionnalité Tailles lors Navigation
+
+## 🗓️ 2025-01-27
+
+### ⌛ Changement : Amélioration critique de la gestion des vues denses dans le rendu D3
+
+**Problème identifié** : Les nœuds et liens perdaient leurs proportions dans les vues avec beaucoup d'éléments (12+ nœuds), passant en mode "dimensions par défaut" au lieu de conserver les proportions basées sur les valeurs.
+
+**Solutions implémentées** :
+
+1. **Adaptation dynamique des dimensions du canvas** :
+   - Facteur de densité basé sur le nombre de nœuds
+   - Augmentation automatique des dimensions pour les vues complexes
+   - Canvas jusqu'à 2000x1200px pour les vues très denses
+
+2. **Configuration D3 Sankey adaptative** :
+   - `nodeWidth` et `nodePadding` calculés selon la densité
+   - Facteur inverse : plus de nœuds = dimensions plus compactes mais proportionnelles
+   - Épaisseur des liens adaptée (1.5-15px selon contexte)
+
+3. **Marges et espacements intelligents** :
+   - Marges qui s'agrandissent avec le nombre de nœuds
+   - Calcul dynamique des espaces pour les labels
+
+4. **Rendu visuel optimisé** :
+   - Police adaptative (14-20px selon densité)
+   - Troncature intelligente des labels longs
+   - Préservation des proportions visuelles
+
+### 🤔 Analyse :
+
+Cette amélioration résout un problème critique d'utilisabilité où le widget devenait illisible dans les vues complexes. L'approche adaptative garantit :
+- **Scalabilité** : Fonctionne de 3 à 20+ nœuds
+- **Maintien des proportions** : Les valeurs restent visuellement comparables
+- **Lisibilité** : Labels et dimensions s'adaptent automatiquement
+- **Performance** : Pas de calculs lourds supplémentaires
+
+### 🔜 Prochaines étapes :
+- Tester avec des datasets très larges (30+ nœuds)
+- Ajouter un mode "zoom out" automatique si nécessaire
+- Optimiser la détection des cas où un scroll devient nécessaire
+
+---
+
+## 🗓️ 2025-01-26

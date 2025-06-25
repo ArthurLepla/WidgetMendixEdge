@@ -32,4 +32,52 @@ Migration complète du tableau de classement vers les composants UI d'Ant Design
 - `antd` : Bibliothèque de composants UI React
 
 ### 🚀 Build Status :
-✅ Compilation réussie avec quelques warnings sur la compatibilité bundler (normaux avec Ant Design) 
+✅ Compilation réussie avec quelques warnings sur la compatibilité bundler (normaux avec Ant Design)
+
+## 📅 2025-01-19 - Suppression de la pagination pour améliorer l'UX
+
+### ⌛ Changement :
+Désactivation de la pagination du tableau Ant Design pour éviter la confusion utilisateur avec les chevrons non fonctionnels.
+
+### 🔍 Détails techniques :
+- **Pagination désactivée** : Changement de `pagination={{ pageSize: 10 }}` vers `pagination={false}`
+- **Problème résolu** : Les chevrons de pagination étaient visibles mais non fonctionnels, troublant l'utilisateur
+- **Affichage linéaire** : Toutes les machines du classement sont maintenant visibles d'un coup sans navigation
+
+### 🤔 Analyse :
+**Impact UX** : L'élimination des éléments d'interface non fonctionnels améliore significativement l'expérience utilisateur. Plus de confusion avec des contrôles inutilisables.
+
+**Impact scalability** : Pour des datasets plus volumineux (>50 machines), il faudra réintroduire une pagination fonctionnelle ou une virtualisation pour maintenir les performances.
+
+### 🔜 Prochaines étapes :
+- Surveiller les performances avec des datasets volumineux
+- Envisager l'ajout d'une pagination conditionnelle (active seulement si >20 machines)
+- Tester l'affichage avec différentes tailles de données 
+
+## 📅 2025-01-19 - Système d'unités intelligent avec conversion automatique
+
+### ⌛ Changement :
+Implémentation d'un système d'unités de base (kWh/m³) avec conversion automatique des kWh vers MWh, GWh, TWh selon la magnitude des valeurs.
+
+### 🔍 Détails techniques :
+- **Enum d'unités de base** : Remplacement de `consumptionUnit: string` par `baseUnit: BaseUnitEnum` (`"kWh" | "m3"`)
+- **Fonction de conversion intelligente** : `convertToAppropriateUnit()` qui convertit automatiquement :
+  - ≥ 1 000 kWh → MWh
+  - ≥ 1 000 000 kWh → GWh  
+  - ≥ 1 000 000 000 kWh → TWh
+  - m³ restent inchangés (pas de conversion)
+- **Affichage dynamique** : Les valeurs s'affichent automatiquement dans l'unité la plus lisible
+- **Mise à jour XML** : Configuration Mendix avec choix enum pour l'unité de base
+
+### 🤔 Analyse :
+**Impact UX** : L'affichage automatique en unités appropriées améliore significantly la lisibilité. Plus besoin de voir "1500000 kWh" quand "1.50 GWh" est plus clair.
+
+**Impact maintainability** : Le système typé avec enum évite les erreurs de saisie d'unités. La logique de conversion centralisée facilite les modifications futures.
+
+**Impact scalability** : Le système s'adapte automatiquement aux ordres de grandeur, supportant des installations de toute taille (du kWh industriel aux TWh nationaux).
+
+### 🔜 Prochaines étapes :
+- Tester avec des données réelles de différents ordres de grandeur
+- Envisager l'ajout d'options de précision personnalisables (1-4 décimales)
+- Documenter les seuils de conversion pour les utilisateurs finaux
+- Ajouter des tests unitaires pour la fonction de conversion 

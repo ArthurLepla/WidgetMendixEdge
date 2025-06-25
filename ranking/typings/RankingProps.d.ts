@@ -9,6 +9,8 @@ import { Big } from "big.js";
 
 export type ModeEnum = "Elec" | "gaz" | "eau" | "Air";
 
+export type BaseUnitEnum = "kWh" | "m3";
+
 export interface RankingContainerProps {
     name: string;
     class: string;
@@ -20,7 +22,7 @@ export interface RankingContainerProps {
     machineGroupEntity?: ListValue;
     machineNameAttribute?: ListAttributeValue<string>;
     consumptionAttribute?: ListAttributeValue<Big>;
-    consumptionUnit: string;
+    baseUnit: BaseUnitEnum;
     limitResults: number;
     highConsumptionColor: string;
     mediumConsumptionColor: string;
@@ -45,7 +47,7 @@ export interface RankingPreviewProps {
     machineGroupEntity: {} | { caption: string } | { type: string } | null;
     machineNameAttribute: string;
     consumptionAttribute: string;
-    consumptionUnit: string;
+    baseUnit: BaseUnitEnum;
     limitResults: number | null;
     highConsumptionColor: string;
     mediumConsumptionColor: string;

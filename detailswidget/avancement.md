@@ -1,4 +1,59 @@
-### �� Date: 2024-12-19 (Implémentation Paramètre baseUnit - Unités Personnalisées)
+### �� Date: 2024-12-19 (Correction Décalage Horaire Exports)
+
+### ⌛ Changement :
+**Correction critique du décalage horaire de -2h** dans les exports par rapport aux données affichées dans les graphiques.
+
+**Problème identifié :**
+- **Export UTC vs Affichage Local** : L'utilisation de `toISOString()` dans les exports convertissait automatiquement les dates en UTC
+- **Décalage -2h** : En été français (UTC+2), les exports affichaient les timestamps avec 2h de retard
+- **Incohérence utilisateur** : Les heures exportées ne correspondaient pas aux heures affichées dans les graphiques
+- **Méthodes différentes** : Graphiques utilisaient `Intl.DateTimeFormat("fr-FR")` (heure locale) vs exports `toISOString()` (UTC)
+
+**Solution implémentée :**
+- **Fonction `formatDateForExport()`** : Nouvelle fonction utilitaire pour formater les dates en heure française
+- **Fuseau horaire explicite** : `timeZone: "Europe/Paris"` pour forcer le fuseau français
+- **Format cohérent** : `YYYY-MM-DD HH:mm:ss` aligné avec les attentes utilisateur
+- **Application universelle** : Correction dans Excel, CSV et JSON
+
+**Code corrigé :**
+```typescript
+const formatDateForExport = (date: Date): string => {
+  return new Intl.DateTimeFormat("fr-FR", {
+    year: "numeric",
+    month: "2-digit", 
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Europe/Paris" // Force le fuseau horaire français
+  }).format(date).replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}):(\d{2})/, "$3-$2-$1 $4:$5:$6");
+};
+
+// Remplacement dans tous les exports
+Timestamp: r.timestamp instanceof Date 
+  ? formatDateForExport(r.timestamp)  // Au lieu de toISOString()
+  : r.timestamp,
+```
+
+**Améliorations apportées :**
+- ✅ **Cohérence parfaite** : Timestamps identiques entre graphiques et exports
+- ✅ **Fuseau horaire français** : Prise en compte automatique de l'heure d'été/hiver
+- ✅ **Format lisible** : `YYYY-MM-DD HH:mm:ss` plus compréhensible que l'ISO
+- ✅ **Correction universelle** : Tous les formats d'export (Excel, CSV, JSON) corrigés
+- ✅ **Expérience utilisateur** : Plus de confusion entre heures affichées et exportées
+
+### 🤔 Analyse :
+Cette correction résout un problème critique d'expérience utilisateur qui pourrait causer des erreurs d'interprétation des données. Le décalage horaire entre affichage et export était source de confusion et de perte de confiance dans les données. La solution adoptée utilise la même logique de formatage que les graphiques (`Intl.DateTimeFormat` avec fuseau français) garantissant une cohérence absolue. L'explicitation du fuseau horaire `Europe/Paris` assure la robustesse face aux changements heure d'été/hiver. Cette approche suit les bonnes pratiques de gestion des fuseaux horaires en étant explicite plutôt qu'implicite.
+
+### 🔜 Prochaines étapes :
+- Tester les exports avec des données de différentes périodes (été/hiver)
+- Valider que les heures correspondent exactement aux graphiques
+- Vérifier la compatibilité avec Excel et les outils d'analyse
+- Documenter cette bonne pratique pour les futurs développements
+
+---
+
+### 📅 Date: 2024-12-19 (Implémentation Paramètre baseUnit - Unités Personnalisées)
 
 ### ⌛ Changement :
 **Implémentation du paramètre `baseUnit` pour gérer des unités de base personnalisées** adaptant le widget aux contraintes métier où les données peuvent ne pas correspondre aux unités présumées selon le type d'énergie.
@@ -382,17 +437,17 @@ Cette refactorisation établit une harmonie visuelle parfaite entre le toggle IP
 - Performance optimisée avec des dimensions appropriées
 
 ### 🤔 Analyse:
-Cette correction critique résout les problèmes visuels majeurs qui rendaient le toggle button inadapté à l'interface. La réduction des dimensions tout en préservant la lisibilité et l'utilisabilité démontre une approche équilibrée entre esthétique et fonctionnalité. L'ajout de `flex-shrink: 0` empêche la compression du toggle dans des espaces restreints. Les ajustements responsive maintiennent la cohérence visuelle sur tous les appareils. Cette approche respecte les contraintes d'espace du header tout en conservant une expérience utilisateur optimale.
+Cette correction critique résout les problèmes visuels majeurs qui nuisaient à la cohérence de l'interface. L'alignement parfait avec le bouton d'export assure une harmonie visuelle dans le header, tandis que la résolution du débordement garantit un rendu professionnel sans artefacts visuels. L'utilisation de flexbox pour le centrage vertical est plus robuste et maintenable que les approches basées sur le padding. La gestion responsive préserve ces améliorations sur tous les appareils. Ces modifications respectent les principes de design system en maintenant la cohérence visuelle entre les composants.
 
 ### 🔜 Prochaines étapes:
-- Valider le rendu final dans le navigateur pour valider la correction
-- Tester sur différentes résolutions d'écran
-- Vérifier l'accessibilité avec les nouvelles dimensions
-- Documenter ces dimensions optimales pour les futurs composants similaires
+- Tester le rendu final dans le navigateur pour valider les corrections
+- Vérifier l'alignement sur différentes tailles d'écran
+- Valider que tous les effets restent contenus dans le toggle
+- Documenter ces bonnes pratiques pour les futurs composants similaires
 
 ---
 
-###  Date: 2024-12-19 (Cohérence Espacements Toggle)
+### �� Date: 2024-12-19 (Cohérence Espacements Toggle)
 
 ### ✨ Changement:
 **Refactorisation complète des espacements du toggle button IPE** pour assurer une cohérence parfaite et un rendu professionnel.

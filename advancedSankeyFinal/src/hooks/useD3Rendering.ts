@@ -96,25 +96,41 @@ function initializeD3Rendering(props: D3RenderingProps, hideTimerRef: React.Muta
 
   const { width, height } = dimensions;
   
-  // 🔧 AMÉLIORATION: Dimensions plus généreuses pour un meilleur affichage
-  const effectiveWidth = Math.min(Math.max(width, 800), 1200);   // Min 800, Max 1200
-  const effectiveHeight = Math.min(Math.max(height, 600), 800);  // Min 600, Max 800
+  // 🔧 CORRECTION: Dimensions de base plus raisonnables
+  const nodeCount = sankeyData!.nodes.length;
+  const linkCount = sankeyData!.links.length;
+  
+  // Facteur de densité plus modéré
+  const densityFactor = Math.max(1, Math.sqrt(nodeCount / 12)); // Référence 12 nœuds au lieu de 8
+  const complexityFactor = linkCount > 15 ? 1.2 : 1.0; // Seuil plus élevé
+  
+  // Dimensions plus conservatrices
+  const effectiveWidth = Math.min(
+    Math.max(width, 800), // Minimum conservé à 800
+    1400 * complexityFactor // Maximum réduit de 2000 à 1400
+  );
+  const effectiveHeight = Math.min(
+    Math.max(height, 600), // Minimum conservé à 600
+    900 * complexityFactor // Maximum réduit de 1200 à 900
+  );
+
+  console.log(`🎛️ ADAPTATION DENSITÉ: ${nodeCount} nœuds, facteur=${densityFactor.toFixed(2)}, dimensions=${effectiveWidth}x${effectiveHeight}`);
 
   // Initialisation du tooltip
   const tooltip = createTooltip();
   
-  // 🔧 MARGES AUGMENTÉES: Plus d'espace pour les labels et orphelins
+  // 🔧 MARGES PLUS MODÉRÉES: Adaptation plus graduelle
   const margin = {
-    top: 40,    // 30 → 40
-    right: 120, // 80 → 120 pour plus d'espace pour orphelins
-    bottom: 40, // 30 → 40
-    left: 100   // 80 → 100 pour plus d'espace pour labels
+    top: Math.max(40, 30 + nodeCount * 1),      // Croissance plus lente
+    right: Math.max(120, 100 + nodeCount * 2),  // Croissance plus lente
+    bottom: Math.max(40, 30 + nodeCount * 1),
+    left: Math.max(100, 80 + nodeCount * 2)
   };
 
-  const innerWidth = Math.max(500, effectiveWidth - margin.left - margin.right);   // 400 → 500
-  const innerHeight = Math.max(400, effectiveHeight - margin.top - margin.bottom); // 250 → 400
+  const innerWidth = Math.max(600, effectiveWidth - margin.left - margin.right);
+  const innerHeight = Math.max(500, effectiveHeight - margin.top - margin.bottom);
 
-  // Configuration du SVG
+  // Configuration du SVG avec dimensions adaptatives
   const { svg, cleanupResize } = setupSVG(svgRef.current!, effectiveWidth, effectiveHeight);
   const g = svg.append("g");
 
@@ -129,14 +145,27 @@ function initializeD3Rendering(props: D3RenderingProps, hideTimerRef: React.Muta
   // 🔧 CORRECTION: Utiliser directement les liens du sankeyData qui sont déjà filtrés par l'orchestrateur.
   // La logique précédente créait une confusion entre les liens de la vue et ceux du contexte.
   const linksToRender = sankeyData!.links;
+  
+  // 🔧 DEBUG: Analyser pourquoi les liens n'arrivent pas en navigation
+  console.log(`🔍 DEBUG LIENS: Total liens à rendre: ${linksToRender.length}`);
+  console.log(`🔍 DEBUG LIENS: Nœuds connectés: ${connectedNodes.length}, Liens disponibles:`, linksToRender.map(l => `${l.source} → ${l.target} (${l.value})`));
+  
+  if (linksToRender.length === 0 && connectedNodes.length > 1) {
+    console.log(`❌ PROBLÈME DÉTECTÉ: ${connectedNodes.length} nœuds mais 0 liens - Causes possibles:`);
+    console.log(`   1. Filtrage DisplayFilterService trop restrictif`);
+    console.log(`   2. IDs des nœuds ne correspondent pas aux IDs des liens`);
+    console.log(`   3. Liens perdus entre l'orchestrateur et le rendu`);
+    console.log(`🔍 Nœuds IDs:`, connectedNodes.map(n => n.id));
+  }
 
-  // Configuration du générateur Sankey
+  // Configuration du générateur Sankey avec adaptation à la densité
   const { sankeyGenerator, processedData } = configureSankey(
     connectedNodes, 
-    linksToRender, // Utilisation des liens corrects
+    linksToRender,
     innerWidth, 
     innerHeight,
-    margin
+    margin,
+    nodeCount // 🔧 NOUVEAU: Passer le nombre de nœuds pour adaptation
   );
 
   // Calcul D3 et positionnement
@@ -145,11 +174,11 @@ function initializeD3Rendering(props: D3RenderingProps, hideTimerRef: React.Muta
   
   // 🔧 CORRECTION CRITIQUE: Gérer le cas des vues sans liens (ex: orphelin + enfants)
   if (connectedD3Nodes.length > 1 && links.length === 0) {
-    console.log(`🎯 D3: Vue multi-nœuds sans liens. Positionnement en grille.`);
-    // Positionner manuellement les nœuds en grille pour éviter le chevauchement
-    const nodeWidth = 50;
-    const nodeHeight = 50;
-    const padding = 40;
+    console.log(`🎯 D3: Vue multi-nœuds sans liens. Positionnement en grille adaptée.`);
+    // Positionner manuellement les nœuds en grille avec espacement adaptatif
+    const nodeWidth = Math.max(40, Math.min(60, innerWidth / Math.max(connectedD3Nodes.length, 8)));
+    const nodeHeight = Math.max(50, Math.min(70, innerHeight / Math.max(Math.ceil(connectedD3Nodes.length / 4), 6)));
+    const padding = Math.max(30, nodeWidth * 0.8);
     const nodesPerRow = Math.floor(innerWidth / (nodeWidth + padding));
 
     connectedD3Nodes.forEach((node, i) => {
@@ -161,10 +190,10 @@ function initializeD3Rendering(props: D3RenderingProps, hideTimerRef: React.Muta
         node.y1 = node.y0 + nodeHeight;
     });
   } else if (connectedD3Nodes.length === 1 && links.length === 0) {
-    // Positionner manuellement le nœud unique au centre
+    // Positionner manuellement le nœud unique au centre avec taille adaptée
     const singleNode = connectedD3Nodes[0];
-    const nodeWidth = Math.max(30, Math.min(50, innerWidth * 0.08));
-    const nodeHeight = Math.max(40, Math.min(60, innerHeight * 0.1));
+    const nodeWidth = Math.max(40, Math.min(80, innerWidth * 0.1));
+    const nodeHeight = Math.max(50, Math.min(100, innerHeight * 0.12));
     
     singleNode.x0 = margin.left + (innerWidth - nodeWidth) / 2;
     singleNode.x1 = singleNode.x0 + nodeWidth;
@@ -270,12 +299,12 @@ function createTooltip(): HTMLDivElement {
 function setupSVG(svgElement: SVGSVGElement, width: number, height: number): { svg: d3.Selection<SVGSVGElement, unknown, null, undefined>, cleanupResize: () => void } {
   const svg = d3.select(svgElement);
   
-  // 🔧 CORRECTION VIEWBOX: Height fixe du SVG, viewBox calculé dynamiquement
-  const svgHeight = 600; // Height fixe comme suggéré
+  // 🔧 AMÉLIORATION: Height adaptatif du SVG selon le contenu
+  const adaptiveHeight = Math.max(600, height); // Minimum 600px, peut être plus grand si nécessaire
   
   svg
     .attr("width", width)
-    .attr("height", svgHeight);
+    .attr("height", adaptiveHeight);
     // Pas de viewBox initial - sera défini après calcul du contenu
 
   // Nettoyer le contenu existant
@@ -327,14 +356,15 @@ function configureSankey(
   links: any[], 
   innerWidth: number, 
   innerHeight: number,
-  margin: { top: number; right: number; bottom: number; left: number }
+  margin: { top: number; right: number; bottom: number; left: number },
+  nodeCount: number
 ) {
   // 🔧 CORRECTION: Gérer le cas des nœuds terminaux (aucun lien)
   if (links.length === 0) {
     console.log("🎯 D3: Nœud terminal - configuration simplifiée sans liens");
     
-    // Configuration minimale pour affichage d'un nœud seul
-    const nodeWidth = Math.max(30, Math.min(50, innerWidth * 0.08));
+    // Configuration minimale pour affichage d'un nœud seul avec adaptation
+    const nodeWidth = Math.max(40, Math.min(80, innerWidth * 0.1));
     const sankeyGenerator = sankey<ExtendedNode, any>()
       .nodeWidth(nodeWidth)
       .nodePadding(20)
@@ -392,16 +422,22 @@ function configureSankey(
     console.log("🔠 Vue complexe, tri personnalisé appliqué pour la clarté logique.");
   }
 
-  // 🔧 AMÉLIORATION: Espacement plus généreux et adaptatif
-  const nodePadding = (() => {
-      const baseSpacing = Math.max(20, Math.min(50, innerHeight / Math.max(connectedNodes.length, 6))); // 12→20, max 30→50
-      return normalizationInfo.applied ? Math.max(baseSpacing * 1.5, 30) : baseSpacing; // min 20→30
-  })();
+  // 🔧 AMÉLIORATION MAJEURE: Espacement et largeur adaptatifs selon la densité
+  const densityFactor = Math.max(0.7, Math.min(1.5, Math.sqrt(8 / nodeCount))); // Facteur inverse de la densité
   
-  // 🔧 LARGEUR NŒUD: Plus large pour meilleure lisibilité
-  const nodeWidth = Math.max(30, Math.min(50, innerWidth * 0.08)); // 25→30, max 40→50
+  // Calcul adaptatif du padding en fonction de la densité et de l'espace disponible
+  const basePadding = Math.max(15, Math.min(50, innerHeight / Math.max(nodeCount, 6)));
+  const adaptivePadding = basePadding * densityFactor;
+  
+  // Assurer un espacement minimum même avec beaucoup de nœuds
+  const nodePadding = Math.max(12, adaptivePadding);
+  
+  // 🔧 LARGEUR NŒUD ADAPTATIVE: Plus étroite avec beaucoup de nœuds, plus large avec peu de nœuds
+  const baseNodeWidth = Math.max(25, Math.min(60, innerWidth * 0.05)); // Base plus conservative
+  const adaptiveNodeWidth = baseNodeWidth * densityFactor;
+  const nodeWidth = Math.max(20, adaptiveNodeWidth); // Minimum absolu de 20px
 
-  console.log(`🎛️ Configuration Sankey: padding=${nodePadding.toFixed(1)}, width=${nodeWidth.toFixed(1)}, taille=${innerWidth}x${innerHeight}`);
+  console.log(`🎛️ Configuration Sankey: nœuds=${nodeCount}, densité=${densityFactor.toFixed(2)}, padding=${nodePadding.toFixed(1)}, width=${nodeWidth.toFixed(1)}, taille=${innerWidth}x${innerHeight}`);
 
   // 3. Configurer le générateur Sankey
   const sankeyGenerator = sankey<ExtendedNode, any>()
@@ -567,7 +603,13 @@ function renderLinks(
 ): void {
   const linkGroup = g.append("g").attr("class", "links").attr("fill", "none");
 
-  // Liens visuels
+  // 🔧 CORRECTION CRITIQUE: Restaurer le rendu Sankey correct
+  // Dans un diagramme Sankey, les liens doivent EXACTEMENT remplir les nœuds
+  // D3 calcule automatiquement les bonnes épaisseurs - ne pas les limiter !
+  
+  console.log(`🔗 LIENS: ${links.length} liens, rendu Sankey naturel (pas de limites d'épaisseur)`);
+
+  // Liens visuels avec épaisseur D3 native
   const linkVisual = linkGroup
     .selectAll("path.sankey-link-visual")
     .data(links)
@@ -575,11 +617,11 @@ function renderLinks(
     .attr("class", "sankey-link-visual")
     .attr("d", sankeyLinkHorizontal())
     .attr("stroke", "#E0E0E0")
-    .attr("stroke-width", d => Math.max(2, d.width || 0)) // Épaisseur minimale pour visibilité
+    .attr("stroke-width", d => Math.max(1, d.width || 1)) // Seulement assurer un minimum de 1px pour visibilité
     .style("opacity", 0.8)
     .style("pointer-events", "none");
 
-  // Liens d'interaction
+  // Liens d'interaction avec zone minimale pour l'interaction
   linkGroup
     .selectAll("path.sankey-link-interaction")
     .data(links)
@@ -587,7 +629,7 @@ function renderLinks(
     .attr("class", "sankey-link-interaction")
     .attr("d", sankeyLinkHorizontal())
     .attr("stroke", "transparent")
-    .attr("stroke-width", d => Math.max(20, d.width || 20))
+    .attr("stroke-width", d => Math.max(15, d.width || 15)) // Zone d'interaction minimum 15px
     .style("opacity", 0)
     .style("cursor", "pointer")
     .on("mouseover", function(event: MouseEvent, d: any) {
@@ -617,6 +659,13 @@ function renderNodes(
   effectiveWidth: number,
   hideTimerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>
 ): void {
+  // 🔧 AMÉLIORATION: Adaptation selon la densité de nœuds
+  const nodeCount = nodes.length;
+  const densityFactor = Math.max(0.6, Math.min(1.2, Math.sqrt(8 / nodeCount)));
+  const baseFontSize = Math.max(14, Math.min(20, 18 * densityFactor));
+  
+  console.log(`🔵 NŒUDS: ${nodeCount} nœuds, densité=${densityFactor.toFixed(2)}, taille police=${baseFontSize.toFixed(1)}px`);
+
   const node = g.append("g")
     .attr("class", "nodes")
     .selectAll("g")
@@ -629,19 +678,21 @@ function renderNodes(
       return `translate(${x},${y})`;
     });
 
-  // Rectangles des nœuds
+  // Rectangles des nœuds avec dimensions adaptatives
   node.append("rect")
     .attr("height", d => {
       const calculatedHeight = d.y1! - d.y0!;
-      return isNaN(calculatedHeight) ? STYLE_CONSTANTS.MIN_NODE_HEIGHT : Math.max(STYLE_CONSTANTS.MIN_NODE_HEIGHT, calculatedHeight);
+      const minHeight = Math.max(STYLE_CONSTANTS.MIN_NODE_HEIGHT, 20 * densityFactor);
+      return isNaN(calculatedHeight) ? minHeight : Math.max(minHeight, calculatedHeight);
     })
     .attr("width", d => {
       const calculatedWidth = d.x1! - d.x0!;
-      return isNaN(calculatedWidth) ? STYLE_CONSTANTS.MIN_NODE_WIDTH : Math.max(STYLE_CONSTANTS.MIN_NODE_WIDTH, calculatedWidth);
+      const minWidth = Math.max(STYLE_CONSTANTS.MIN_NODE_WIDTH, 25 * densityFactor);
+      return isNaN(calculatedWidth) ? minWidth : Math.max(minWidth, calculatedWidth);
     })
     .attr("fill", d => getNodeColor(d))
-    .attr("rx", 4)
-    .attr("ry", 4)
+    .attr("rx", Math.max(3, 4 * densityFactor))
+    .attr("ry", Math.max(3, 4 * densityFactor))
     .style("cursor", "pointer")
     .style("filter", "drop-shadow(2px 2px 3px rgba(0,0,0,0.2))")
     .on("mouseover", function(event: MouseEvent, d: ExtendedNode) {
@@ -658,7 +709,7 @@ function renderNodes(
       onNodeClick(d);
     });
 
-  // Labels des nœuds
+  // Labels des nœuds avec taille adaptative
   node.append("text")
     .attr("x", d => getTextPosition(d, effectiveWidth))
     .attr("y", d => {
@@ -669,9 +720,21 @@ function renderNodes(
     .attr("text-anchor", d => getTextAnchor(d, effectiveWidth))
     .attr("fill", "#424242")
     .attr("font-family", "'Barlow', sans-serif")
-    .style("font-size", "20px")
+    .style("font-size", `${baseFontSize}px`)
     .style("font-weight", "500")
-    .text(d => getNodeLabel(d, selectedEnergies, displayMode, priceData, currency, startDate, endDate));
+    .text(d => {
+      const fullLabel = getNodeLabel(d, selectedEnergies, displayMode, priceData, currency, startDate, endDate);
+      // 🔧 TRONCATURE ADAPTATIVE: Labels plus courts si beaucoup de nœuds
+      if (nodeCount > 10 && fullLabel.length > 25) {
+        const parts = fullLabel.split('(');
+        if (parts.length > 1) {
+          const name = parts[0].trim();
+          const value = '(' + parts[1];
+          return name.length > 15 ? name.substring(0, 12) + '...' + value : fullLabel;
+        }
+      }
+      return fullLabel;
+    });
 }
 
 // === FONCTIONS UTILITAIRES TOOLTIP ET STYLE ===

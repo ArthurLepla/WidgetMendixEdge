@@ -153,7 +153,8 @@ export function LevelBasedHierarchyView({
         );
     };
     
-    if (levels.length === 0) {
+    // Renderiser le message d'erreur pour les résultats vides
+    const renderEmptyContent = (): ReactElement => {
         return (
             <div className="level-hierarchy-empty">
                 <div className="empty-content">
@@ -173,92 +174,97 @@ export function LevelBasedHierarchyView({
                 </div>
             </div>
         );
-    }
+    };
     
     return (
         <div className="level-hierarchy-container">
-            {/* Filtres rapides par niveau */}
+            {/* Filtres rapides par niveau - toujours affichés */}
             <div className="level-filters">
                 <div className="filter-label">
                     <Filter className="filter-icon" />
                     Filtres par niveau :
                 </div>
                 <div className="filter-pills">
-                    {levels.map(level => {
-                        const config = levelConfig[level];
+                    {dataSources.map(ds => {
+                        const config = levelConfig[ds.level];
                         const Icon = config?.icon || Package;
-                        const isActive = levelFilters.has(level);
+                        const isActive = levelFilters.has(ds.level);
+                        const nodeCount = nodesByLevel[ds.level]?.length || 0;
                         
                         return (
                             <button
-                                key={level}
+                                key={ds.level}
                                 className={`filter-pill ${isActive ? 'filter-pill-active' : ''}`}
-                                onClick={() => toggleLevelFilter(level)}
+                                onClick={() => toggleLevelFilter(ds.level)}
                                 style={{ 
                                     '--pill-color': config?.color,
                                     borderColor: isActive ? config?.color : undefined
                                 } as any}
                             >
                                 <Icon className="pill-icon" />
-                                {config?.label || `Niveau ${level}`}
-                                <span className="pill-count">({nodesByLevel[level].length})</span>
+                                {config?.label || `Niveau ${ds.level}`}
+                                <span className="pill-count">({nodeCount})</span>
                             </button>
                         );
                     })}
                 </div>
             </div>
             
-            {/* Sections par niveau */}
+            {/* Sections par niveau - ou message d'erreur si vide */}
             <div className="level-sections">
-                {levels.map(level => {
-                    const levelNodes = nodesByLevel[level];
-                    const config = levelConfig[level];
-                    const Icon = config?.icon || Package;
-                    const isExpanded = expandedLevels.has(level);
-                    const isFiltered = levelFilters.size > 0 && !levelFilters.has(level);
-                    
-                    if (isFiltered) return null;
-                    
-                    return (
-                        <div key={level} className="level-section">
-                            <div 
-                                className="level-header"
-                                onClick={() => toggleLevel(level)}
-                                style={{ borderLeftColor: config?.color } as any}
-                            >
-                                <div className="level-header-content">
-                                    <div className="level-icon" style={{ color: config?.color }}>
-                                        <Icon className="icon" />
-                                    </div>
-                                    <div className="level-info">
-                                        <h3 className="level-title">
-                                            {config?.label || `Niveau ${level}`}
-                                        </h3>
-                                        <div className="level-meta">
-                                            {levelNodes.length} élément{levelNodes.length > 1 ? 's' : ''}
-                                            {levelNodes.filter(n => n.modified).length > 0 && (
-                                                <span className="modified-count">
-                                                    • {levelNodes.filter(n => n.modified).length} modifié{levelNodes.filter(n => n.modified).length > 1 ? 's' : ''}
-                                                </span>
-                                            )}
+                {levels.length === 0 ? (
+                    renderEmptyContent()
+                ) : (
+                    levels.map(level => {
+                        const levelNodes = nodesByLevel[level];
+                        const config = levelConfig[level];
+                        const Icon = config?.icon || Package;
+                        const isExpanded = expandedLevels.has(level);
+                        const isFiltered = levelFilters.size > 0 && !levelFilters.has(level);
+                        
+                        if (isFiltered) return null;
+                        
+                        return (
+                            <div key={level} className="level-section">
+                                <div 
+                                    className="level-header"
+                                    onClick={() => toggleLevel(level)}
+                                    style={{ borderLeftColor: config?.color } as any}
+                                >
+                                    <div className="level-header-content">
+                                        <div className="level-icon" style={{ color: config?.color }}>
+                                            <Icon className="icon" />
+                                        </div>
+                                        <div className="level-info">
+                                            <h3 className="level-title">
+                                                {config?.label || `Niveau ${level}`}
+                                            </h3>
+                                            <div className="level-meta">
+                                                {levelNodes.length} élément{levelNodes.length > 1 ? 's' : ''}
+                                                {levelNodes.filter(n => n.modified).length > 0 && (
+                                                    <span className="modified-count">
+                                                        • {levelNodes.filter(n => n.modified).length} modifié{levelNodes.filter(n => n.modified).length > 1 ? 's' : ''}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
+                                    <button className={`expand-btn ${isExpanded ? 'expand-btn-expanded' : ''}`}>
+                                        {isExpanded ? <ChevronDown className="icon" /> : <ChevronRight className="icon" />}
+                                    </button>
                                 </div>
-                                <button className={`expand-btn ${isExpanded ? 'expand-btn-expanded' : ''}`}>
-                                    {isExpanded ? <ChevronDown className="icon" /> : <ChevronRight className="icon" />}
-                                </button>
-                            </div>
-                            
-                            {isExpanded && (
-                                <div className="level-content">
-                                    <div className="asset-grid">
-                                        {levelNodes.map(node => renderAssetNode(node))}
+                                
+                                {isExpanded && (
+                                    <div className="level-content">
+                                        <div className="asset-grid">
+                                            {levelNodes.map(node => renderAssetNode(node))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
+                                )}
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );
