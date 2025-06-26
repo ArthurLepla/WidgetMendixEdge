@@ -1,5 +1,5 @@
 import React from "react";
-import { ReactElement, createElement, useState, useEffect, useMemo } from "react";
+import { ReactElement, createElement, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Table,
@@ -21,7 +21,6 @@ import {
 import {
     SearchOutlined,
     CloseOutlined,
-    DownOutlined,
     RightOutlined,
     ExportOutlined,
     FileTextOutlined,
@@ -30,8 +29,7 @@ import {
     BarChartOutlined,
     DatabaseOutlined,
     ExpandOutlined,
-    CompressOutlined,
-    NodeExpandOutlined
+    CompressOutlined
 } from "@ant-design/icons";
 import { formatEnergy, calculateVariation, formatPercentage } from "../utils/dataFormatters";
 import { EnergyData, Month } from "../types/energyData";
@@ -107,7 +105,6 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
     const [searchValue, setSearchValue] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isAllExpanded, setIsAllExpanded] = useState<boolean>(false);
-    const [animatingNodes, setAnimatingNodes] = useState<Set<string>>(new Set());
 
     // Utiliser soit le nouveau système flexible, soit l'ancien pour rétrocompatibilité
     const legacyHierarchy = useHierarchicalData(data, months);
@@ -419,19 +416,7 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
                                         }
                                                                                  onClick={() => {
                                              // Animation fluide avec feedback visuel
-                                             setAnimatingNodes(prev => new Set(prev).add(record.id));
-                                             
-                                             // Délai léger pour permettre l'animation du bouton
-                                             setTimeout(() => {
-                                                 toggleNodeExpansion(record.id);
-                                                 setTimeout(() => {
-                                                     setAnimatingNodes(prev => {
-                                                         const newSet = new Set(prev);
-                                                         newSet.delete(record.id);
-                                                         return newSet;
-                                                     });
-                                                 }, 300);
-                                             }, 50);
+                                             toggleNodeExpansion(record.id);
                                          }}
                                         style={{
                                             color: expandedNodes[record.id] ? "#38a13c" : "#64748b",
