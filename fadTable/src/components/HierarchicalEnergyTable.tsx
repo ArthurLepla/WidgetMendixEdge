@@ -556,7 +556,7 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
         }
     ];
 
-    // États de chargement, erreur, données vides
+    // États de chargement, erreur, données vides INITIAUX seulement
     if (isLoading) {
         return (
             <Card style={{ textAlign: "center", padding: "40px" }}>
@@ -572,6 +572,7 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
         return <Alert message="Erreur" description={error} type="error" style={{ margin: "20px 0" }} />;
     }
 
+    // Vérifier seulement si vraiment aucune donnée initiale (pas de filtrage)
     if (!data || data.length === 0) {
         return (
             <Alert
@@ -679,9 +680,9 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
                         </Col>
 
                         {/* Search Section */}
-                        <Col flex="320px">
+                        <Col flex="280px">
                             <motion.div
-                                initial={{ opacity: 0, x: 30 }}
+                                initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.3, duration: 0.5 }}
                             >
@@ -732,250 +733,154 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
                                 />
                             </motion.div>
                         </Col>
-                    </Row>
-                </Card>
-            </motion.div>
 
-            {/* Control Panel */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                style={{ marginBottom: "20px" }}
-            >
-                <Card
-                    style={{
-                        borderRadius: "16px",
-                        background: "linear-gradient(135deg, #ffffff, #f8fafc)",
-                        border: "1px solid rgba(148, 163, 184, 0.1)",
-                        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06)"
-                    }}
-                >
-                    <Row justify="space-between" align="middle" gutter={[16, 16]}>
-                        {/* Hierarchy Controls - Design professionnel */}
+                        {/* Actions Section - Controls intégrés de manière compacte */}
                         <Col>
                             <motion.div
-                                initial={{ opacity: 0, x: -20 }}
+                                initial={{ opacity: 0, x: 30 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.5, duration: 0.4 }}
+                                transition={{ delay: 0.4, duration: 0.5 }}
                             >
-                                <div
-                                    style={{
-                                        background: "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
-                                        padding: "16px 24px",
-                                        borderRadius: "16px",
-                                        border: "1px solid rgba(148, 163, 184, 0.15)",
-                                        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)"
-                                    }}
-                                >
-                                    <Row gutter={[16, 8]} align="middle">
-                                        {/* Section Title */}
-                                        <Col span={24}>
-                                            <Space size="small" align="center">
-                                                <div
-                                                    style={{
-                                                        background: "linear-gradient(135deg, #38a13c, #22c55e)",
-                                                        borderRadius: "8px",
-                                                        padding: "6px",
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent: "center"
-                                                    }}
-                                                >
-                                                    <NodeExpandOutlined style={{ fontSize: "16px", color: "white" }} />
-                                                </div>
-                                                <Text
-                                                    strong
-                                                    style={{
-                                                        color: "#1e293b",
-                                                        userSelect: "none",
-                                                        fontSize: "16px",
-                                                        fontWeight: 600
-                                                    }}
-                                                >
-                                                    Navigation Hiérarchique
-                                                </Text>
-                                            </Space>
-                                        </Col>
-
-                                        {/* Action Button - Bouton unique à 2 états avec animations améliorées */}
-                                        <Col span={24}>
-                                            <motion.div
-                                                whileHover={{
-                                                    scale: 1.05,
-                                                    y: -3,
-                                                    transition: {
-                                                        type: "spring",
-                                                        stiffness: 500,
-                                                        damping: 20,
-                                                        duration: 0.2
-                                                    }
-                                                }}
-                                                whileTap={{
-                                                    scale: 0.96,
-                                                    transition: {
-                                                        type: "spring",
-                                                        stiffness: 600,
-                                                        damping: 15,
-                                                        duration: 0.1
-                                                    }
-                                                }}
-                                                animate={{
-                                                    scale: 1,
-                                                    transition: {
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 25
-                                                    }
-                                                }}
-                                            >
-                                                <motion.div
-                                                    animate={{
-                                                        background: isAllExpanded
-                                                            ? "linear-gradient(135deg, #ffffff, #f8fafc)"
-                                                            : "linear-gradient(135deg, #38a13c, #22c55e)",
-                                                        boxShadow: isAllExpanded
-                                                            ? "0 2px 8px rgba(0, 0, 0, 0.06)"
-                                                            : "0 4px 16px rgba(56, 161, 60, 0.3)"
-                                                    }}
-                                                    transition={{
-                                                        duration: 0.4,
-                                                        ease: [0.4, 0, 0.2, 1] // Courbe de Bézier personnalisée
-                                                    }}
-                                                    whileHover={{
-                                                        boxShadow: isAllExpanded
-                                                            ? "0 4px 20px rgba(0, 0, 0, 0.1)"
-                                                            : "0 8px 32px rgba(56, 161, 60, 0.4)",
-                                                        transition: { duration: 0.2 }
-                                                    }}
-                                                    style={{
-                                                        borderRadius: "12px",
-                                                        overflow: "hidden",
-                                                        width: "100%"
-                                                    }}
-                                                >
-                                                    <Button
-                                                        type={isAllExpanded ? "default" : "primary"}
-                                                        icon={
-                                                            <AnimatePresence mode="wait">
-                                                                <motion.div
-                                                                    key={isAllExpanded ? "compress" : "expand"}
-                                                                    initial={{
-                                                                        scale: 0.8,
-                                                                        rotate: -90,
-                                                                        opacity: 0
-                                                                    }}
-                                                                    animate={{
-                                                                        scale: 1,
-                                                                        rotate: 0,
-                                                                        opacity: 1
-                                                                    }}
-                                                                    exit={{
-                                                                        scale: 0.8,
-                                                                        rotate: 90,
-                                                                        opacity: 0
-                                                                    }}
-                                                                    transition={{
-                                                                        type: "spring",
-                                                                        stiffness: 300,
-                                                                        damping: 20,
-                                                                        duration: 0.3
-                                                                    }}
-                                                                >
-                                                                    {isAllExpanded ? (
-                                                                        <CompressOutlined />
-                                                                    ) : (
-                                                                        <ExpandOutlined />
-                                                                    )}
-                                                                </motion.div>
-                                                            </AnimatePresence>
-                                                        }
-                                                        onClick={handleToggleExpansion}
-                                                        disabled={isLoading}
-                                                        size="large"
-                                                        style={{
-                                                            fontWeight: 600,
-                                                            borderRadius: "12px",
-                                                            background: "transparent",
-                                                            border: isAllExpanded ? "2px solid #e2e8f0" : "none",
-                                                            color: isAllExpanded ? "#475569" : "white",
-                                                            width: "100%",
-                                                            boxShadow: "none",
-                                                            transition: "color 0.3s ease, border-color 0.3s ease"
-                                                        }}
-                                                    >
-                                                        <AnimatePresence mode="wait">
-                                                            <motion.span
-                                                                key={isAllExpanded ? "reduce" : "expand"}
-                                                                initial={{ opacity: 0, x: -10 }}
-                                                                animate={{ opacity: 1, x: 0 }}
-                                                                exit={{ opacity: 0, x: 10 }}
-                                                                transition={{
-                                                                    duration: 0.25,
-                                                                    ease: "easeInOut"
-                                                                }}
-                                                            >
-                                                                {isAllExpanded ? "Tout Réduire" : "Tout Développer"}
-                                                            </motion.span>
-                                                        </AnimatePresence>
-                                                    </Button>
-                                                </motion.div>
-                                            </motion.div>
-                                        </Col>
-                                    </Row>
-                                </div>
-                            </motion.div>
-                        </Col>
-
-                        {/* Export Menu */}
-                        {enableExport && (
-                            <Col>
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.6, duration: 0.3 }}
-                                >
-                                    <Dropdown
-                                        menu={{ items: exportMenuItems }}
-                                        placement="bottomRight"
-                                        trigger={["click"]}
+                                <Space size="middle" align="center">
+                                    {/* Navigation Hiérarchique - Version compacte */}
+                                    <motion.div
+                                        whileHover={{
+                                            scale: 1.05,
+                                            y: -2,
+                                            transition: {
+                                                type: "spring",
+                                                stiffness: 400,
+                                                damping: 25,
+                                                duration: 0.2
+                                            }
+                                        }}
+                                        whileTap={{
+                                            scale: 0.95,
+                                            transition: {
+                                                type: "spring",
+                                                stiffness: 600,
+                                                damping: 15,
+                                                duration: 0.1
+                                            }
+                                        }}
                                     >
+                                        <Tooltip 
+                                            title={
+                                                <div>
+                                                    <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+                                                        Navigation Hiérarchique
+                                                    </div>
+                                                    <div style={{ fontSize: "12px", opacity: 0.8 }}>
+                                                        {isAllExpanded ? "Réduire tous les niveaux" : "Développer tous les niveaux"}
+                                                    </div>
+                                                </div>
+                                            }
+                                            placement="bottom"
+                                        >
+                                            <Button
+                                                type={isAllExpanded ? "default" : "primary"}
+                                                icon={
+                                                    <AnimatePresence mode="wait">
+                                                        <motion.div
+                                                            key={isAllExpanded ? "compress" : "expand"}
+                                                            initial={{
+                                                                scale: 0.8,
+                                                                rotate: -45,
+                                                                opacity: 0
+                                                            }}
+                                                            animate={{
+                                                                scale: 1,
+                                                                rotate: 0,
+                                                                opacity: 1
+                                                            }}
+                                                            exit={{
+                                                                scale: 0.8,
+                                                                rotate: 45,
+                                                                opacity: 0
+                                                            }}
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 300,
+                                                                damping: 20,
+                                                                duration: 0.3
+                                                            }}
+                                                        >
+                                                            {isAllExpanded ? (
+                                                                <CompressOutlined />
+                                                            ) : (
+                                                                <ExpandOutlined />
+                                                            )}
+                                                        </motion.div>
+                                                    </AnimatePresence>
+                                                }
+                                                onClick={handleToggleExpansion}
+                                                disabled={isLoading}
+                                                size="large"
+                                                style={{
+                                                    fontWeight: 600,
+                                                    borderRadius: "12px",
+                                                    background: isAllExpanded 
+                                                        ? "linear-gradient(135deg, #ffffff, #f8fafc)" 
+                                                        : "linear-gradient(135deg, #38a13c, #22c55e)",
+                                                    border: isAllExpanded ? "2px solid #e2e8f0" : "none",
+                                                    color: isAllExpanded ? "#475569" : "white",
+                                                    boxShadow: isAllExpanded
+                                                        ? "0 2px 8px rgba(0, 0, 0, 0.06)"
+                                                        : "0 4px 16px rgba(56, 161, 60, 0.3)",
+                                                    minWidth: "48px",
+                                                    height: "48px",
+                                                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </motion.div>
+
+                                    {/* Export Menu - Version compacte */}
+                                    {enableExport && (
                                         <motion.div
                                             whileHover={{ scale: 1.05, y: -2 }}
                                             whileTap={{ scale: 0.95 }}
                                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                         >
-                                            <Button
-                                                type="primary"
-                                                icon={<ExportOutlined />}
-                                                size="large"
-                                                style={{
-                                                    background: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
-                                                    border: "none",
-                                                    fontWeight: 600,
-                                                    borderRadius: "12px",
-                                                    boxShadow: "0 8px 32px rgba(59, 130, 246, 0.3)",
-                                                    minWidth: "180px",
-                                                    height: "48px"
-                                                }}
+                                            <Dropdown
+                                                menu={{ items: exportMenuItems }}
+                                                placement="bottomRight"
+                                                trigger={["click"]}
                                             >
-                                                Exporter les Données
-                                                <DownOutlined />
-                                            </Button>
+                                                <Tooltip title="Exporter les données" placement="bottom">
+                                                    <Button
+                                                        type="primary"
+                                                        icon={<ExportOutlined />}
+                                                        size="large"
+                                                        style={{
+                                                            background: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+                                                            border: "none",
+                                                            fontWeight: 600,
+                                                            borderRadius: "12px",
+                                                            boxShadow: "0 4px 16px rgba(59, 130, 246, 0.3)",
+                                                            minWidth: "48px",
+                                                            height: "48px",
+                                                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                                                        }}
+                                                    />
+                                                </Tooltip>
+                                            </Dropdown>
                                         </motion.div>
-                                    </Dropdown>
-                                </motion.div>
-                            </Col>
-                        )}
+                                    )}
+                                </Space>
+                            </motion.div>
+                        </Col>
                     </Row>
                 </Card>
             </motion.div>
+
+
 
             {/* Professional Data Table */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
             >
                 <Card
                     style={{
@@ -984,42 +889,79 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
                         boxShadow: "0 8px 32px rgba(0, 0, 0, 0.06)"
                     }}
                 >
-                    <Table
-                        columns={tableColumns}
-                        dataSource={displayNodes}
-                        rowKey="id"
-                        pagination={false}
-                        size="middle"
-                        scroll={{ x: "max-content" }}
-                        style={{ fontSize: "14px" }}
-                        expandable={{
-                            showExpandColumn: false,
-                            expandIcon: () => null
-                        }}
-                        rowClassName={getRowClassName}
-                    >
-                        {/* Pagination si nécessaire */}
-                        {loadingStrategy === "pagination" && totalPages > 1 && (
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    padding: "20px",
-                                    borderTop: "1px solid #f0f0f0"
-                                }}
+                    {/* Vérifier si aucun résultat après filtrage/recherche */}
+                    {displayNodes.length === 0 ? (
+                        <div style={{ 
+                            textAlign: "center", 
+                            padding: "60px 40px",
+                            background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                            borderRadius: "12px",
+                            margin: "20px"
+                        }}>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
                             >
-                                <Pagination
-                                    current={currentPage}
-                                    total={flattenedNodes.length}
-                                    pageSize={pageSize}
-                                    onChange={setCurrentPage}
-                                    showSizeChanger={false}
-                                    showQuickJumper
-                                    showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} éléments`}
+                                <SearchOutlined 
+                                    style={{ 
+                                        fontSize: "48px", 
+                                        color: "#94a3b8",
+                                        marginBottom: "16px"
+                                    }} 
                                 />
-                            </div>
-                        )}
-                    </Table>
+                                <Title level={4} style={{ color: "#64748b", marginBottom: "8px" }}>
+                                    Aucun résultat trouvé
+                                </Title>
+                                <Text style={{ color: "#94a3b8", fontSize: "16px", display: "block", marginBottom: "16px" }}>
+                                    {searchValue 
+                                        ? `Aucun élément ne correspond à votre recherche "${searchValue}"`
+                                        : "Aucune donnée ne correspond aux filtres appliqués"
+                                    }
+                                </Text>
+                                <Text style={{ color: "#cbd5e1", fontSize: "14px" }}>
+                                    Essayez de modifier votre recherche ou de réinitialiser les filtres
+                                </Text>
+                            </motion.div>
+                        </div>
+                    ) : (
+                        <Table
+                            columns={tableColumns}
+                            dataSource={displayNodes}
+                            rowKey="id"
+                            pagination={false}
+                            size="middle"
+                            scroll={{ x: "max-content" }}
+                            style={{ fontSize: "14px" }}
+                            expandable={{
+                                showExpandColumn: false,
+                                expandIcon: () => null
+                            }}
+                            rowClassName={getRowClassName}
+                        />
+                    )}
+
+                    {/* Pagination si nécessaire */}
+                    {loadingStrategy === "pagination" && totalPages > 1 && displayNodes.length > 0 && (
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                padding: "20px",
+                                borderTop: "1px solid #f0f0f0"
+                            }}
+                        >
+                            <Pagination
+                                current={currentPage}
+                                total={flattenedNodes.length}
+                                pageSize={pageSize}
+                                onChange={setCurrentPage}
+                                showSizeChanger={false}
+                                showQuickJumper
+                                showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} éléments`}
+                            />
+                        </div>
+                    )}
                 </Card>
             </motion.div>
 
