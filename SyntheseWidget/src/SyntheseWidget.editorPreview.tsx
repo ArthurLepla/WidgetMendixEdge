@@ -69,28 +69,28 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
                     currentValue={demoData.usine.consoElec}
                     previousValue={demoData.usine.consoElecPrec}
                     type="electricity"
-                    baseUnit="auto"
+                    baseUnit="kWh"
                 />
                 <CardConsoTotal
                     title="Gaz"
                     currentValue={demoData.usine.consoGaz}
                     previousValue={demoData.usine.consoGazPrec}
                     type="gas"
-                    baseUnit="auto"
+                    baseUnit="m3"
                 />
                 <CardConsoTotal
                     title="Eau"
                     currentValue={demoData.usine.consoEau}
                     previousValue={demoData.usine.consoEauPrec}
                     type="water"
-                    baseUnit="auto"
+                    baseUnit="m3"
                 />
                 <CardConsoTotal
                     title="Air"
                     currentValue={demoData.usine.consoAir}
                     previousValue={demoData.usine.consoAirPrec}
                     type="air"
-                    baseUnit="auto"
+                    baseUnit="m3"
                 />
             </div>
 
@@ -99,7 +99,7 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
                     data={demoData.secteurs} 
                     title="Consommation Électricité par Secteur"
                     type="elec"
-                    baseUnit="auto"
+                    baseUnit="kWh"
                 />
                 <DPE 
                     value={dpeValue}
@@ -151,13 +151,13 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
                     data={demoData.secteurs} 
                     title="Consommation Gaz par Secteur"
                     type="gaz"
-                    baseUnit="auto"
+                    baseUnit="m3"
                 />
                 <ColumnChart 
                     data={demoData.secteurs} 
                     title="Consommation Eau par Secteur"
                     type="eau"
-                    baseUnit="auto"
+                    baseUnit="m3"
                 />
             </div>
 
@@ -166,13 +166,20 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
                     data={demoData.secteurs} 
                     title="Consommation Air par Secteur"
                     type="air"
-                    baseUnit="auto"
+                    baseUnit="m3"
                 />
             </div>
 
             <div className="grid-responsive-2">
                 {demoData.secteurs.map((secteur, index) => (
-                    <SecteurConsoCard key={index} {...secteur} />
+                    <SecteurConsoCard 
+                        key={index} 
+                        {...secteur}
+                        baseUnitElectricity="kWh"
+                        baseUnitGas="m3"
+                        baseUnitWater="m3"
+                        baseUnitAir="m3"
+                    />
                 ))}
             </div>
         </div>

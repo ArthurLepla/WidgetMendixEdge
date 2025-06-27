@@ -86,6 +86,15 @@ export function LevelBasedHierarchyView({
     const levels = Object.keys(nodesByLevel)
         .map(Number)
         .sort((a, b) => a - b);
+
+    // Grouper les nœuds non filtrés par niveau pour les statistiques
+    const allNodesByLevel = nodes.reduce((acc, node) => {
+        if (!acc[node.level]) {
+            acc[node.level] = [];
+        }
+        acc[node.level].push(node);
+        return acc;
+    }, {} as Record<number, AssetNode[]>);
         
     const toggleLevel = (level: number) => {
         const newExpanded = new Set(expandedLevels);
@@ -155,20 +164,52 @@ export function LevelBasedHierarchyView({
     
     // Renderiser le message d'erreur pour les résultats vides
     const renderEmptyContent = (): ReactElement => {
+        const hasAnyData = nodes.length > 0;
+        const isSearchActive = searchTerm.trim().length > 0;
+        const hasActiveFilters = levelFilters.size > 0;
+        
         return (
             <div className="level-hierarchy-empty">
                 <div className="empty-content">
                     <div className="empty-icon">🏭</div>
-                    <h3>Aucun asset trouvé</h3>
-                    <p>
-                        {searchTerm 
-                            ? `Aucun résultat pour "${searchTerm}"`
-                            : "Aucune donnée disponible pour cette configuration"
-                        }
-                    </p>
-                    {searchTerm && (
-                        <div className="empty-hint">
-                            Essayez de modifier votre recherche ou vérifiez les filtres appliqués
+                    
+                    {!hasAnyData ? (
+                        // Cas 1: Aucune donnée du tout n'est disponible
+                        <div>
+                            <h3>Aucune donnée disponible</h3>
+                            <p>Aucune donnée n'est disponible pour l'affichage</p>
+                            <div className="empty-hint">
+                                Vérifiez la configuration des sources de données
+                            </div>
+                        </div>
+                    ) : isSearchActive ? (
+                        // Cas 2: Données disponibles mais aucun résultat pour la recherche
+                        <div>
+                            <h3>Aucun résultat trouvé</h3>
+                            <p>Aucun résultat pour "{searchTerm}"</p>
+                            <div className="empty-hint">
+                                <strong>Suggestions :</strong>
+                                <ul>
+                                    <li>Vérifiez l'orthographe de votre recherche</li>
+                                    <li>Essayez des termes plus généraux</li>
+                                    <li>Effacez les filtres de niveau actifs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    ) : hasActiveFilters ? (
+                        // Cas 3: Données disponibles mais masquées par les filtres
+                        <div>
+                            <h3>Aucun résultat avec ces filtres</h3>
+                            <p>Les filtres de niveau masquent tous les résultats</p>
+                            <div className="empty-hint">
+                                Désactivez certains filtres de niveau pour voir plus de résultats
+                            </div>
+                        </div>
+                    ) : (
+                        // Cas 4: Fallback générique
+                        <div>
+                            <h3>Aucun asset trouvé</h3>
+                            <p>Aucun résultat pour cette configuration</p>
                         </div>
                     )}
                 </div>
@@ -190,6 +231,7 @@ export function LevelBasedHierarchyView({
                         const Icon = config?.icon || Package;
                         const isActive = levelFilters.has(ds.level);
                         const nodeCount = nodesByLevel[ds.level]?.length || 0;
+                        const totalNodeCount = allNodesByLevel[ds.level]?.length || 0;
                         
                         return (
                             <button
@@ -203,7 +245,9 @@ export function LevelBasedHierarchyView({
                             >
                                 <Icon className="pill-icon" />
                                 {config?.label || `Niveau ${ds.level}`}
-                                <span className="pill-count">({nodeCount})</span>
+                                <span className="pill-count">
+                                    ({nodeCount}{totalNodeCount !== nodeCount ? `/${totalNodeCount}` : ''})
+                                </span>
                             </button>
                         );
                     })}

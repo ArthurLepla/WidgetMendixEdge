@@ -3,13 +3,14 @@ import { Zap, Flame, Droplet, Wind } from "lucide-react";
 import { Big } from "big.js";
 import * as echarts from "echarts";
 import { formatSmartValue, BaseUnit } from "../utils/unitConverter";
+import { EnergyType } from "../typings/EnergyTypes";
 
 export interface CardConsoTotalProps {
     title: string;
     currentValue: Big;
     previousValue: Big;
-    type: "electricity" | "gas" | "water" | "air";
-    baseUnit?: BaseUnit;
+    type: EnergyType;
+    baseUnit: BaseUnit;
 }
 
 const ENERGY_CONFIG = {
@@ -90,7 +91,7 @@ const generateTrendData = (previousValue: Big | null, currentValue: Big | null):
     });
 };
 
-export const CardConsoTotal = ({ title, currentValue, previousValue, type, baseUnit = "auto" }: CardConsoTotalProps): ReactElement => {
+export const CardConsoTotal = ({ title, currentValue, previousValue, type, baseUnit }: CardConsoTotalProps): ReactElement => {
     const sparklineRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
     const hasData = currentValue !== null && previousValue !== null;

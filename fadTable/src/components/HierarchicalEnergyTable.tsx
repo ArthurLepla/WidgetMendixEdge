@@ -557,8 +557,9 @@ export default function HierarchicalEnergyTable(props: HierarchicalEnergyTablePr
         return <Alert message="Erreur" description={error} type="error" style={{ margin: "20px 0" }} />;
     }
 
-    // Vérifier seulement si vraiment aucune donnée initiale (pas de filtrage)
-    if (!data || data.length === 0) {
+    // Vérifier seulement si vraiment aucune donnée initiale (AVANT tout filtrage)
+    // Utiliser totalOriginal pour éviter de masquer l'interface lors des recherches
+    if (totalOriginal === 0) {
         return (
             <Alert
                 message="Aucune donnée disponible"

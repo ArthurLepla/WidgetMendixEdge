@@ -22,7 +22,7 @@ interface ColumnChartProps {
     title: string;
     type: 'elec' | 'gaz' | 'eau' | 'air';
     onClickSecteur?: (secteurName: string) => void;
-    baseUnit?: BaseUnit;
+    baseUnit: BaseUnit;
 }
 
 // Mappage entre les types de graphique et les types d'énergie
@@ -69,7 +69,7 @@ const getEnergyType = (type: string): "electricity" | "gas" | "water" | "air" =>
 };
 
 // Formatage des valeurs pour affichage avec le nouveau système
-const formatValueWithUnit = (value: number, type: string, baseUnit: BaseUnit = "auto"): { formattedValue: string, displayUnit: string } => {
+const formatValueWithUnit = (value: number, type: string, baseUnit: BaseUnit): { formattedValue: string, displayUnit: string } => {
     const energyType = getEnergyType(type);
     const bigValue = new Big(value);
     return formatSmartValue(bigValue, energyType, baseUnit);
@@ -110,13 +110,91 @@ const calculateVariation = (current: number, previous: number): number => {
     return ((current - previous) / previous) * 100;
 };
 
-export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit = "auto" }: ColumnChartProps): ReactElement => {
+export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: ColumnChartProps): ReactElement => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
     // Suppression de l'état hoveredIndex qui n'est pas utilisé activement
     
     // Utiliser le hook de chargement, en ne récupérant que startLoading qui est utilisé
     const { startLoading } = useLoading();
+
+    // Fonction pour calculer la configuration optimale des labels selon le nombre d'entités
+    const calculateLabelConfig = (dataLength: number, containerWidth: number) => {
+        const isMobile = window.innerWidth < 640;
+        
+        // Estimation de l'espace disponible par label
+        const availableWidth = containerWidth * (isMobile ? 0.7 : 0.85);
+        const spacePerLabel = availableWidth / dataLength;
+        
+                 // Configuration adaptative basée sur l'espace par label et le nombre d'entités
+        if (dataLength <= 4) {
+            // Peu d'entités : affichage normal
+            return {
+                rotate: 0,
+                interval: 0,
+                width: isMobile ? 80 : 120,
+                align: 'center',
+                fontSize: 12,
+                overflow: 'none'
+            };
+        } else if (dataLength <= 8 && spacePerLabel > 60) {
+            // Nombre modéré : légère adaptation
+            return {
+                rotate: isMobile ? 30 : 0,
+                interval: 0,
+                width: isMobile ? 70 : 100,
+                align: isMobile ? 'right' : 'center',
+                fontSize: isMobile ? 11 : 12,
+                overflow: 'truncate'
+            };
+        } else if (dataLength <= 12 && spacePerLabel > 40) {
+            // Nombre élevé : rotation et troncature
+            return {
+                rotate: isMobile ? 45 : 30,
+                interval: 0,
+                width: isMobile ? 60 : 80,
+                align: 'right',
+                fontSize: isMobile ? 10 : 11,
+                overflow: 'truncate'
+            };
+        } else if (dataLength <= 20) {
+            // Beaucoup d'entités : rotation forte + affichage sélectif
+            const interval = Math.ceil(dataLength / (isMobile ? 6 : 10)) - 1;
+            return {
+                rotate: 45,
+                interval: interval,
+                width: isMobile ? 50 : 70,
+                align: 'right',
+                fontSize: isMobile ? 9 : 10,
+                overflow: 'truncate'
+            };
+        } else {
+            // Très nombreuses entités : affichage très sélectif
+            const interval = Math.ceil(dataLength / (isMobile ? 4 : 8)) - 1;
+            return {
+                rotate: 60,
+                interval: interval,
+                width: isMobile ? 40 : 60,
+                align: 'right',
+                fontSize: 9,
+                overflow: 'truncate'
+            };
+        }
+    };
+
+    // Fonction pour tronquer les noms intelligemment
+    const truncateLabel = (label: string, maxLength: number): string => {
+        if (label.length <= maxLength) return label;
+        
+        // Essayer de garder le début et la fin si possible
+        if (maxLength > 6) {
+            const start = Math.ceil((maxLength - 3) / 2);
+            const end = Math.floor((maxLength - 3) / 2);
+            return `${label.substring(0, start)}...${label.substring(label.length - end)}`;
+        }
+        
+        return `${label.substring(0, maxLength - 3)}...`;
+    };
 
     useEffect(() => {
         const initChart = () => {
@@ -135,6 +213,16 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit = "aut
             const color = ENERGY_CONFIG[type].color;
             const isMobile = window.innerWidth < 640;
             const isClickable = !!onClickSecteur;
+
+            // Calculer la configuration optimale des labels
+            const containerWidth = chartRef.current?.offsetWidth || 400;
+            const labelConfig = calculateLabelConfig(data.length, containerWidth);
+            
+            // Adapter la hauteur du graphique selon la rotation des labels
+            const needsExtraBottomSpace = labelConfig.rotate > 30;
+            const bottomSpacing = needsExtraBottomSpace 
+                ? (isMobile ? '25%' : '20%') 
+                : (isMobile ? '20%' : '15%');
 
             const option = {
                 title: {
@@ -189,20 +277,28 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit = "aut
                     top: 80,
                     left: isMobile ? '15%' : '5%',
                     right: '5%',
-                    bottom: isMobile ? '20%' : '15%',
+                    bottom: bottomSpacing,
                     containLabel: true
                 },
                 xAxis: {
                     type: 'category',
                     data: data.map(d => d.name),
                     axisLabel: {
-                        fontSize: 12,
+                        fontSize: labelConfig.fontSize,
                         fontWeight: 500,
-                        interval: 0,
-                        rotate: isMobile ? 45 : 0,
-                        width: isMobile ? 60 : 100,
-                        overflow: 'truncate',
-                        align: isMobile ? 'right' : 'center'
+                        interval: labelConfig.interval,
+                        rotate: labelConfig.rotate,
+                        width: labelConfig.width,
+                        overflow: labelConfig.overflow,
+                        align: labelConfig.align,
+                        // Formatter pour tronquer les labels si nécessaire
+                        formatter: (value: string) => {
+                            if (labelConfig.overflow === 'truncate') {
+                                const maxLength = Math.floor(labelConfig.width / (labelConfig.fontSize * 0.6));
+                                return truncateLabel(value, maxLength);
+                            }
+                            return value;
+                        }
                     }
                 },
                 yAxis: {
@@ -315,18 +411,36 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit = "aut
 
         const handleResize = () => {
             if (chartInstance.current) {
-                const isMobile = window.innerWidth < 640;
                 chartInstance.current.resize();
+                // Recalculer la configuration lors du redimensionnement
+                const containerWidth = chartRef.current?.offsetWidth || 400;
+                const labelConfig = calculateLabelConfig(data.length, containerWidth);
+                const needsExtraBottomSpace = labelConfig.rotate > 30;
+                const isMobile = window.innerWidth < 640;
+                const bottomSpacing = needsExtraBottomSpace 
+                    ? (isMobile ? '25%' : '20%') 
+                    : (isMobile ? '20%' : '15%');
+                
                 chartInstance.current.setOption({
                     grid: {
                         left: isMobile ? '15%' : '5%',
-                        bottom: isMobile ? '20%' : '15%'
+                        bottom: bottomSpacing
                     },
                     xAxis: {
                         axisLabel: {
-                            rotate: isMobile ? 45 : 0,
-                            width: isMobile ? 60 : 100,
-                            align: isMobile ? 'right' : 'center'
+                            fontSize: labelConfig.fontSize,
+                            interval: labelConfig.interval,
+                            rotate: labelConfig.rotate,
+                            width: labelConfig.width,
+                            overflow: labelConfig.overflow,
+                            align: labelConfig.align,
+                            formatter: (value: string) => {
+                                if (labelConfig.overflow === 'truncate') {
+                                    const maxLength = Math.floor(labelConfig.width / (labelConfig.fontSize * 0.6));
+                                    return truncateLabel(value, maxLength);
+                                }
+                                return value;
+                            }
                         }
                     }
                 });
@@ -343,7 +457,7 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit = "aut
                 chartInstance.current = null;
             }
         };
-    }, [data, title, type, onClickSecteur, startLoading]);
+    }, [data, title, type, onClickSecteur, startLoading, baseUnit]);
 
     return (
         <div className="card-base">
@@ -354,6 +468,11 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit = "aut
             {onClickSecteur && (
                 <div className="text-center text-sm text-gray-500 mt-2 italic">
                     Survolez et cliquez sur un secteur pour voir plus de détails
+                    {data.length > 12 && (
+                        <span className="block text-xs mt-1">
+                            Tous les secteurs ne sont pas affichés sur l'axe - utilisez les tooltips pour voir les détails
+                        </span>
+                    )}
                 </div>
             )}
         </div>

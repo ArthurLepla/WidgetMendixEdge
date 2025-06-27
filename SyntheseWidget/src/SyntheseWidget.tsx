@@ -444,6 +444,10 @@ export function SyntheseWidget({
                                 consoGazPrec={secteur.consoGazPrec}
                                 consoEauPrec={secteur.consoEauPrec}
                                 consoAirPrec={secteur.consoAirPrec}
+                                baseUnitElectricity={baseUnitElectricity as BaseUnit}
+                                baseUnitGas={baseUnitGas as BaseUnit}
+                                baseUnitWater={baseUnitWater as BaseUnit}
+                                baseUnitAir={baseUnitAir as BaseUnit}
                             />
                         ))}
                     </div>

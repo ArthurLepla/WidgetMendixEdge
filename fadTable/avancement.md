@@ -195,6 +195,75 @@ Suppression des fonctionnalités de tri sur les colonnes "Nom" et "Total" pour s
 
 ---
 
+### 2024-01-01 17:20 - Correction de l'interface utilisateur lors des recherches vides
+
+### ⌛ Changement :
+Correction du bug critique où l'interface complète (header, boutons, champ de recherche) disparaissait lors d'une recherche ne trouvant aucun résultat, empêchant l'utilisateur de corriger sa recherche.
+
+### 🔧 **Problème identifié** :
+
+**Mécanisme défaillant :**
+La vérification précoce dans `HierarchicalEnergyTable.tsx` lignes 559-567 :
+```typescript
+// AVANT (problématique)
+if (!data || data.length === 0) {
+    return (
+        <Alert message="Aucune donnée disponible" />
+    );
+}
+```
+
+**Cause du bug :**
+- Cette condition se basait sur la prop `data` qui peut être filtrée par le composant parent
+- Lors d'une recherche infructueuse, le parent passe un tableau vide à `data`
+- La condition se déclenche et fait un `return` précoce qui empêche l'affichage de toute l'interface
+- L'utilisateur perd l'accès au champ de recherche et ne peut plus corriger sa requête
+
+**Solution appliquée :**
+Remplacement de la condition par :
+```typescript
+// APRÈS (corrigé)  
+if (totalOriginal === 0) {
+    return (
+        <Alert message="Aucune donnée disponible" />
+    );
+}
+```
+
+**Logique corrigée :**
+- `totalOriginal` représente le nombre total d'éléments AVANT tout filtrage
+- Cette vérification ne se déclenche que lors d'un véritable état initial sans données
+- En cas de recherche vide, l'interface reste accessible avec le message approprié dans la section tableau
+
+### 🤔 Analyse :
+**Impact scalability :**
+- **UX améliorée** : L'utilisateur garde toujours accès aux contrôles d'interface
+- **Workflow préservé** : Possibilité de corriger une recherche sans recharger
+- **Moins de frustration** : Évite les "états bloqués" où l'utilisateur doit recommencer
+
+**Impact maintainability :**
+- **Logique plus claire** : Distinction nette entre "pas de données initiales" vs "recherche vide"
+- **Principe de responsabilité** : Chaque niveau gère ses propres messages d'état
+- **Code plus robuste** : Évite les états UI inconsistants
+
+**Cohérence avec mémoire :** 
+Cette correction s'aligne avec la résolution précédente des problèmes d'interface dans AssetTableau [[memory:4072426473202960452]] où une logique similaire avait été mise en place pour maintenir l'accès aux contrôles lors de recherches vides.
+
+### 🔜 Prochaines étapes :
+1. **Tests utilisateur** : Valider que tous les scénarios de recherche fonctionnent
+2. **Documentation** : Documenter les différents états de l'interface
+3. **Cohérence** : Vérifier que d'autres composants n'ont pas le même problème
+4. **Tests automatisés** : Ajouter des tests pour les états de recherche vide
+
+**Bug critique résolu :**
+- ✅ Interface maintenue lors de recherches vides
+- ✅ Accès permanent au champ de recherche
+- ✅ Messages contextuels appropriés selon l'état
+- ✅ Workflow utilisateur fluide préservé
+- ✅ Distinction claire entre états "vide initial" vs "recherche vide"
+
+---
+
 ### 2024-01-01 12:35 - Correction critique de l'accès aux attributs Mendix
 
 ### ⌛ Changement :

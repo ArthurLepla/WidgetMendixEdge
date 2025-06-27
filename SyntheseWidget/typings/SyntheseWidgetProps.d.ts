@@ -7,13 +7,13 @@ import { CSSProperties } from "react";
 import { ActionValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
 import { Big } from "big.js";
 
-export type BaseUnitElectricityEnum = "auto" | "kWh" | "m3";
+export type BaseUnitElectricityEnum = "kWh" | "m3";
 
-export type BaseUnitGasEnum = "auto" | "kWh" | "m3";
+export type BaseUnitGasEnum = "kWh" | "m3";
 
-export type BaseUnitWaterEnum = "auto" | "kWh" | "m3";
+export type BaseUnitWaterEnum = "kWh" | "m3";
 
-export type BaseUnitAirEnum = "auto" | "kWh" | "m3";
+export type BaseUnitAirEnum = "kWh" | "m3";
 
 export interface SyntheseWidgetContainerProps {
     name: string;

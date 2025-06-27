@@ -166,38 +166,34 @@
 
         <!-- Configuration des Unités -->
         <propertyGroup caption="Configuration des Unités">
-            <property key="baseUnitElectricity" type="enumeration" defaultValue="auto">
+            <property key="baseUnitElectricity" type="enumeration" defaultValue="kWh">
                 <caption>Unité de base - Électricité</caption>
                 <description>Choisir l'unité de base pour les données d'électricité</description>
                 <enumerationValues>
-                    <enumerationValue key="auto">Automatique (kWh)</enumerationValue>
                     <enumerationValue key="kWh">kWh (kilowatt-heure)</enumerationValue>
                     <enumerationValue key="m3">m³ (mètre cube)</enumerationValue>
                 </enumerationValues>
             </property>
-            <property key="baseUnitGas" type="enumeration" defaultValue="auto">
+            <property key="baseUnitGas" type="enumeration" defaultValue="m3">
                 <caption>Unité de base - Gaz</caption>
                 <description>Choisir l'unité de base pour les données de gaz</description>
                 <enumerationValues>
-                    <enumerationValue key="auto">Automatique (m³)</enumerationValue>
                     <enumerationValue key="kWh">kWh (kilowatt-heure)</enumerationValue>
                     <enumerationValue key="m3">m³ (mètre cube)</enumerationValue>
                 </enumerationValues>
             </property>
-            <property key="baseUnitWater" type="enumeration" defaultValue="auto">
+            <property key="baseUnitWater" type="enumeration" defaultValue="m3">
                 <caption>Unité de base - Eau</caption>
                 <description>Choisir l'unité de base pour les données d'eau</description>
                 <enumerationValues>
-                    <enumerationValue key="auto">Automatique (m³)</enumerationValue>
                     <enumerationValue key="kWh">kWh (kilowatt-heure)</enumerationValue>
                     <enumerationValue key="m3">m³ (mètre cube)</enumerationValue>
                 </enumerationValues>
             </property>
-            <property key="baseUnitAir" type="enumeration" defaultValue="auto">
+            <property key="baseUnitAir" type="enumeration" defaultValue="m3">
                 <caption>Unité de base - Air</caption>
                 <description>Choisir l'unité de base pour les données d'air</description>
                 <enumerationValues>
-                    <enumerationValue key="auto">Automatique (m³)</enumerationValue>
                     <enumerationValue key="kWh">kWh (kilowatt-heure)</enumerationValue>
                     <enumerationValue key="m3">m³ (mètre cube)</enumerationValue>
                 </enumerationValues>

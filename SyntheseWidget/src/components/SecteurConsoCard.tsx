@@ -1,6 +1,7 @@
 import { ReactElement, createElement } from "react";
 import { Big } from "big.js";
 import { Zap, Flame, Droplet, Wind } from "lucide-react";
+import { formatSmartValue, BaseUnit } from "../utils/unitConverter";
 
 export interface SecteurConsoCardProps {
     name: string;
@@ -12,6 +13,10 @@ export interface SecteurConsoCardProps {
     consoGazPrec: Big;
     consoEauPrec: Big;
     consoAirPrec: Big;
+    baseUnitElectricity: BaseUnit;
+    baseUnitGas: BaseUnit;
+    baseUnitWater: BaseUnit;
+    baseUnitAir: BaseUnit;
 }
 
 const ENERGY_CONFIG = {
@@ -41,31 +46,8 @@ const ENERGY_CONFIG = {
     }
 };
 
-// Fonction pour formater les valeurs d'électricité avec les bonnes unités selon la magnitude
-const formatValue = (value: Big): { formattedValue: string, displayUnit: string } => {
-    const numericValue = value.toNumber();
-    
-    // Conversion automatique basée sur la magnitude
-    if (numericValue >= 1000000) {
-        // Convertir en GWh si >= 1 000 000 kWh
-        return { 
-            formattedValue: (numericValue / 1000000).toFixed(2), 
-            displayUnit: "GWh" 
-        };
-    } else if (numericValue >= 1000) {
-        // Convertir en MWh si >= 1 000 kWh
-        return { 
-            formattedValue: (numericValue / 1000).toFixed(2), 
-            displayUnit: "MWh" 
-        };
-    } else {
-        // Laisser en kWh pour les petites valeurs
-        return { 
-            formattedValue: numericValue.toFixed(1), 
-            displayUnit: "kWh" 
-        };
-    }
-};
+// Cette fonction est remplacée par formatSmartValue du nouveau système
+// Conservée pour référence historique
 
 const calculateVariation = (current: Big | null, previous: Big | null): number => {
     if (!current || !previous || previous.eq(0)) return 0;
@@ -81,7 +63,11 @@ export const SecteurConsoCard = ({
     consoElecPrec,
     consoGazPrec,
     consoEauPrec,
-    consoAirPrec
+    consoAirPrec,
+    baseUnitElectricity,
+    baseUnitGas,
+    baseUnitWater,
+    baseUnitAir
 }: SecteurConsoCardProps): ReactElement => {
     const hasElecData = !consoElec.eq(0) || !consoElecPrec.eq(0);
     const hasGazData = !consoGaz.eq(0) || !consoGazPrec.eq(0);
@@ -95,8 +81,11 @@ export const SecteurConsoCard = ({
         air: calculateVariation(consoAir, consoAirPrec)
     };
     
-    // Formatage des valeurs d'électricité avec conversion d'unités
-    const formattedElec = hasElecData ? formatValue(consoElec) : { formattedValue: "0.0", displayUnit: "kWh" };
+    // Formatage des valeurs avec le nouveau système d'unités
+    const formattedElec = hasElecData ? formatSmartValue(consoElec, 'electricity', baseUnitElectricity) : { formattedValue: "0.0", displayUnit: baseUnitElectricity === "kWh" ? "kWh" : "m³" };
+    const formattedGaz = hasGazData ? formatSmartValue(consoGaz, 'gas', baseUnitGas) : { formattedValue: "0.0", displayUnit: baseUnitGas === "kWh" ? "kWh" : "m³" };
+    const formattedEau = hasEauData ? formatSmartValue(consoEau, 'water', baseUnitWater) : { formattedValue: "0.0", displayUnit: baseUnitWater === "kWh" ? "kWh" : "m³" };
+    const formattedAir = hasAirData ? formatSmartValue(consoAir, 'air', baseUnitAir) : { formattedValue: "0.0", displayUnit: baseUnitAir === "kWh" ? "kWh" : "m³" };
 
     return (
         <div className="card-base">
@@ -143,7 +132,7 @@ export const SecteurConsoCard = ({
                         {hasGazData ? (
                             <div>
                                 <div className="text-xl font-bold mt-2" style={{ color: ENERGY_CONFIG.gas.color }}>
-                                    {consoGaz.toFixed(1)} m³
+                                    {formattedGaz.formattedValue} {formattedGaz.displayUnit}
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
                                     <span
@@ -175,7 +164,7 @@ export const SecteurConsoCard = ({
                         {hasEauData ? (
                             <div>
                                 <div className="text-xl font-bold mt-2" style={{ color: ENERGY_CONFIG.water.color }}>
-                                    {consoEau.toFixed(1)} m³
+                                    {formattedEau.formattedValue} {formattedEau.displayUnit}
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
                                     <span
@@ -207,7 +196,7 @@ export const SecteurConsoCard = ({
                         {hasAirData ? (
                             <div>
                                 <div className="text-xl font-bold mt-2" style={{ color: ENERGY_CONFIG.air.color }}>
-                                    {consoAir.toFixed(1)} m³
+                                    {formattedAir.formattedValue} {formattedAir.displayUnit}
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
                                     <span
