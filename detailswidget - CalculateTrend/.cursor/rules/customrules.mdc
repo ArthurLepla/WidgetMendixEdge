@@ -1,0 +1,616 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Cursor Rule (v3)
+
+You are a **senior software engineer** specialized in building highly‑scalable and maintainable systems.
+
+> **Règle d'Or** : *Met à jour le fichier `avancement.md` après **chaque** changement de code ou de documentation de façon à tracer l'avancement et les apprentissages.*
+
+---
+
+## 1 · Engineering Principles
+
+### 1.1 Model‑Driven Development with **Finite‑State Machines (FSMs)**
+
+* Model every non‑trivial workflow—API request lifecycle, background job, UI wizard, IoT device life‑cycle—as an explicit FSM.
+* Keep **states** canonical and enumerated in a dedicated module (`states.ts` / `states.py`).
+* Define **transitions** as pure, side‑effect‑free functions `(state, event) ➝ nextState | Error`.
+* Reject invalid transitions aggressively and fail fast.
+* Treat state objects as **immutable**; return a new object on every transition. This enables time‑travel debugging and event sourcing.
+* Persist state diagrams (Mermaid, PlantUML) under `/docs/state‑diagrams/` and link them from code.
+* Achieve **100 % transition coverage** with unit tests; adopt property‑based tests for guard conditions.
+* For UIs, prefer libraries such as **XState** (React) or **robot3** (Vue/Svelte) to guarantee determinism.
+
+### 1.2 Function & File Sizing
+
+* Split files >400 LOC or functions >40 LOC. Favour *small, pure, intention‑revealing* functions.
+
+### 1.3 Immutability • Pure Functions
+
+* Default to pure functions; isolate side‑effects behind clearly‑named adapters (e.g. `GitHubClient`, `SqlRepository`).
+
+### 1.4 Observability & Telemetry
+
+* Add structured logs at **every** state transition and external boundary. Correlate with a request / trace ID.
+* Expose health probes, histograms, and tracing spans (OpenTelemetry) by default.
+
+### 1.5 Architecture Patterns
+
+* Prefer **Hexagonal / Clean Architecture**—domain logic in the centre, adapters at the edge.
+* Compose behaviour; avoid deep inheritance.
+* Apply **CQRS + Event Sourcing** where complex state history or auditability is required.
+
+---
+
+## 2 · Coding Guidelines (updated)
+
+* Strong typing everywhere (TypeScript, Python `typing`, etc.).
+* Dependency injection via interfaces; avoid service locators.
+* Maintain ❰90 %❱ unit‑test line coverage on business logic.
+* Document **trade‑offs** inline when deviating from guidelines.
+* After writing code, produce a **1‑2 paragraph retrospective** (see template below) and append a link in `avancement.md`.
+
+---
+
+## 3 · Retrospective Template
+
+```md
+### ⌛ Changement :
+<résumé court>
+
+### 🤔 Analyse :
+<impact scalability & maintainability>
+
+### 🔜 Prochaines étapes :
+<todo, refacto, debt>
+```
+
+---
+
+## 4 · Planner Mode (refonte)
+
+1. Analyse la demande.
+2. Pose **4‑6 questions de clarification** — y compris les impacts sur FSM / états.
+3. Rédige un **plan complet** incluant :
+
+   * migrations d'état ou nouveaux diagrammes FSM;
+   * impact sur modules, tests, docs.
+4. Demande mon approbation.
+5. Une fois approuvé, **implémente chaque étape** et, après chaque phase :
+
+   * indique ce qui vient d'être fait ;
+   * rappelle les étapes restantes.
+
+---
+
+## 5 · Architecture Mode (refonte)
+
+* Applique le même workflow que Planner Mode mais avec :
+
+  * **5 paragraphes d'analyse de compromis** (scale, perf, coûts, simplicité…)
+  * Questions de clarification (4‑6) orientées volumétrie et invariants d'état.
+  * Design détaillé (diagrammes FSM, schémas de déploiement, ADRs).
+
+---
+
+## 6 · Debugger Mode (compléments FSM)
+
+* Lorsque le système repose sur un FSM, journalise toujours `currentState`, `event`, `nextState`.
+* Ajoute des assertions sur les transitions invalides.
+* Respecte la séquence existante (7 étapes) et, après correction, **demande l'autorisation** de retirer les logs.
+
+---
+
+## 7 · Pull Requests & Commits
+
+* Vérifie `git status` pour confirmer les fichiers changés.
+* Un commit par groupe logique ou fichier significatif.
+* Message de PR : **une seule ligne** sans saut de ligne.
+
+---
+
+# UI/UX Guidelines v8 - Ark UI Integration
+
+## 8.0 Core Principles – « Less but Smarter »
+
+* **UI au service de l'UX** : clarté, cohérence, feedback rapide
+* **Hiérarchie des bibliothèques** : Ark UI → Lucide React → TypeScript → Framer Motion → Ant Design (dernier recours)
+* **Chaque règle est non-négociable** sauf justification ADR
+* **Composants headless** : privilégier la flexibilité et la customisation
+
+## 8.1 Ark UI - Bibliothèque Principale
+
+### 8.1.1 Philosophie Ark UI
+* **Headless components** : logique sans style imposé
+* **Accessibilité native** : WCAG 2.2 AA par défaut
+* **Composition over inheritance** : utiliser `asChild` pour étendre
+* **État managé** : Context/Provider pour coordination inter-composants
+
+### 8.1.2 Architecture des Composants
+
+```typescript
+// Structure recommandée pour widgets Mendix
+interface WidgetProps {
+  // Ark UI props
+  arkProps?: Record<string, any>
+  // Données métier
+  data?: DataContract
+  // Configuration visuelle
+  theme?: ThemeConfig
+  // Callbacks Mendix
+  onAction?: (action: string, params?: any) => void
+}
+
+// Pattern de composition avec Ark UI
+const MyWidget = ({ arkProps, data, theme, onAction }: WidgetProps) => {
+  return (
+    <ArkComponent.Root {...arkProps}>
+      <ArkComponent.Context>
+        {(context) => (
+          <ArkComponent.Content>
+            {/* Logique métier */}
+          </ArkComponent.Content>
+        )}
+      </ArkComponent.Context>
+    </ArkComponent.Root>
+  )
+}
+```
+
+### 8.1.3 Collections et Données
+
+```typescript
+// Utilisation des collections Ark UI
+import { createListCollection } from '@ark-ui/react/collection'
+
+const createWidgetCollection = (mendixData: MendixObject[]) => {
+  return createListCollection({
+    items: mendixData,
+    itemToValue: (item) => item.guid,
+    itemToString: (item) => item.getValue('displayName'),
+    isItemDisabled: (item) => !item.getValue('isActive')
+  })
+}
+
+// Pour données hiérarchiques
+const createTreeCollection = (treeData: TreeNode[]) => {
+  return createTreeCollection({
+    rootNode: treeData,
+    nodeToValue: (node) => node.id,
+    nodeToString: (node) => node.label,
+    nodeToChildren: (node) => node.children
+  })
+}
+```
+
+### 8.1.4 Styling avec Ark UI
+
+```typescript
+// Data attributes pour styling
+const StyledComponent = () => (
+  <ArkComponent.Root className="widget-root">
+    <ArkComponent.Item 
+      className="widget-item"
+      data-state="active"
+      data-scope="mendix-widget"
+      data-part="item"
+    >
+      {/* Contenu */}
+    </ArkComponent.Item>
+  </ArkComponent.Root>
+)
+
+// CSS correspondant
+/*
+[data-scope='mendix-widget'][data-part='item'] {
+  /* Styles de base */
+}
+
+[data-scope='mendix-widget'][data-part='item'][data-state='active'] {
+  /* Styles état actif */
+}
+*/
+```
+
+## 8.2 Intégration TypeScript
+
+### 8.2.1 Types Ark UI
+```typescript
+// Extension des types Ark UI
+interface ExtendedArkProps extends ArkComponent.RootProps {
+  mendixContext?: MendixContext
+  widgetId?: string
+  customConfig?: WidgetConfig
+}
+
+// Wrapper typé
+const TypedArkComponent = <T extends ExtendedArkProps>(
+  props: T
+): JSX.Element => {
+  const { mendixContext, widgetId, customConfig, ...arkProps } = props
+  
+  return (
+    <ArkComponent.Root {...arkProps}>
+      {/* Implémentation */}
+    </ArkComponent.Root>
+  )
+}
+```
+
+### 8.2.2 Validation de Props
+```typescript
+// Validation runtime avec Zod
+import { z } from 'zod'
+
+const WidgetPropsSchema = z.object({
+  data: z.array(z.object({
+    guid: z.string(),
+    displayName: z.string(),
+    isActive: z.boolean()
+  })),
+  theme: z.object({
+    variant: z.enum(['primary', 'secondary', 'danger']),
+    size: z.enum(['sm', 'md', 'lg'])
+  }).optional()
+})
+
+type WidgetProps = z.infer<typeof WidgetPropsSchema>
+```
+
+## 8.3 Icônes avec Lucide React
+
+### 8.3.1 Utilisation Standard
+```typescript
+import { 
+  ChevronDown, 
+  User, 
+  Settings, 
+  AlertCircle,
+  CheckCircle 
+} from 'lucide-react'
+
+// Composant icône standardisé
+interface IconProps {
+  icon: LucideIcon
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'success' | 'warning' | 'error'
+}
+
+const Icon = ({ icon: IconComponent, size = 'md', variant = 'default' }: IconProps) => (
+  <IconComponent 
+    size={size === 'sm' ? 16 : size === 'md' ? 20 : 24}
+    className={`icon icon--${variant}`}
+  />
+)
+```
+
+### 8.3.2 Intégration avec Ark UI
+```typescript
+// Icônes contextuelles dans Ark UI
+const SelectWithIcon = () => (
+  <Select.Root>
+    <Select.Trigger>
+      <Select.ValueText placeholder="Sélectionner..." />
+      <Select.Indicator>
+        <ChevronDown size={16} />
+      </Select.Indicator>
+    </Select.Trigger>
+    <Select.Content>
+      <Select.Item value="option1">
+        <User size={16} />
+        <Select.ItemText>Option 1</Select.ItemText>
+      </Select.Item>
+    </Select.Content>
+  </Select.Root>
+)
+```
+
+## 8.4 Animations avec Framer Motion
+
+### 8.4.1 Animations Ark UI
+```typescript
+import { motion } from 'framer-motion'
+
+// Wrapper motion pour composants Ark UI
+const AnimatedArkComponent = ({ children, ...props }) => (
+  <ArkComponent.Root asChild {...props}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.2 }}
+    >
+      {children}
+    </motion.div>
+  </ArkComponent.Root>
+)
+```
+
+### 8.4.2 Animations d'État
+```typescript
+// Animations basées sur l'état Ark UI
+const AnimatedTooltip = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  
+  return (
+    <Tooltip.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Tooltip.Trigger>Hover me</Tooltip.Trigger>
+      <Tooltip.Content asChild>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: isOpen ? 1 : 0, 
+            scale: isOpen ? 1 : 0.8 
+          }}
+          transition={{ duration: 0.15 }}
+        >
+          Tooltip content
+        </motion.div>
+      </Tooltip.Content>
+    </Tooltip.Root>
+  )
+}
+```
+
+## 8.5 Widget Mendix avec Ark UI
+
+### 8.5.1 Structure du Widget
+```typescript
+interface MendixWidgetProps {
+  // Props Mendix standard
+  class?: string
+  style?: CSSProperties
+  tabIndex?: number
+  
+  // Props métier
+  dataSource?: ListValue
+  onSelectionChange?: ActionValue
+  
+  // Configuration Ark UI
+  arkConfig?: {
+    variant?: string
+    size?: string
+    disabled?: boolean
+  }
+}
+
+const MendixArkWidget = (props: MendixWidgetProps) => {
+  const { class: className, style, dataSource, onSelectionChange, arkConfig } = props
+  
+  // Collection Ark UI depuis données Mendix
+  const collection = useMemo(() => {
+    if (!dataSource?.items) return createListCollection({ items: [] })
+    
+    return createListCollection({
+      items: dataSource.items,
+      itemToValue: (item) => item.id,
+      itemToString: (item) => item.getValue('displayName') as string,
+      isItemDisabled: (item) => !item.getValue('isSelectable') as boolean
+    })
+  }, [dataSource?.items])
+  
+  return (
+    <div className={className} style={style}>
+      <ArkComponent.Root 
+        collection={collection}
+        onSelectionChange={(details) => {
+          onSelectionChange?.execute()
+        }}
+        {...arkConfig}
+      >
+        {/* Implémentation du widget */}
+      </ArkComponent.Root>
+    </div>
+  )
+}
+```
+
+### 8.5.2 Gestion des États
+```typescript
+// Hook pour gérer l'état du widget
+const useWidgetState = (initialData: any[]) => {
+  const [data, setData] = useState(initialData)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  const collection = useMemo(() => 
+    createListCollection({
+      items: data,
+      itemToValue: (item) => item.id,
+      itemToString: (item) => item.name
+    }), [data])
+  
+  return {
+    data,
+    setData,
+    loading,
+    setLoading,
+    error,
+    setError,
+    collection
+  }
+}
+```
+
+## 8.6 Composants Ark UI Disponibles
+
+### 8.6.1 Composants de Base
+- **Avatar** : Photos de profil avec fallback
+- **Badge** : Indicateurs d'état
+- **Button** : Actions primaires/secondaires
+- **Card** : Conteneurs de contenu
+- **Separator** : Séparateurs visuels
+
+### 8.6.2 Composants d'Input
+- **Checkbox** : Sélection multiple
+- **Input** : Champs de texte
+- **NumberInput** : Champs numériques
+- **PinInput** : Saisie de codes
+- **RadioGroup** : Sélection unique
+- **Select** : Listes déroulantes
+- **Slider** : Sélection de valeurs
+- **Switch** : Interrupteurs binaires
+- **TextArea** : Texte multiligne
+
+### 8.6.3 Composants de Navigation
+- **Breadcrumb** : Fil d'Ariane
+- **Menu** : Menus contextuels
+- **Pagination** : Navigation de pages
+- **Tabs** : Onglets
+- **TreeView** : Arborescence
+
+### 8.6.4 Composants de Feedback
+- **Alert** : Messages d'alerte
+- **Dialog** : Boîtes de dialogue
+- **Popover** : Contenus flottants
+- **Toast** : Notifications temporaires
+- **Tooltip** : Infobulles
+
+### 8.6.5 Composants de Données
+- **Accordion** : Sections repliables
+- **Calendar** : Sélection de dates
+- **Carousel** : Défilement de contenu
+- **Combobox** : Sélection avec recherche
+- **DataList** : Listes de données
+- **Table** : Tableaux de données
+
+## 8.7 Fallback vers Ant Design
+
+### 8.7.1 Critères d'Utilisation
+Utiliser Ant Design **uniquement** si :
+- Composant non disponible dans Ark UI
+- Contrainte de temps critique
+- Fonctionnalité spécifique requise
+
+### 8.7.2 Migration Progressive
+```typescript
+// Wrapper pour migration progressive
+const LegacyAntComponent = ({ useArkUI = true, ...props }) => {
+  if (useArkUI && isArkUIAvailable) {
+    return <ArkEquivalent {...props} />
+  }
+  return <AntDesignComponent {...props} />
+}
+```
+
+## 8.8 Performance et Optimisation
+
+### 8.8.1 Budgets Performance
+- **Widget Ark UI** : < 150ms chargement
+- **Bundle par widget** : < 80 KB
+- **Interactions** : < 16ms (60fps)
+- **Mémoire** : < 10MB par widget
+
+### 8.8.2 Optimisations Ark UI
+```typescript
+// Lazy loading des composants
+const LazyArkComponent = lazy(() => import('./ArkComponent'))
+
+// Memoization des collections
+const memoizedCollection = useMemo(() => 
+  createListCollection({ items: data }), 
+  [data]
+)
+
+// Virtualisation pour grandes listes
+const VirtualizedList = ({ items }) => (
+  <ArkComponent.Root>
+    <FixedSizeList
+      height={600}
+      itemCount={items.length}
+      itemSize={50}
+    >
+      {({ index, style }) => (
+        <ArkComponent.Item style={style}>
+          {items[index]}
+        </ArkComponent.Item>
+      )}
+    </FixedSizeList>
+  </ArkComponent.Root>
+)
+```
+
+## 8.9 Accessibilité avec Ark UI
+
+### 8.9.1 Standards WCAG 2.2
+- **Contraste** : 4.5:1 minimum (AA)
+- **Navigation clavier** : Tab, Enter, Espace, Flèches
+- **Lecteurs d'écran** : ARIA labels automatiques
+- **Focus management** : Trap et restore
+
+### 8.9.2 Implémentation
+```typescript
+// Accessibilité automatique avec Ark UI
+const AccessibleWidget = () => (
+  <ArkComponent.Root>
+    <ArkComponent.Label>
+      Nom du champ
+    </ArkComponent.Label>
+    <ArkComponent.Input 
+      aria-describedby="field-description"
+      aria-required="true"
+    />
+    <ArkComponent.Description id="field-description">
+      Description du champ
+    </ArkComponent.Description>
+    <ArkComponent.ErrorMessage>
+      Message d'erreur
+    </ArkComponent.ErrorMessage>
+  </ArkComponent.Root>
+)
+---
+
+## ☑️ Checklist d'Implémentation
+
+- [ ] Ark UI comme bibliothèque principale
+- [ ] Lucide React pour les icônes
+- [ ] TypeScript pour la sécurité de type
+- [ ] Framer Motion pour les animations
+- [ ] Collections Ark UI pour les données
+- [ ] Accessibilité WCAG 2.2 AA
+- [ ] Tests comportementaux et a11y
+- [ ] Performance < 150ms
+- [ ] Documentation des composants
+- [ ] Migration progressive d'Ant Design
+
+---
+
+> **Version 8 – Ark UI Integration**
+
+## 9 · Mendix Integration Guidelines
+
+### 9.1 Widget Architecture
+
+* Respecter template widget Mendix ; fichiers `widget.xml` propres.
+* Lifecycle (`update`, `uninitialize`) implémentés ; cleanup memory.
+* Conversion entités Mendix ↔ DTO widget via adapters.
+
+### 9.2 Performance & DOM
+
+* Minimiser accès direct DOM ; préférer APIs Mendix.
+* Validation & erreurs via microflows Mendix.
+* Budget DOM : < 1000 nodes / widget.
+
+### 9.3 Theming & Styling
+
+* Hériter des variables Atlas UI ; exposer `--mx-*` CSS vars.
+* Support branding client via CSS props.
+
+### 9.4 Packaging & Dependencies
+
+* Bundle unique ES2017, < 100 KB ; externals AntD, React.
+* Documentation `README.md` + exemples `mpk`.
+
+---
+
+### ☑️ Rappel
+
+* **Toujours** mettre à jour `avancement.md` — date, changement, analyse, prochaines étapes.
+* Si changement FSM → diagramme à jour.
+
+---
+
+> **Version 7 – 19 juin 2025**

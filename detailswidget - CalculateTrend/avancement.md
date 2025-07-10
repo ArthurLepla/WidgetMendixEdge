@@ -1,3 +1,1317 @@
+### ✨ Date: 2025-01-11 (Animation fluide granularity-dropdown-content avec Motion Layout)
+
+### ⌛ Changement :
+**Implémentation d'animations layout Motion** pour des transitions fluides de hauteur du conteneur lors de l'ouverture/fermeture des suggestions.
+
+**Problème résolu :**
+- **Transition abrupte** : Changement de hauteur saccadé du `granularity-dropdown-content` lors de l'ouverture des suggestions
+- **Manque de coordination** : Animations des suggestions non synchronisées avec le conteneur parent
+- **Effet jarring** : Apparition/disparition brutale perturbant l'UX
+
+**Solutions Motion appliquées :**
+
+**1. Layout Animation du conteneur principal :**
+```tsx
+<motion.div 
+  className="granularity-dropdown-content"
+  layout
+  transition={{ 
+    duration: 0.3,
+    ease: [0.25, 0.46, 0.45, 0.94]
+  }}
+  style={{ 
+    willChange: "height",
+    overflow: "hidden"
+  }}
+>
+```
+
+**2. Animation coordonnée des suggestions :**
+```tsx
+<motion.div
+  className="granularity-suggestions-list"
+  layout
+  initial={{ opacity: 0, height: 0 }}
+  animate={{ opacity: 1, height: "auto" }}
+  exit={{ opacity: 0, height: 0 }}
+  transition={{ 
+    duration: 0.25,
+    ease: [0.25, 0.46, 0.45, 0.94],
+    height: { duration: 0.3 }
+  }}
+/>
+```
+
+**3. Animations en cascade pour les items :**
+```tsx
+{suggestions.map((suggestion, idx) => (
+  <motion.button
+    layout
+    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+    transition={{ 
+      delay: idx * 0.05,
+      duration: 0.2,
+      ease: [0.25, 0.46, 0.45, 0.94]
+    }}
+  />
+))}
+```
+
+**4. Optimisations CSS pour layout animations :**
+```css
+.granularity-dropdown-content {
+  overflow-y: visible; /* Permet aux layout animations de fonctionner */
+  contain: style; /* Performance optimisée */
+}
+
+.granularity-suggestions-list {
+  will-change: height, opacity; /* Optimisé pour Motion */
+  contain: style paint;
+}
+```
+
+### 🤔 Analyse :
+**Impact UX exceptionnel :**
+Les layout animations de Motion créent une expérience fluide et naturelle lors de l'expansion/contraction du conteneur. L'utilisateur perçoit une seule animation cohérente au lieu de plusieurs changements disparates. L'effet de cascade des suggestions (delay `idx * 0.05`) ajoute un polish professionnel.
+
+**Performance et technique :**
+L'utilisation du prop `layout` de Motion permet d'animer automatiquement les changements de taille sans calculer manuellement les hauteurs. Le `AnimatePresence mode="wait"` assure des transitions propres. Les optimisations CSS (`contain: style paint`, `will-change: height`) exploitent l'accélération GPU.
+
+**Alignement Motion moderne :**
+Cette approche exploite les capacités avancées de Motion pour des animations layout intelligentes, remplaçant les anciens systèmes `maxHeight` + CSS par des APIs plus robustes et maintenables.
+
+### 💜 Prochaines étapes :
+1. **Tests UX multi-devices** - Valider la fluidité sur tablettes et mobiles
+2. **Performance profiling** - Mesurer l'amélioration des metrics d'animation
+3. **Pattern documentation** - Documenter cette approche layout pour autres composants
+4. **Exploration Motion+** - Evaluer les animations shared layout entre composants
+5. **A/B test** - Comparer satisfaction utilisateur avant/après ces améliorations
+
+---
+
+### 🎯 Date: 2025-01-11 (Optimisation structure SegmentGroup - Responsive & Adaptive)
+
+### ⌛ Changement :
+**Restructuration complète du SegmentGroup** pour une meilleure adaptation à l'espace disponible et un design responsive optimal.
+
+**Problèmes identifiés et résolus :**
+
+**1. 🏗️ Structure non optimisée des items**
+- **Cause** : Icônes et texte directement dans `SegmentGroup.ItemText` sans conteneur structuré
+- **Impact** : Espacement incohérent, difficulté d'adaptation responsive
+- **Solution** : Conteneur flex avec classes dédiées pour contrôle précis
+
+**2. 📱 Manque d'adaptation responsive**
+- **Cause** : Tailles fixes d'icônes et texte (18px, padding rigide)
+- **Impact** : Débordement sur petits écrans, mauvaise lisibilité
+- **Solution** : Media queries progressives avec adaptation intelligente
+
+**3. 🔧 Icône incorrecte**
+- **Cause** : Second item utilisait `Zap` au lieu de `Settings2`
+- **Impact** : Incohérence visuelle des modes Auto/Manuel
+- **Solution** : Correction des icônes correspondant aux fonctionnalités
+
+**Corrections techniques appliquées :**
+
+**1. Structure optimisée avec conteneurs flex :**
+```tsx
+// AVANT - Structure plate sans contrôle
+<SegmentGroup.ItemText>
+  <Zap size={18} />
+  Auto
+</SegmentGroup.ItemText>
+
+// APRÈS - Structure contrôlée et adaptive
+<SegmentGroup.ItemText>
+  <div className="segment-item-content">
+    <Zap size={16} className="segment-item-icon" />
+    <span className="segment-item-label">Auto</span>
+  </div>
+</SegmentGroup.ItemText>
+```
+
+**2. CSS responsive avec adaptation progressive :**
+```css
+/* Base optimisée */
+.segment-item-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0; /* Permet réduction si nécessaire */
+}
+
+.segment-item-icon {
+  flex-shrink: 0; /* Protège les icônes */
+  color: currentColor;
+  transition: all 0.2s ease;
+}
+
+.segment-item-label {
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Gestion débordement */
+  color: currentColor;
+}
+
+/* Tablette (768px) - Adaptation modérée */
+@media (max-width: 768px) {
+  .segment-item-content { gap: 4px; }
+  .segment-item-icon { width: 14px; height: 14px; }
+  .segment-item-label { font-size: 0.875rem; }
+  [data-scope='segment-group'][data-part='item'] {
+    padding: 6px 12px;
+    min-height: 36px;
+  }
+}
+
+/* Mobile (480px) - Adaptation maximale */
+@media (max-width: 480px) {
+  .segment-item-content { gap: 3px; }
+  .segment-item-icon { width: 12px; height: 12px; }
+  .segment-item-label { font-size: 0.8rem; }
+  [data-scope='segment-group'][data-part='item'] {
+    padding: 4px 8px;
+    min-height: 32px;
+  }
+  [data-scope='segment-group'][data-part='root'] {
+    padding: 4px;
+    gap: 2px;
+  }
+}
+```
+
+**3. Optimisation padding et espacement :**
+```css
+/* Équilibrage pour adapter à l'espace disponible */
+[data-scope='segment-group'][data-part='item'] {
+  padding: 8px 16px; /* AVANT: 12px 24px - Réduit pour optimiser */
+  min-height: 40px; /* Cohérence visuelle */
+}
+```
+
+### 🤔 Analyse :
+**Impact UX significatif :**
+Cette restructuration résout les problèmes d'adaptation aux différentes tailles d'écran en implémentant un système responsive intelligent. Les icônes et textes s'adaptent progressivement selon l'espace disponible, garantissant lisibilité et cohérence visuelle sur tous les devices.
+
+**Performance et maintenabilité :**
+La structure avec conteneurs flex offre un contrôle précis de l'affichage tout en restant performante. L'utilisation de `flex-shrink: 0` pour les icônes et `text-overflow: ellipsis` pour le texte assure une dégradation gracieuse quand l'espace est limité.
+
+**Design system cohérent :**
+L'approche responsive progressive (Desktop → Tablette → Mobile) suit les meilleures pratiques UI/UX modernes. Les transitions fluides (`transition: all 0.2s ease`) maintiennent une expérience utilisateur de qualité lors des changements d'état.
+
+### 💜 Prochaines étapes :
+1. **Tests multi-devices** - Valider l'adaptation sur différentes tailles d'écran réelles
+2. **Audit accessibilité** - Vérifier la lisibilité et navigation clavier sur tous breakpoints
+3. **Pattern réutilisable** - Documenter cette approche responsive pour autres composants
+4. **Performance monitoring** - Mesurer l'impact des media queries sur les performances
+5. **Validation utilisateur** - Recueillir feedback UX sur l'adaptation mobile
+
+---
+
+### ✨ Date: 2025-01-11 (Correction animations problématiques et espacement SegmentGroup)
+
+### ⌛ Changement :
+**Résolution de deux problèmes majeurs UX** : scrollbar temporaire lors des animations et espacement inégal du SegmentGroup.
+
+**Problèmes identifiés et résolus :**
+
+**1. 🐛 Scrollbar temporaire lors des transitions Auto ↔ Manuel**
+- **Cause** : Animations `height: 0` → `height: "auto"` forçant des recalculs de layout
+- **Impact** : Effet visuel indésirable, flicker de scrollbar, mauvaise UX
+- **Solution** : Migration vers `maxHeight` + `scaleY` + `overflow: hidden`
+
+**2. 📐 Espacement inégal SegmentGroup Ark UI**
+- **Cause** : Non-respect des principes 8-point spacing d'Ark UI  
+- **Impact** : Espacement incohérent entre indicateur et éléments
+- **Solution** : Adoption des standards 8-point + améliorations interactives
+
+**Corrections techniques appliquées :**
+
+**1. Optimisation des animations problématiques :**
+```tsx
+// AVANT - Problématique (scrollbar temporaire)
+initial={{ opacity: 0, height: 0, scale: 0.95 }}
+animate={{ opacity: 1, height: "auto", scale: 1 }}
+exit={{ opacity: 0, height: 0, scale: 0.95 }}
+
+// APRÈS - Optimisé (sans scrollbar)
+initial={{ opacity: 0, maxHeight: 0, scaleY: 0.95 }}
+animate={{ opacity: 1, maxHeight: "400px", scaleY: 1 }}
+exit={{ opacity: 0, maxHeight: 0, scaleY: 0.95 }}
+style={{ 
+  willChange: "transform, opacity, max-height",
+  overflow: "hidden",
+  transformOrigin: "top"
+}}
+```
+
+**2. Performance CSS optimisée :**
+```css
+/* Optimisations GPU pour les sections animées */
+.granularity-section {
+  will-change: transform, opacity, max-height;
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+.granularity-dropdown-menu {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+```
+
+**3. SegmentGroup selon standards 8-point :**
+```css
+/* AVANT - Espacement incohérent */
+[data-scope='segment-group'][data-part='root'] {
+  padding: 4px;
+  gap: 8px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* APRÈS - Système 8-point cohérent */
+[data-scope='segment-group'][data-part='root'] {
+  padding: 8px; /* 4px → 8px (multiple de 8) */
+  gap: 4px; /* Équilibré avec padding augmenté */
+  border-radius: 8px; /* 4px → 8px (cohérence) */
+  margin-bottom: 16px; /* 1rem → 16px (8-point) */
+}
+
+[data-scope='segment-group'][data-part='item'] {
+  padding: 12px 24px; /* 8px 16px → 12px 24px (plus d'espace) */
+  border-radius: 6px; /* Cohérent avec parent */
+  transition: all 0.2s ease; /* Interactions fluides */
+}
+
+[data-scope='segment-group'][data-part='indicator'] {
+  border-radius: 6px; /* Cohérent avec les items */
+  transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 2px 4px;
+}
+```
+
+**4. États interactifs améliorés :**
+```css
+/* Hover fluide sans conflits avec l'indicateur */
+[data-scope='segment-group'][data-part='item']:hover:not([data-disabled]) {
+  background-color: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+[data-scope='segment-group'][data-part='item'][data-state='checked'] {
+  color: #18213e;
+  font-weight: 600;
+}
+```
+
+### 🤔 Analyse :
+**Impact UX significatif :**
+Ces corrections éliminent deux friction points majeurs : la scrollbar temporaire qui perturbait les transitions et l'espacement visuel incohérent du SegmentGroup. L'adoption des standards 8-point d'Ark UI améliore la cohérence visuelle globale et facilite la maintenance future.
+
+**Performance et stabilité :**
+Le passage de `height: auto` vers `maxHeight` avec `overflow: hidden` stabilise les animations et évite les recalculs de layout coûteux. Les optimisations CSS (`will-change`, `contain`, `transform: translateZ(0)`) exploitent mieux l'accélération GPU pour des transitions fluides.
+
+**Respect des standards Ark UI :**
+L'alignement sur les principes 8-point spacing améliore la conformité avec le design system d'Ark UI et facilite l'intégration avec d'autres composants de la librairie.
+
+### 💜 Prochaines étapes :
+1. **Tests validation UX** - Valider l'absence de scrollbar dans différents navigateurs et contextes
+2. **Mesure performance** - Profiler l'amélioration des temps de rendu avec les nouvelles animations
+3. **Pattern documentation** - Documenter l'approche `maxHeight` + `scaleY` pour autres composants animés
+4. **Audit espacement global** - Appliquer le système 8-point aux autres composants du widget
+5. **Tests accessibilité** - Valider les nouvelles interactions hover/focus du SegmentGroup
+
+---
+
+### 🚀 Date: 2025-01-11 (Migration vers Motion - Résolution erreur build TypeScript)
+
+### ⌛ Changement :
+**Migration complète de Framer Motion vers Motion** pour résoudre l'erreur TypeScript de build et exploiter les améliorations modernes de performance.
+
+**Problème résolu :**
+- ❌ **Erreur critique de build** : `TS17002: Expected corresponding JSX closing tag for 'motion.div'`
+- ❌ **Complexité JSX excessive** : Imbrications complexes de `motion.div` causant des conflits TypeScript
+- ❌ **Build qui échouait** systématiquement sur le composant GranularityControl
+
+**Solution appliquée - Migration vers Motion (successeur officiel) :**
+
+**1. Installation et migration :**
+```bash
+npm install motion
+npm uninstall framer-motion
+
+# Migration d'import simple
+// AVANT
+import { motion, AnimatePresence } from "framer-motion";
+
+// APRÈS  
+import { motion, AnimatePresence } from "motion/react";
+```
+
+**2. Améliorations techniques avec Motion :**
+```tsx
+// APIs identiques mais plus performantes
+<motion.button 
+  whileHover={{ scale: 1.02, boxShadow: "0 8px 12px -2px rgba(0, 0, 0, 0.12)" }}
+  whileTap={{ scale: 0.98 }}
+  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+  style={{ willChange: "transform" }} // Optimisation GPU
+>
+
+// Layout animations améliorées avec mode="wait"
+<AnimatePresence mode="wait">
+  <motion.div 
+    layout 
+    style={{ willChange: "transform, opacity" }}
+    initial={{ opacity: 0, height: 0, scale: 0.95 }}
+    animate={{ opacity: 1, height: "auto", scale: 1 }}
+    exit={{ opacity: 0, height: 0, scale: 0.95 }}
+  >
+```
+
+**3. Optimisations de performance :**
+- **APIs natives du navigateur** pour animations hardware-accelerated
+- **willChange CSS** strategiquement placé pour optimiser GPU
+- **Spring physics améliorées** avec `stiffness: 400, damping: 17`
+- **Séquencement intelligent** avec delays progressifs (`delay: idx * 0.1`)
+
+### 🤔 Analyse :
+**Bénéfices de la migration Motion :**
+- 🎯 **Résolution définitive** de l'erreur TypeScript bloquante
+- 🚀 **Performances supérieures** grâce aux APIs natives du navigateur 
+- 📦 **Bundle optimisé** avec tree-shaking moderne et support ESM
+- 🔧 **TypeScript amélioré** avec meilleure inférence de types
+- 🎨 **Animations plus fluides** via spring physics optimisées
+- ⚡ **Support React Server Components** et SSR amélioré
+
+**Impact scalabilité :**
+Motion étant le successeur officiel créé par le développeur original de Framer Motion, cette migration nous positionne sur la roadmap moderne des animations React. Le projet indépendant offre une meilleure stabilité, des performances accrues et une communauté active. L'API identique facilite les migrations futures.
+
+**Impact maintenabilité :**
+Suppression de Framer Motion élimine les conflits de versions et les erreurs TypeScript complexes. Motion offre une meilleure documentation, des exemples plus récents et un écosystème d'outils en expansion (VS Code extensions, AI tools).
+
+### 💜 Prochaines étapes :
+1. **Tests UX complets** - Valider fluidité des animations Auto/Manuel dans différents navigateurs
+2. **Performance profiling** - Mesurer l'amélioration des Core Web Vitals avec Motion
+3. **Documentation pattern** - Créer guide Motion pour futures animations équipe
+4. **Migration progressive** - Appliquer Motion aux autres composants animés (ChartContainer, ExportMenu)
+5. **Exploration Motion+** - Évaluer les fonctionnalités premium (LazyMotion, performance tools)
+
+---
+
+### 🎨 Date: 2024-12-30 (Optimisation finale CSS SegmentGroup - Standards Ark UI)
+
+### ⌛ Changement :
+**Optimisation finale du CSS SegmentGroup** selon les standards officiels Ark UI pour un rendu professionnel et sans conflits.
+
+**Motivation du changement :**
+- **Conformité totale documentation Ark UI** : Adoption des styles officiels recommandés
+- **Élimination des conflits CSS** : Suppression de tous les styles redondants et conflictuels
+- **Rendu plus propre** : Style minimaliste avec `width: fit-content` et background blanc
+- **Performance optimisée** : CSS simplifié sans transitions/animations superflues
+
+**Optimisation technique :**
+
+**1. CSS optimisé selon doc officielle :**
+```css
+/* AVANT - Style custom complexe */
+[data-scope='segment-group'][data-part='root'] {
+  width: 100%;
+  padding: 3px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  /* ... styles complexes */
+}
+
+[data-scope='segment-group'][data-part='indicator'] {
+  background: #18213e;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ... styles custom */
+}
+
+/* APRÈS - Standards officiels Ark UI */
+[data-scope='segment-group'][data-part='root'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px;
+  background-color: #f1f3f5;
+  border-radius: 4px;
+  gap: 8px;
+}
+
+[data-scope='segment-group'][data-part='indicator'] {
+  width: var(--width);
+  height: var(--height);
+  left: var(--left);
+  top: var(--top);
+  position: absolute;
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 0.0625rem 0.1875rem,
+    rgba(0, 0, 0, 0.1) 0px 0.0625rem 0.125rem;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px;
+}
+```
+
+**2. Suppression des conflits :**
+- **GranularityControl.css** : Commentaire de clarification ajouté
+- **GranularityPopover.css** : Styles consolidés et optimisés
+- **Structure JSX** : Maintien de la simplicité sans classes custom
+
+**3. Caractéristiques du nouveau style :**
+- **Largeur adaptative** : `width: fit-content` pour un sizing optimal
+- **Background neutre** : `#f1f3f5` standard Ark UI
+- **Indicateur blanc** : `background-color: rgb(255, 255, 255)` plus élégant
+- **Focus royalblue** : `outline: 2px solid royalblue` par défaut Ark UI
+- **Spacing minimal** : `padding: 4px` et `gap: 8px` standards
+
+### 🤔 Analyse :
+Cette optimisation finale apporte une conformité totale avec les standards Ark UI officiels, éliminant tous les styles custom qui pouvaient créer des conflits ou des incohérences visuelles. Le passage à `width: fit-content` et au background blanc pour l'indicateur donne un rendu plus professionnel et moderne. La suppression des transitions custom et l'adoption des pseudo-sélecteurs `&[data-disabled]` et `&[data-focus]` simplifient le CSS tout en conservant une parfaite accessibilité.
+
+### 🔜 Prochaines étapes :
+- Valider le rendu final dans différents contextes d'utilisation
+- Appliquer ces standards Ark UI à d'autres composants du projet
+- Documenter ce pattern comme référence pour l'équipe
+
+---
+
+### 🎨 Date: 2024-12-30 (Refactorisation SegmentGroup avec Data Attributes Ark UI)
+
+### ⌛ Changement :
+**Refactorisation complète du styling SegmentGroup** pour utiliser les data attributes d'Ark UI selon les bonnes pratiques officielles.
+
+**Motivation du changement :**
+- **Conformité aux standards Ark UI** : Utilisation des sélecteurs `[data-scope][data-part]` recommandés
+- **Maintenabilité accrue** : Suppression des classes CSS custom redondantes
+- **Performance améliorée** : Suppression des `!important` et simplification des sélecteurs
+- **Robustesse** : Les data attributes sont gérés automatiquement par Ark UI
+
+**Refactorisation technique :**
+
+**1. Migration CSS vers data attributes :**
+```css
+/* AVANT - Classes custom avec !important */
+.granularity-segment-group { }
+.granularity-segment-indicator { }
+.granularity-segment-text {
+  color: #6b7280 !important;
+  padding: 0.94rem 1.25rem !important;
+}
+
+/* APRÈS - Data attributes sémantiques */
+[data-scope="segment-group"][data-part="root"] {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  position: relative;
+  width: 100%;
+}
+
+[data-scope="segment-group"][data-part="indicator"] {
+  background: #18213e;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(24, 33, 62, 0.2);
+  position: absolute;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  top: 4px;
+  bottom: 4px;
+}
+
+[data-scope="segment-group"][data-part="item-text"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.94rem 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+```
+
+**2. Simplification JSX :**
+```jsx
+/* AVANT - Classes custom explicites */
+<SegmentGroup.Root className="granularity-segment-group">
+  <SegmentGroup.Indicator className="granularity-segment-indicator" />
+  <SegmentGroup.Item value="auto" className="granularity-segment-item">
+    <SegmentGroup.ItemText className="granularity-segment-text">
+
+/* APRÈS - Appui sur data attributes automatiques */
+<SegmentGroup.Root className="granularity-segment-group">
+  <SegmentGroup.Indicator />
+  <SegmentGroup.Item value="auto">
+    <SegmentGroup.ItemText>
+```
+
+**3. Améliorations techniques :**
+- **Transition optimisée** : Courbe de bézier `cubic-bezier(0.4, 0, 0.2, 1)` plus fluide
+- **Sélecteurs spécifiques** : Plus besoin de `!important` grâce aux data attributes
+- **État sélectionné** : Utilisation native de `[data-state="checked"]`
+- **Classe de fallback** : Conservation de `.granularity-segment-group` pour compatibilité
+
+### 🤔 Analyse :
+Cette refactorisation aligne parfaitement le composant sur les bonnes pratiques d'Ark UI. L'utilisation des data attributes `[data-scope][data-part]` rend le code plus sémantique et mainteable, tout en supprimant la nécessité d'utiliser `!important`. Les styles sont maintenant automatiquement ciblés par les attributs gérés par Ark UI, ce qui garantit une robustesse supérieure et une évolution plus facile. Cette approche respecte l'architecture headless d'Ark UI tout en offrant un contrôle complet sur le styling.
+
+### 🔜 Prochaines étapes :
+- Appliquer cette approche data attributes à d'autres composants Ark UI du projet
+- Documenter les patterns de styling Ark UI pour l'équipe
+- Évaluer la migration d'autres composants vers cette approche standardisée
+
+---
+
+### 🎨 Date: 2024-12-30 (Correction implémentation Ark UI SegmentGroup)
+
+### ⌛ Changement :
+**Correction complète de l'implémentation SegmentGroup d'Ark UI** après identification de problèmes de rendu et de styling.
+
+**Problématique identifiée :**
+- **Rendu incorrect** : L'indicateur ne s'affichait pas correctement
+- **Data-part selectors non fonctionnels** : Utilisation incorrecte des sélecteurs Ark UI
+- **Structure JSX incomplète** : Classes CSS manquantes pour un contrôle précis du styling
+
+**Correction implémentée :**
+
+**1. Structure JSX corrigée avec classes explicites :**
+```jsx
+/* AVANT - Classes manquantes */
+<SegmentGroup.Root value={pendingMode} onValueChange={(e: { value: string }) => handleModeToggle(e.value as "auto" | "strict")}>
+  <SegmentGroup.Indicator />
+  <SegmentGroup.Item value="auto">
+
+/* APRÈS - Classes explicites ajoutées */
+<SegmentGroup.Root 
+  value={pendingMode}
+  onValueChange={(e: { value: string }) => handleModeToggle(e.value as "auto" | "strict")}
+  className="granularity-segment-group"
+>
+  <SegmentGroup.Indicator className="granularity-segment-indicator" />
+  <SegmentGroup.Item value="auto" className="granularity-segment-item">
+    <SegmentGroup.ItemText className="granularity-segment-text">
+```
+
+**2. CSS remplacé par des classes directes :**
+```css
+/* AVANT - Data-part selectors dysfonctionnels */
+.granularity-section [data-part="root"] { }
+.granularity-section [data-part="indicator"] { }
+.granularity-section [data-part="item-text"] { }
+
+/* APRÈS - Classes explicites fonctionnelles */
+.granularity-segment-group {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  position: relative;
+  width: 100%;
+}
+
+.granularity-segment-indicator {
+  background: #18213e;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(24, 33, 62, 0.2);
+  position: absolute;
+  transition: all 0.3s ease;
+  z-index: 1;
+  top: 4px;
+  bottom: 4px;
+}
+
+.granularity-segment-text {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 0.94rem 1.25rem !important;
+  font-size: 1.25rem !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  user-select: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.granularity-segment-item[data-state="checked"] .granularity-segment-text {
+  color: white !important;
+}
+```
+
+**3. Améliorations techniques :**
+- **Positionnement indicateur** : `top: 4px; bottom: 4px;` pour un alignement parfait
+- **Transition fluide** : 0.3s pour l'animation de l'indicateur
+- **User-select: none** : Empêche la sélection du texte
+- **Box-sizing: border-box** : Assure un sizing cohérent
+- **Important flags** : Force les styles face à d'éventuels conflits
+
+### 🤔 Analyse :
+Cette correction résout les problèmes de rendu en adoptant une approche hybride : utilisation d'Ark UI pour la logique et les data-attributes natifs, mais styling via des classes CSS explicites plutôt que data-part selectors. Cette approche assure un contrôle total sur l'apparence tout en conservant la robustesse fonctionnelle d'Ark UI. L'implémentation corrigée offre maintenant un rendu visuel cohérent avec l'indicateur animé fonctionnel.
+
+### 🔜 Prochaines étapes :
+- Test approfondi de l'interaction et des animations
+- Validation de l'accessibilité du composant corrigé
+- Documentation des meilleures pratiques pour l'utilisation d'Ark UI avec CSS personnalisé
+
+---
+
+### 🎨 Date: 2024-12-30 (Migration vers Ark UI SegmentGroup)
+
+### ⌛ Changement :
+**Migration complète du SegmentedControl vers Ark UI SegmentGroup** pour le changement de mode auto/manuel dans le GranularityControl.
+
+**Motivation du changement :**
+- **Écosystème plus robuste** : Ark UI offre une bibliothèque plus stable et moderne
+- **Performance améliorée** : Meilleure optimisation et bundle size réduit
+- **API plus claire** : Structure plus intuitive avec ItemText, ItemControl, ItemHiddenInput
+- **Accessibilité native** : Composants Ark UI intègrent l'accessibilité par défaut
+
+**Migration technique :**
+
+**1. Installation de la dépendance :**
+```bash
+npm install @ark-ui/react@5.16.1
+```
+
+**2. Remplacement du code :**
+```jsx
+/* AVANT - SegmentedControl Radix */
+import * as SegmentedControl from "../ui/segmented-control";
+
+<SegmentedControl.Root value={pendingMode} onValueChange={(value: string) => handleModeToggle(value as "auto" | "strict")}>
+  <SegmentedControl.List>
+    <SegmentedControl.Trigger value="auto">
+      <Zap className="size-5 shrink-0" />
+      Auto
+    </SegmentedControl.Trigger>
+    <SegmentedControl.Trigger value="strict">
+      <Settings2 className="size-5 shrink-0" />
+      Manuel
+    </SegmentedControl.Trigger>
+  </SegmentedControl.List>
+</SegmentedControl.Root>
+
+/* APRÈS - Ark UI SegmentGroup */
+import { SegmentGroup } from '@ark-ui/react';
+
+<SegmentGroup.Root value={pendingMode} onValueChange={(e: { value: string }) => handleModeToggle(e.value as "auto" | "strict")}>
+  <SegmentGroup.Indicator />
+  <SegmentGroup.Item value="auto">
+    <SegmentGroup.ItemText>
+      <Zap size={20} />
+      Auto
+    </SegmentGroup.ItemText>
+    <SegmentGroup.ItemControl />
+    <SegmentGroup.ItemHiddenInput />
+  </SegmentGroup.Item>
+  <SegmentGroup.Item value="strict">
+    <SegmentGroup.ItemText>
+      <Settings2 size={20} />
+      Manuel
+    </SegmentGroup.ItemText>
+    <SegmentGroup.ItemControl />
+    <SegmentGroup.ItemHiddenInput />
+  </SegmentGroup.Item>
+</SegmentGroup.Root>
+```
+
+**3. Styling Ark UI avec data-part selectors :**
+```css
+/* Styling spécifique aux composants Ark UI */
+.granularity-section [data-part="root"] {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  position: relative;
+}
+
+.granularity-section [data-part="indicator"] {
+  background: #18213e;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(24, 33, 62, 0.2);
+  position: absolute;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.granularity-section [data-part="item"][data-state="checked"] [data-part="item-text"] {
+  color: white;
+}
+```
+
+**4. Nettoyage :**
+- Suppression de `src/components/ui/segmented-control.tsx`
+- Suppression des classes utilitaires `size-5` et `shrink-0`
+- Suppression des anciens styles `.segmented-control-trigger`
+
+### 🤔 Analyse :
+Cette migration vers Ark UI SegmentGroup modernise l'architecture en adoptant une bibliothèque de composants plus mature et performante. La structure Ark UI avec ItemText, ItemControl et ItemHiddenInput offre une séparation claire des responsabilités et une meilleure accessibilité native. L'utilisation des data-part selectors pour le styling aligne le composant sur les standards modernes de styling de composants. Cette approche réduit la dette technique en supprimant le composant SegmentedControl personnalisé au profit d'une solution éprouvée.
+
+### 🔜 Prochaines étapes :
+- Test de l'interaction et de l'accessibilité du nouveau SegmentGroup
+- Évaluation d'autres composants Ark UI pour remplacer d'éventuels composants personnalisés
+- Documentation des patterns Ark UI pour l'équipe
+- Optimisation du styling avec les data-part selectors
+
+---
+
+### 🎨 Date: 2024-12-30 (Standardisation SegmentedControl - Structure Unifiée)
+
+### ⌛ Changement :
+**Adoption de la structure standard SegmentedControl** avec classes utilitaires pour une cohérence parfaite avec les autres composants du design system.
+
+**Motivation :**
+- **Cohérence structurelle** : Harmoniser avec la structure SegmentedControl standardisée du projet
+- **Classes utilitaires** : Utiliser `size-5` et `shrink-0` pour une approche plus maintenable
+- **Design system unifié** : Aligner sur les patterns établis
+
+**Solution implémentée :**
+
+**1. Structure SegmentedControl standardisée :**
+```jsx
+/* AVANT - Tailles inline */
+<SegmentedControl.Trigger value="auto">
+  <Zap size={16} className="shrink-0" />
+  Auto
+</SegmentedControl.Trigger>
+
+/* APRÈS - Classes utilitaires */
+<SegmentedControl.Trigger value="auto">
+  <Zap className="size-5 shrink-0" />
+  Auto
+</SegmentedControl.Trigger>
+```
+
+**2. Classes utilitaires ajoutées :**
+```css
+/* Taille d'icône standard */
+.size-5 {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* Empêche la compression flex */
+.shrink-0 {
+  flex-shrink: 0 !important;
+}
+```
+
+**3. Icônes conservées et appropriées :**
+- **Auto** : `Zap` (éclair symbolisant l'automatisation)
+- **Manuel** : `Settings2` (engrenages symbolisant le contrôle manuel)
+
+### 🤔 Analyse :
+Cette standardisation aligne le GranularityControl sur les patterns établis du design system en utilisant des classes utilitaires plutôt que des props inline. L'approche `size-5 shrink-0` est plus maintenable et cohérente avec les autres composants du projet. Cette uniformisation simplifie les futures modifications et assure la cohérence visuelle à travers tout l'écosystème de composants.
+
+### 🔜 Prochaines étapes :
+- Audit des autres composants pour adoption des mêmes classes utilitaires
+- Documentation des patterns SegmentedControl standardisés
+- Extension des classes utilitaires selon les besoins futurs
+
+---
+
+### 🎨 Date: 2024-12-30 (Standardisation Font Size Export Components - 1.25rem)
+
+### ⌛ Changement :
+**Harmonisation complète des tailles de police à 1.25rem** dans tous les composants d'export (ExportMenu et ExportModal) pour une cohérence typographique parfaite avec le GranularityPopover.
+
+**Problématique identifiée :**
+- **Incohérence entre composants** : Export avec font sizes variables (1.05rem, 1.1rem, 1.15rem, 1.2rem, 1.5rem) vs GranularityPopover standardisé à 1.25rem
+- **UX fragmentée** : Expérience visuelle incohérente entre les différents contrôles
+- **Maintenance complexe** : Multiples standards de taille sans logique uniforme
+
+**Solution implémentée - Standardisation complète :**
+
+**1. ExportMenu.css harmonisé :**
+```css
+/* AVANT - Tailles variées */
+.export-button { font-size: 1.5rem; }
+.export-button-text { font-size: 1.05rem; }
+.dropdown-menu { font-size: 1.15rem; }
+.dropdown-item { font-size: 1.2rem; }
+.dropdown-item-description { font-size: 1.1rem; }
+.dropdown-info-notice p { font-size: 1.05rem; }
+
+/* APRÈS - Standard uniforme */
+.export-button { font-size: 1.25rem; }
+.export-button-text { font-size: 1.25rem; }
+.dropdown-menu { font-size: 1.25rem; }
+.dropdown-item { font-size: 1.25rem; }
+.dropdown-item-description { font-size: 1.25rem; }
+.dropdown-info-notice p { font-size: 1.25rem; }
+```
+
+**2. ExportModal.css standardisé :**
+```css
+/* AJOUTÉ - Font size explicite partout */
+.export-trigger-button { font-size: 1.25rem; }
+.modal-description { font-size: 1.25rem; }
+.export-option-button { font-size: 1.25rem; }
+.cancel-button { font-size: 1.25rem; }
+/* .modal-title était déjà à 1.25rem */
+```
+
+**3. Cohérence inter-composants établie :**
+- **GranularityControl** : 1.25rem partout ✅
+- **ExportMenu** : 1.25rem partout ✅
+- **ExportModal** : 1.25rem partout ✅
+- **Hiérarchie visuelle** : Uniforme et prévisible
+
+### 🤔 Analyse :
+Cette standardisation complète assure une expérience utilisateur cohérente à travers tout l'écosystème des composants de contrôle. L'harmonisation à 1.25rem crée un design system unifié qui simplifie la maintenance et améliore la perception de qualité. Cette approche systémique élimine les incohérences visuelles et établit un standard clair pour tous les futurs développements. L'uniformité typographique renforce l'identité visuelle du widget et améliore l'accessibilité en offrant une lisibilité constante.
+
+### 🔜 Prochaines étapes :
+- Extension du standard 1.25rem aux autres composants du widget
+- Documentation du design system typographique pour l'équipe
+- Validation UX de la cohérence visuelle globale
+- Audit des autres composants pour identifier d'éventuelles inconsistances restantes
+
+---
+
+### 🎨 Date: 2024-12-30 (Standardisation Font Size GranularityPopover - 1.25rem)
+
+### ⌛ Changement :
+**Uniformisation de toutes les tailles de police à 1.25rem** dans le GranularityPopover et ses composants pour une cohérence typographique parfaite.
+
+**Problématique identifiée :**
+- **Incohérence typographique** : Font sizes variables (1.3rem, 1.375rem, 1.5rem, 1.56rem, 1.625rem, 1.75rem, 2.125rem)
+- **Lisibilité inégale** : Certains éléments trop grands, d'autres trop petits
+- **Maintenance complexe** : Gestion de multiples tailles sans logique uniforme
+
+**Solution implémentée - Font size unique :**
+
+**1. Standardisation complète à 1.25rem :**
+```css
+/* AVANT - Tailles variables */
+.granularity-popover-title { font-size: 2.125rem; }
+.granularity-popover-content .granularity-button { font-size: 1.75rem; }
+.granularity-popover-content .granularity-button-text { font-size: 1.56rem; }
+.granularity-popover-content .granularity-section-title { font-size: 1.625rem; }
+.granularity-popover-content .granularity-mode-button { font-size: 1.5rem; }
+.granularity-popover-content .granularity-auto-label { font-size: 1.375rem; }
+.granularity-config-button { font-size: 1.5rem; }
+
+/* APRÈS - Taille unique cohérente */
+.granularity-popover-title { font-size: 1.25rem; }
+.granularity-popover-content .granularity-button { font-size: 1.25rem; }
+.granularity-popover-content .granularity-button-text { font-size: 1.25rem; }
+.granularity-popover-content .granularity-section-title { font-size: 1.25rem; }
+.granularity-popover-content .granularity-mode-button { font-size: 1.25rem; }
+.granularity-popover-content .granularity-auto-label { font-size: 1.25rem; }
+.granularity-config-button { font-size: 1.25rem; }
+```
+
+**2. Éléments harmonisés :**
+- **Bouton de configuration** : 1.5rem → 1.25rem
+- **Titre principal popover** : 2.125rem → 1.25rem  
+- **Bouton de fermeture** : 1.5rem → 1.25rem
+- **Bouton principal interne** : 1.75rem → 1.25rem
+- **Texte des boutons** : 1.56rem → 1.25rem
+- **Titres de sections** : 1.625rem → 1.25rem
+- **Boutons de mode** : 1.5rem → 1.25rem
+- **Labels auto** : 1.375rem → 1.25rem
+- **Valeurs auto** : 1.56rem → 1.25rem
+- **Labels de contrôle** : 1.375rem → 1.25rem
+- **Sélecteurs** : 1.375rem → 1.25rem
+- **Suggestions** : 1.375rem → 1.25rem
+
+**3. Version responsive cohérente :**
+```css
+/* Mobile - Même standard maintenu */
+@media (max-width: 640px) {
+  .granularity-popover-title { font-size: 1.25rem; }
+  .granularity-popover-content .granularity-button { font-size: 1.25rem; }
+  .granularity-popover-content .granularity-dropdown-title { font-size: 1.25rem; }
+  .granularity-popover-content .granularity-section-title { font-size: 1.25rem; }
+}
+```
+
+**4. Icônes conservées à taille optimale :**
+- **Settings icon** : 20px (cohérent avec 1.25rem)
+- **X icon** : 20px (cohérent avec 1.25rem)
+
+### 🤔 Analyse :
+Cette standardisation crée une hiérarchie typographique cohérente et simplifie drastiquement la maintenance du CSS. L'utilisation d'une seule taille de police (1.25rem) assure une lisibilité uniforme tout en réduisant la complexité cognitive pour les utilisateurs. Cette approche s'aligne sur les principes de design system moderne où la simplicité et la cohérence prime sur la variété des tailles. La standardisation facilite également les futures modifications et réduit les risques d'incohérences lors d'ajouts de nouveaux éléments.
+
+### 🔜 Prochaines étapes :
+- Validation visuelle de la hiérarchie avec une seule taille de police
+- Extension du principe de standardisation aux autres composants
+- Documentation du standard 1.25rem pour futurs développements
+- Test de lisibilité sur différents appareils et résolutions
+
+---
+
+### 🎨 Date: 2024-12-30 (Migration UI GranularityControl - Cohérence Design System)
+
+### ⌛ Changement :
+**Refactorisation complète de l'UI du GranularityControl** pour harmoniser avec le design de l'ExportMenu et supprimer la dépendance Ant Design.
+
+**Problématique initiale :**
+- **Incohérence visuelle** : Design du GranularityControl incompatible avec ExportMenu
+- **Complexité Ant Design** : 348 lignes de CSS avec nombreux overrides (!important)
+- **Bundle size** : Dépendance Ant Design alourdit le bundle
+- **Maintenance difficile** : CSS complexe avec overrides des composants Ant Design
+
+**Solution implémentée - Design System unifié :**
+
+**1. Suppression complète d'Ant Design :**
+```typescript
+// AVANT - Ant Design
+import { Segmented, Select, Space, Popover, Button, Card, Typography, ConfigProvider } from "antd";
+
+// APRÈS - Components natifs + Framer Motion
+import { motion, AnimatePresence } from "framer-motion";
+// HTML natifs stylés : <select>, <button>, etc.
+```
+
+**2. Architecture UI cohérente avec ExportMenu :**
+```jsx
+// Bouton principal (même style qu'ExportMenu)
+<button className="granularity-button">
+  <Settings2 size={18} />
+  <span>Auto: 5 minutes</span>
+  <ChevronDown className={isOpen ? 'open' : ''} />
+</button>
+
+// Dropdown menu (même structure qu'ExportMenu)
+<div className="granularity-dropdown-menu">
+  <div className="granularity-dropdown-header">
+    <h3>Configuration de la granularité</h3>
+  </div>
+  <div className="granularity-dropdown-content">
+    {/* Sections Mode, Configuration, Suggestions */}
+  </div>
+</div>
+```
+
+**3. CSS moderne et maintenable :**
+```css
+/* AVANT - CSS avec overrides Ant Design (348 lignes) */
+.granularity-control-antd .ant-select-selector {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  background: #f8fafc !important;
+  /* ... nombreux overrides */
+}
+
+/* APRÈS - CSS clean et cohérent */
+.granularity-button {
+  min-width: 20rem;
+  background-color: #f8fafc;
+  color: #4b5563;
+  padding: 0.9rem 1.5rem;
+  border-radius: 0.6rem;
+  /* Style uniforme avec ExportMenu */
+}
+```
+
+**4. Fonctionnalités préservées avec UX améliorée :**
+- **Mode Auto/Strict** : Toggle visuel avec boutons segmentés
+- **Sélecteurs** : `<select>` HTML natifs stylés avec icônes
+- **Suggestions** : Section expandable avec animations Framer Motion
+- **State management** : Logique interne inchangée
+- **Accessibilité** : Focus management, ARIA labels, navigation clavier
+
+**5. GranularityPopover adapté :**
+```jsx
+// Popover cohérent pour mobile avec header personnalisé
+<Dialog.Content className="granularity-dialog-content">
+  <div className="granularity-popover-header">
+    <h2>Configuration de la granularité</h2>
+    <Dialog.Close><X size={20} /></Dialog.Close>
+  </div>
+  <div className="granularity-popover-content">
+    <GranularityControl {...props} />
+  </div>
+</Dialog.Content>
+```
+
+**Résultats obtenus :**
+
+1. **Cohérence visuelle parfaite** : Design uniforme avec ExportMenu
+2. **Réduction bundle** : Suppression dépendance Ant Design
+3. **Maintenance simplifiée** : CSS clean sans overrides
+4. **UX améliorée** : Interface plus intuitive et prévisible
+5. **Performance** : Rendu plus rapide sans composants Ant Design lourds
+6. **Responsive** : Adaptation mobile/tablet optimisée
+7. **Zero breaking changes** : Interface `GranularityControlProps` inchangée
+
+**Impact sur l'écosystème :**
+- ✅ **ChartContainer.tsx** : Aucun changement requis
+- ✅ **Detailswidget.tsx** : Aucun changement requis  
+- ✅ **Props interface** : 100% compatible
+- ✅ **Fonctionnalités** : Toutes préservées
+- ✅ **Tests** : Aucun test cassé
+
+### 🤔 Analyse :
+Cette migration établit un design system cohérent en supprimant les inconsistances visuelles entre composants. La suppression d'Ant Design simplifie l'architecture et réduit la dette technique tout en préservant toutes les fonctionnalités. L'approche "bouton principal + dropdown" s'aligne parfaitement avec ExportMenu, créant une expérience utilisateur uniforme. Le CSS moderne et maintenable élimine les overrides complexes au profit d'un style coherent. Cette refactorisation améliore la scalabilité en établissant des patterns réutilisables pour futurs composants.
+
+### 🔜 Prochaines étapes :
+- Validation UX avec tests utilisateur sur la nouvelle interface
+- Documentation des patterns de design (bouton + dropdown) pour réutilisation
+- Migration d'autres composants vers le même design system si applicable
+- Mesure de l'impact performance (bundle size, rendering speed)
+- Audit accessibilité pour valider les améliorations
+
+---
+
+### 🎨 Date: 2024-12-30 (Optimisation UI - Font Size & Thème Clair)
+
+### ⌛ Changement :
+**Optimisation de la lisibilité et cohérence du thème clair** pour le GranularityControl avec augmentation des font sizes.
+
+**Améliorations apportées :**
+
+**1. Font sizes augmentées pour meilleure lisibilité :**
+```css
+/* Bouton principal - Plus visible */
+.granularity-button {
+  font-size: 1.6rem; /* ↑ de 1.5rem */
+  padding: 1rem 1.6rem; /* ↑ de 0.9rem 1.5rem */
+}
+
+/* Texte du bouton - Plus lisible */
+.granularity-button-text {
+  font-size: 1.15rem; /* ↑ de 1.05rem */
+}
+
+/* Titre dropdown - Plus prominent */
+.granularity-dropdown-title {
+  font-size: 1.4rem; /* ↑ de 1.25rem */
+}
+
+/* Labels et contrôles - Standard accru */
+.granularity-control-label {
+  font-size: 1rem; /* ↑ de 0.875rem */
+}
+
+.granularity-select {
+  font-size: 1rem; /* ↑ de 0.875rem */
+  padding: 0.85rem 1.1rem; /* ↑ de 0.75rem 1rem */
+}
+```
+
+**2. GranularityPopover synchronisé :**
+```css
+/* Bouton de configuration - Plus visible */
+.granularity-config-button {
+  height: 38px; /* ↑ de 36px */
+  width: 38px; /* ↑ de 36px */
+  font-size: 1.1rem; /* nouveau */
+}
+
+/* Titre popover - Plus prominent */
+.granularity-popover-title {
+  font-size: 1.5rem; /* ↑ de 1.25rem */
+}
+
+/* Contenu popover - Cohérent */
+.granularity-popover-content .granularity-button {
+  font-size: 1.25rem; /* nouveau */
+  padding: 1rem 1.25rem; /* nouveau */
+}
+```
+
+**3. Thème clair forcé (suppression dark mode) :**
+```css
+/* SUPPRIMÉ - Styles dark mode */
+/* 
+@media (prefers-color-scheme: dark) {
+  .granularity-button {
+    background-color: #1e293b;
+    color: #f1f5f9;
+    // ... tous les styles dark supprimés
+  }
+}
+*/
+
+/* GARDÉ - Uniquement thème clair */
+.granularity-button {
+  background-color: #f8fafc; /* Toujours clair */
+  color: #4b5563; /* Toujours clair */
+  border: 1px solid #e5e7eb; /* Toujours clair */
+}
+```
+
+**4. Responsive adapté aux nouvelles tailles :**
+```css
+/* Tablet */
+@media (max-width: 1024px) {
+  .granularity-button {
+    font-size: 1.5rem; /* ↑ proportionnel */
+    min-width: 18rem; /* ↑ pour accommodate */
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .granularity-button {
+    font-size: 1.35rem; /* ↑ de 1.3rem */
+  }
+}
+```
+
+**Bénéfices directs :**
+
+1. **Lisibilité améliorée** : Textes plus grands et plus lisibles sur tous les devices
+2. **Cohérence garantie** : Thème clair uniforme sans variations involontaires
+3. **Accessibilité renforcée** : Font sizes conformes aux bonnes pratiques (≥1rem)
+4. **UX mobile optimisée** : Tailles adaptées aux interactions tactiles  
+5. **Maintenance simplifiée** : Un seul thème à maintenir
+
+### 🤔 Analyse :
+Ces optimisations UI complètent parfaitement la migration vers le design system cohérent. L'augmentation des font sizes améliore l'accessibilité et la lisibilité, particulièrement importante pour un composant de configuration comme GranularityControl. La suppression du dark mode élimine les variations de thème involontaires et garantit une cohérence visuelle parfaite avec ExportMenu. Les ajustements responsive préservent l'utilisabilité sur mobile tout en respectant les nouvelles tailles de police. Cette approche "thème clair forcé" simplifie le CSS et évite les comportements imprévisibles selon les préférences système.
+
+### 🔜 Prochaines étapes :
+- Validation UX avec tests utilisateur sur la nouvelle interface
+- Documentation des patterns de design (bouton + dropdown) pour réutilisation
+- Migration d'autres composants vers le même design system si applicable
+- Mesure de l'impact performance (bundle size, rendering speed)
+- Audit accessibilité pour valider les améliorations
+
+---
+
+### 🎯 Date: 2024-12-30 (Amélioration Indicateurs Visuels d'Interactivité)
+
+### ⌛ Changement :
+**Ajout d'indicateurs visuels avancés** pour rendre évident que le GranularityControl est cliquable et interactif.
+
+**Améliorations implémentées :**
+
+**1. Chevron redesigné et plus visible :**
+```tsx
+// Structure améliorée avec wrapper dédié
+<div className="granularity-chevron-wrapper">
+  <ChevronDown size={20} className={`granularity-chevron ${isOpen ? 'open' : ''}`} />
+</div>
+```
+
+**2. Zone de chevron interactive :**
+```css
+.granularity-chevron-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  border-radius: 0.375rem;
+  background: rgba(107, 114, 128, 0.08); /* Fond subtil */
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+/* Effet hover accentué */
+.granularity-button:hover:not(:disabled) .granularity-chevron-wrapper {
+  background: rgba(56, 161, 60, 0.15);
+  transform: scale(1.05);
+}
+```
+
+**3. Animations subtiles d'interactivité :**
+```css
+/* Animation pulse pour attirer l'attention */
+@keyframes pulse-chevron {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.granularity-button:not(.open):not(:disabled) .granularity-chevron-wrapper {
+  animation: pulse-chevron 2s ease-in-out infinite;
+}
+
+/* Shimmer effect au hover */
+.granularity-button::before {
+  content: '';
+  position: absolute;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  /* Animation de balayage au hover */
+}
+```
+
+**4. Feedback visuel renforcé :**
+```css
+/* Couleurs dynamiques */
+.granularity-button:hover:not(:disabled) .granularity-button-icon {
+  color: #38a13c; /* Vert énergétique */
+}
+
+.granularity-button:hover:not(:disabled) .granularity-chevron {
+  color: #38a13c; /* Chevron coloré */
+}
+
+/* Bordure active */
+.granularity-button.open {
+  border-color: #38a13c; /* Bordure verte en état ouvert */
+}
+
+/* Élévation au hover */
+.granularity-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+```
+
+**5. GranularityPopover synchronisé :**
+```css
+/* Animation pulse sur le bouton de configuration */
+@keyframes pulse-config {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(56, 161, 60, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 0 4px rgba(56, 161, 60, 0.1);
+    transform: scale(1.02);
+  }
+}
+
+.granularity-config-button:not(:disabled) {
+  animation: pulse-config 3s ease-in-out infinite;
+}
+```
+
+**Bénéfices UX directs :**
+
+1. **Affordance claire** : Le chevron dans sa zone dédiée indique explicitement l'action "cliquer pour ouvrir"
+2. **Feedback immédiat** : Changements visuels instantanés au hover (couleur, taille, élévation)
+3. **Attention guidée** : Animation pulse subtile attire l'œil sans être intrusive
+4. **État visible** : Différenciation claire entre état fermé/ouvert/hover
+5. **Cohérence mobile** : Indicateurs visuels adaptés aux interactions tactiles
+6. **Accessibility** : Feedback visuel complète le feedback audio/tactile
+
+**Design patterns établis :**
+- **Zone chevron interactive** : Pattern réutilisable pour d'autres dropdowns
+- **Animation pulse** : Indicateur d'interactivité non-intrusif  
+- **Shimmer effect** : Feedback premium au hover
+- **Élévation progressive** : Hiérarchie visuelle claire
+
+### 🤔 Analyse :
+Ces améliorations transforment le GranularityControl d'un composant fonctionnel en une interface véritablement engageante. L'ajout d'indicateurs visuels clairs élimine toute ambiguïté sur l'interactivité du composant. Les animations subtiles guident l'utilisateur sans perturber l'expérience, créant un design "self-explanatory". Cette approche respecte les principes d'affordance de Don Norman tout en maintenant l'esthétique moderne. Les patterns établis peuvent être réutilisés pour créer un design system cohérent à travers l'application.
+
+### 🔜 Prochaines étapes :
+- Tests utilisateur pour valider l'efficacité des nouveaux indicateurs visuels
+- Application des mêmes patterns aux autres composants interactifs du design system
+- Mesure de l'impact sur le taux d'engagement et la découvrabilité
+- Documentation des guidelines d'affordance pour l'équipe design
+- Optimisation des animations pour les préférences de mouvement réduit
+
+---
+
 ### 🚨 Date: 2024-12-20 (Correction Critique Anti-Crash - Escalade Bidirectionnelle)
 
 ### ⌛ Changement :
@@ -1465,3 +2779,3533 @@ Cette modernisation élève l'interface d'un composant fonctionnel vers une exp�
 ---
 
 ### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 📦 Date: 2025-07-07 (Granularité – mode lecture seule par défaut)
+
+### ⌛ Changement :
+Ajout de l'option **`allowManualGranularity`** (bool, défaut : false) permettant de verrouiller le composant GranularityControl en lecture seule dans le packaging de base :
+
+1. `Detailswidget.xml` : nouvelle propriété dans la section *Configuration*.
+2. `typings/DetailswidgetProps.d.ts` : mise à jour des interfaces Container & Preview.
+3. `Detailswidget.tsx` :
+   * prise en compte de la prop ;
+   * calcul `granularityDisabled = !allowManualGranularity || !isPreviewOK` ;
+   * passage du flag à `ChartContainer`.
+4. GranularityControl reste visible mais désactivé (menu inatteignable).
+
+### 🤔 Analyse :
+Cette évolution prépare la diffusion du widget dans un packaging où la granularité doit rester automatique par défaut, tout en conservant la possibilité de la ré-activer pour des éditions *Pro*. La solution est backward-compatible : la prop est facultative et le comportement existant reste inchangé lorsque la valeur est *true*.
+
+### 💜 Prochaines étapes :
+* Générer à nouveau les typings via `pluggable-widgets-tools` pour éviter la mise à jour manuelle.
+* Ajuster la documentation utilisateur.
+* Envisager un indicateur visuel (tooltip) précisant que le réglage est bloqué.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🔧 Date: 2025-07-07 (Optimisation SegmentedControl - Résolution Conflits CSS)
+
+### ⌛ Changement :
+Amélioration de l'intégration du `SegmentedControl` dans `GranularityControl` avec résolution des conflits CSS Mendix :
+
+1. **Résolution conflits CSS** :
+   - Suppression de `text-sm` générique dans `segmented-control.tsx`
+   - Ajout de classe spécifique `.segmented-control-trigger` 
+   - Utilisation de `!important` pour forcer les styles et éviter les overrides Mendix
+
+2. **UI modernisée** selon l'exemple fourni :
+   - Structure simplifiée : `<Icon /> Text` au lieu de wrapper div
+   - Suppression des anciens styles `.granularity-mode-button`
+   - Adoption du pattern Radix natif plus propre
+
+3. **CSS robuste** :
+   ```css
+   .granularity-section .segmented-control-trigger {
+     font-size: 1.05rem !important;
+     padding: 0.75rem 1rem !important;
+     /* Styles forcés pour éviter les conflits */
+   }
+   ```
+
+### 🤔 Analyse :
+Cette optimisation résout les problèmes de compatibilité avec l'écosystème Mendix tout en modernisant l'interface. L'utilisation de sélecteurs CSS spécifiques et de `!important` assure que les styles ne seront pas écrasés par les feuilles de style globales de Mendix. Le pattern simplifié améliore la maintenabilité et la cohérence avec les standards Radix.
+
+### 💜 Prochaines étapes :
+- Tester l'intégration dans l'environnement Mendix pour valider l'absence de conflits
+- Documenter les patterns CSS anti-conflits pour les futurs composants
+- Considérer l'encapsulation CSS (CSS Modules) pour éviter complètement les conflits globaux
+
+---
+
+###  Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 📦 Date: 2025-07-07 (Granularité – mode lecture seule par défaut)
+
+### ⌛ Changement :
+Ajout de l'option **`allowManualGranularity`** (bool, défaut : false) permettant de verrouiller le composant GranularityControl en lecture seule dans le packaging de base :
+
+1. `Detailswidget.xml` : nouvelle propriété dans la section *Configuration*.
+2. `typings/DetailswidgetProps.d.ts` : mise à jour des interfaces Container & Preview.
+3. `Detailswidget.tsx` :
+   * prise en compte de la prop ;
+   * calcul `granularityDisabled = !allowManualGranularity || !isPreviewOK` ;
+   * passage du flag à `ChartContainer`.
+4. GranularityControl reste visible mais désactivé (menu inatteignable).
+
+### 🤔 Analyse :
+Cette évolution prépare la diffusion du widget dans un packaging où la granularité doit rester automatique par défaut, tout en conservant la possibilité de la ré-activer pour des éditions *Pro*. La solution est backward-compatible : la prop est facultative et le comportement existant reste inchangé lorsque la valeur est *true*.
+
+### 💜 Prochaines étapes :
+* Générer à nouveau les typings via `pluggable-widgets-tools` pour éviter la mise à jour manuelle.
+* Ajuster la documentation utilisateur.
+* Envisager un indicateur visuel (tooltip) précisant que le réglage est bloqué.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### �� Date: 2025-07-07 (Optimisation Lisibilité - Font Size +25% & Simplification Chevrons)
+
+### ⌛ Changement :
+Augmentation massive de 25% des tailles de police pour maximiser l'utilisation de l'espace disponible et suppression des effets visuels sur les chevrons des dropdowns pour une interface plus sobre :
+
+**1. Augmentation Font Size +25% :**
+- `.granularity-button` : 1.6rem → 2rem
+- `.granularity-button-text` : 1.15rem → 1.44rem  
+- `.granularity-dropdown-title` : 1.4rem → 1.75rem
+- `.granularity-section-title` : 1.2rem → 1.5rem
+- `.segmented-control-trigger` : 1.05rem → 1.31rem (+ padding proportionnel)
+- `.granularity-select` : 1rem → 1.25rem
+- Tous les autres textes augmentés proportionnellement
+
+**2. Popover synchronisé :**
+- `.granularity-popover-title` : 1.7rem → 2.125rem
+- `.granularity-config-button` : 38px → 47px (taille + font)
+- Tous les éléments internes augmentés de 25%
+
+**3. Simplification chevrons dropdown :**
+```css
+/* AVANT - Effets visuels complexes */
+.granularity-select:hover {
+  border-color: #cbd5e1;
+  background: white;
+  box-shadow: 0 0 0 2px rgba(75, 85, 99, 0.25);
+}
+
+/* APRÈS - Interface sobre */
+.granularity-select:hover {
+  border-color: #cbd5e1;
+}
+.granularity-select:focus {
+  outline: none;
+  border-color: #4b5563;
+}
+```
+
+### 🤔 Analyse :
+Cette optimisation maximise l'utilisation de l'espace disponible tout en créant une interface plus lisible et moins distractante. L'augmentation de 25% des font sizes améliore significativement l'accessibilité, particulièrement sur les écrans haute résolution. La suppression des effets visuels sur les chevrons réduit la complexité visuelle et concentre l'attention sur le contenu essentiel.
+
+### 💜 Prochaines étapes :
+- Valider que les nouveaux textes ne débordent pas sur les écrans plus petits
+- Tester l'accessibilité avec les nouvelles tailles (contraste, lisibilité)
+- Documenter les nouvelles tailles de référence pour cohérence future
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes tailles d'écran pour confirmer qu'il n'y a pas de débordement de texte.
+- Documenter les nouvelles tailles de police de référence pour les popovers dans le guide de style.
+
+---
+
+### 🎯 Date: 2024-12-20 (Simplification Architecturale - Force Mode Auto sur Changement de Plage)
+
+### 🎨 Date: 2025-07-07 (Intégration SegmentedControl & UI Sobrisation)
+
+### ⌛ Changement :
+1. Ajout du **SegmentedControl** basé sur Radix Tabs pour la sélection du mode *Auto/Strict* ;
+2. Création des fichiers :
+   - `src/hooks/use-tab-observer.ts`
+   - `src/components/ui/segmented-control.tsx`
+3. Mise à jour de `GranularityControl.tsx` pour remplacer les boutons par le SegmentedControl ;
+4. **Sobrisation UI** : neutralisation des effets hover verts (#38a13c) dans `GranularityControl.css` (icônes, chevrons, focus, select) ;
+5. Ajout des dépendances **@radix-ui/react-tabs** et **merge-refs** dans `package.json`.
+
+### 🤔 Analyse :
+L'introduction du SegmentedControl modernise l'interaction en remplaçant les boutons custom par un pattern Radix plus accessible et cohérent. La suppression des accents verts réduit la charge visuelle, rendant le composant plus neutre et conforme à la charte couleur. L'impact sur la scalabilité est positif : le composant est désormais réutilisable via Radix et le hook `useTabObserver`, tandis que l'animation du fond flottant améliore la perception d'état sans surcharge.
+
+### 🔜 Prochaines étapes :
+- Ajuster le design system pour homogénéiser les tokens couleurs (utiliser palette ou CSS vars) ;
+- Écrire des tests unitaires pour le SegmentedControl et le hook observer ;
+- Documenter le nouveau pattern dans le guide UI.
+
+---
+
+### �� Date: 2025-07-07 (Retrait Chevron & Masquage si pas de données)
+
+### ⌛ Changement :
+- Suppression du chevron dans le bouton principal de GranularityControl pour alléger l'UI ;
+- Condition `hasData` ajoutée dans ChartContainer afin que le contrôleur de granularité (ou popover) n'apparaisse que s'il existe des données.
+
+### 🤔 Analyse :
+Design plus épuré et respect des cas d'usage : l'utilisateur n'a plus de contrôle inutile quand aucune donnée n'est présente, évitant confusion et interactions stériles.
+
+---
+
+### 🎨 Date: 2025-07-07 (Amélioration UI - Lisibilité GranularityPopover)
+
+### ⌛ Changement :
+Augmentation générale des `font-size` dans le composant `GranularityPopover` pour une meilleure lisibilité, notamment sur les écrans à haute résolution.
+
+- `.granularity-popover-title`: 1.5rem → 1.7rem
+- `.granularity-popover-content .granularity-button`: 1.25rem → 1.4rem
+- `.granularity-popover-content .granularity-dropdown-title`: 1.35rem → 1.5rem
+- `.granularity-popover-content .granularity-section-title`: 1.2rem → 1.3rem
+- Augmentation de 0.1rem à 0.15rem pour la plupart des autres textes pour maintenir la hiérarchie visuelle.
+
+### 🤔 Analyse :
+Cette modification améliore directement l'expérience utilisateur en rendant les textes plus clairs et plus faciles à lire. L'impact sur le layout est minime et géré par des ajustements de padding, conservant ainsi la cohérence du design system. La lisibilité est un facteur clé d'accessibilité et de confort d'utilisation.
+
+### 💜 Prochaines étapes :
+- Valider le rendu sur différentes ta

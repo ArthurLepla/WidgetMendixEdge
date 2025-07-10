@@ -86,15 +86,6 @@ export function LevelBasedHierarchyView({
     const levels = Object.keys(nodesByLevel)
         .map(Number)
         .sort((a, b) => a - b);
-
-    // Grouper les nœuds non filtrés par niveau pour les statistiques
-    const allNodesByLevel = nodes.reduce((acc, node) => {
-        if (!acc[node.level]) {
-            acc[node.level] = [];
-        }
-        acc[node.level].push(node);
-        return acc;
-    }, {} as Record<number, AssetNode[]>);
         
     const toggleLevel = (level: number) => {
         const newExpanded = new Set(expandedLevels);
@@ -162,153 +153,112 @@ export function LevelBasedHierarchyView({
         );
     };
     
-    // Renderiser le message d'erreur pour les résultats vides
-    const renderEmptyContent = (): ReactElement => {
-        const hasAnyData = nodes.length > 0;
-        const isSearchActive = searchTerm.trim().length > 0;
-        const hasActiveFilters = levelFilters.size > 0;
-        
+    if (levels.length === 0) {
         return (
             <div className="level-hierarchy-empty">
                 <div className="empty-content">
                     <div className="empty-icon">🏭</div>
-                    
-                    {!hasAnyData ? (
-                        // Cas 1: Aucune donnée du tout n'est disponible
-                        <div>
-                            <h3>Aucune donnée disponible</h3>
-                            <p>Aucune donnée n'est disponible pour l'affichage</p>
-                            <div className="empty-hint">
-                                Vérifiez la configuration des sources de données
-                            </div>
-                        </div>
-                    ) : isSearchActive ? (
-                        // Cas 2: Données disponibles mais aucun résultat pour la recherche
-                        <div>
-                            <h3>Aucun résultat trouvé</h3>
-                            <p>Aucun résultat pour "{searchTerm}"</p>
-                            <div className="empty-hint">
-                                <strong>Suggestions :</strong>
-                                <ul>
-                                    <li>Vérifiez l'orthographe de votre recherche</li>
-                                    <li>Essayez des termes plus généraux</li>
-                                    <li>Effacez les filtres de niveau actifs</li>
-                                </ul>
-                            </div>
-                        </div>
-                    ) : hasActiveFilters ? (
-                        // Cas 3: Données disponibles mais masquées par les filtres
-                        <div>
-                            <h3>Aucun résultat avec ces filtres</h3>
-                            <p>Les filtres de niveau masquent tous les résultats</p>
-                            <div className="empty-hint">
-                                Désactivez certains filtres de niveau pour voir plus de résultats
-                            </div>
-                        </div>
-                    ) : (
-                        // Cas 4: Fallback générique
-                        <div>
-                            <h3>Aucun asset trouvé</h3>
-                            <p>Aucun résultat pour cette configuration</p>
+                    <h3>Aucun asset trouvé</h3>
+                    <p>
+                        {searchTerm 
+                            ? `Aucun résultat pour "${searchTerm}"`
+                            : "Aucune donnée disponible pour cette configuration"
+                        }
+                    </p>
+                    {searchTerm && (
+                        <div className="empty-hint">
+                            Essayez de modifier votre recherche ou vérifiez les filtres appliqués
                         </div>
                     )}
                 </div>
             </div>
         );
-    };
+    }
     
     return (
         <div className="level-hierarchy-container">
-            {/* Filtres rapides par niveau - toujours affichés */}
+            {/* Filtres rapides par niveau */}
             <div className="level-filters">
                 <div className="filter-label">
                     <Filter className="filter-icon" />
                     Filtres par niveau :
                 </div>
                 <div className="filter-pills">
-                    {dataSources.map(ds => {
-                        const config = levelConfig[ds.level];
+                    {levels.map(level => {
+                        const config = levelConfig[level];
                         const Icon = config?.icon || Package;
-                        const isActive = levelFilters.has(ds.level);
-                        const nodeCount = nodesByLevel[ds.level]?.length || 0;
-                        const totalNodeCount = allNodesByLevel[ds.level]?.length || 0;
+                        const isActive = levelFilters.has(level);
                         
                         return (
                             <button
-                                key={ds.level}
+                                key={level}
                                 className={`filter-pill ${isActive ? 'filter-pill-active' : ''}`}
-                                onClick={() => toggleLevelFilter(ds.level)}
+                                onClick={() => toggleLevelFilter(level)}
                                 style={{ 
                                     '--pill-color': config?.color,
                                     borderColor: isActive ? config?.color : undefined
                                 } as any}
                             >
                                 <Icon className="pill-icon" />
-                                {config?.label || `Niveau ${ds.level}`}
-                                <span className="pill-count">
-                                    ({nodeCount}{totalNodeCount !== nodeCount ? `/${totalNodeCount}` : ''})
-                                </span>
+                                {config?.label || `Niveau ${level}`}
+                                <span className="pill-count">({nodesByLevel[level].length})</span>
                             </button>
                         );
                     })}
                 </div>
             </div>
             
-            {/* Sections par niveau - ou message d'erreur si vide */}
+            {/* Sections par niveau */}
             <div className="level-sections">
-                {levels.length === 0 ? (
-                    renderEmptyContent()
-                ) : (
-                    levels.map(level => {
-                        const levelNodes = nodesByLevel[level];
-                        const config = levelConfig[level];
-                        const Icon = config?.icon || Package;
-                        const isExpanded = expandedLevels.has(level);
-                        const isFiltered = levelFilters.size > 0 && !levelFilters.has(level);
-                        
-                        if (isFiltered) return null;
-                        
-                        return (
-                            <div key={level} className="level-section">
-                                <div 
-                                    className="level-header"
-                                    onClick={() => toggleLevel(level)}
-                                    style={{ borderLeftColor: config?.color } as any}
-                                >
-                                    <div className="level-header-content">
-                                        <div className="level-icon" style={{ color: config?.color }}>
-                                            <Icon className="icon" />
-                                        </div>
-                                        <div className="level-info">
-                                            <h3 className="level-title">
-                                                {config?.label || `Niveau ${level}`}
-                                            </h3>
-                                            <div className="level-meta">
-                                                {levelNodes.length} élément{levelNodes.length > 1 ? 's' : ''}
-                                                {levelNodes.filter(n => n.modified).length > 0 && (
-                                                    <span className="modified-count">
-                                                        • {levelNodes.filter(n => n.modified).length} modifié{levelNodes.filter(n => n.modified).length > 1 ? 's' : ''}
-                                                    </span>
-                                                )}
-                                            </div>
+                {levels.map(level => {
+                    const levelNodes = nodesByLevel[level];
+                    const config = levelConfig[level];
+                    const Icon = config?.icon || Package;
+                    const isExpanded = expandedLevels.has(level);
+                    const isFiltered = levelFilters.size > 0 && !levelFilters.has(level);
+                    
+                    if (isFiltered) return null;
+                    
+                    return (
+                        <div key={level} className="level-section">
+                            <div 
+                                className="level-header"
+                                onClick={() => toggleLevel(level)}
+                                style={{ borderLeftColor: config?.color } as any}
+                            >
+                                <div className="level-header-content">
+                                    <div className="level-icon" style={{ color: config?.color }}>
+                                        <Icon className="icon" />
+                                    </div>
+                                    <div className="level-info">
+                                        <h3 className="level-title">
+                                            {config?.label || `Niveau ${level}`}
+                                        </h3>
+                                        <div className="level-meta">
+                                            {levelNodes.length} élément{levelNodes.length > 1 ? 's' : ''}
+                                            {levelNodes.filter(n => n.modified).length > 0 && (
+                                                <span className="modified-count">
+                                                    • {levelNodes.filter(n => n.modified).length} modifié{levelNodes.filter(n => n.modified).length > 1 ? 's' : ''}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                    <button className={`expand-btn ${isExpanded ? 'expand-btn-expanded' : ''}`}>
-                                        {isExpanded ? <ChevronDown className="icon" /> : <ChevronRight className="icon" />}
-                                    </button>
                                 </div>
-                                
-                                {isExpanded && (
-                                    <div className="level-content">
-                                        <div className="asset-grid">
-                                            {levelNodes.map(node => renderAssetNode(node))}
-                                        </div>
-                                    </div>
-                                )}
+                                <button className={`expand-btn ${isExpanded ? 'expand-btn-expanded' : ''}`}>
+                                    {isExpanded ? <ChevronDown className="icon" /> : <ChevronRight className="icon" />}
+                                </button>
                             </div>
-                        );
-                    })
-                )}
+                            
+                            {isExpanded && (
+                                <div className="level-content">
+                                    <div className="asset-grid">
+                                        {levelNodes.map(node => renderAssetNode(node))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

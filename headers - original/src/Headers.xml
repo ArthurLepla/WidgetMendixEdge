@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="mendix.headers.Headers" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Headers</name>
+    <description>Widget de header personnalisable avec fil d'ariane, sélecteur d'énergie, multi-sélecteur et sélecteur de dates</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Général">
+            <property key="homeAction" type="action" required="false">
+                <caption>Action Accueil</caption>
+                <description>Action à exécuter lors du clic sur l'icône Home</description>
+            </property>
+            <property key="headerTitle" type="string" required="false">
+                <caption>Titre du header</caption>
+                <description>Le titre principal qui sera affiché dans le header</description>
+            </property>
+            <property key="showHeaderTitle" type="boolean" defaultValue="true">
+                <caption>Afficher le titre</caption>
+                <description>Détermine si le titre du header doit être affiché</description>
+            </property>
+            <property key="breadcrumbItems" type="object" isList="true" required="false">
+                <caption>Éléments du fil d'ariane</caption>
+                <description>Liste des éléments du fil d'ariane</description>
+                <properties>
+                    <propertyGroup caption="Apparence">
+                        <property key="label" type="string" required="true">
+                            <caption>Label</caption>
+                            <description>Texte à afficher</description>
+                        </property>
+                        <property key="icon" type="icon" required="false">
+                            <caption>Icône</caption>
+                            <description>Icône à afficher avant le label</description>
+                        </property>
+                    </propertyGroup>
+                    <propertyGroup caption="Événements">
+                        <property key="action" type="action" required="false">
+                            <caption>Action</caption>
+                            <description>Action à exécuter au clic</description>
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Sélecteur d'Énergie">
+            <property key="energySelectorEnabled" type="boolean" defaultValue="false">
+                <caption>Activer le sélecteur d'énergie</caption>
+                <description>Activer/désactiver le sélecteur d'énergie</description>
+            </property>
+            <property key="electricityEnabled" type="boolean" defaultValue="true">
+                <caption>Activer l'électricité</caption>
+                <description>Autoriser la sélection de l'électricité</description>
+            </property>
+            <property key="gasEnabled" type="boolean" defaultValue="true">
+                <caption>Activer le gaz</caption>
+                <description>Autoriser la sélection du gaz</description>
+            </property>
+            <property key="waterEnabled" type="boolean" defaultValue="true">
+                <caption>Activer l'eau</caption>
+                <description>Autoriser la sélection de l'eau</description>
+            </property>
+            <property key="airEnabled" type="boolean" defaultValue="true">
+                <caption>Activer l'air</caption>
+                <description>Autoriser la sélection de l'air</description>
+            </property>
+            <property key="selectedEnergy" type="enumeration" defaultValue="none">
+                <caption>Énergie sélectionnée par défaut</caption>
+                <description>L'énergie qui sera active par défaut</description>
+                <enumerationValues>
+                    <enumerationValue key="none">Aucune</enumerationValue>
+                    <enumerationValue key="electricity">Électricité</enumerationValue>
+                    <enumerationValue key="gas">Gaz</enumerationValue>
+                    <enumerationValue key="water">Eau</enumerationValue>
+                    <enumerationValue key="air">Air</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="onElectricitySelect" type="action" required="false">
+                <caption>Action - Sélection Électricité</caption>
+                <description>Action à exécuter lors de la sélection de l'électricité</description>
+            </property>
+            <property key="onGasSelect" type="action" required="false">
+                <caption>Action - Sélection Gaz</caption>
+                <description>Action à exécuter lors de la sélection du gaz</description>
+            </property>
+            <property key="onWaterSelect" type="action" required="false">
+                <caption>Action - Sélection Eau</caption>
+                <description>Action à exécuter lors de la sélection de l'eau</description>
+            </property>
+            <property key="onAirSelect" type="action" required="false">
+                <caption>Action - Sélection Air</caption>
+                <description>Action à exécuter lors de la sélection de l'air</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="MultiSélecteur">
+            <property key="multiSelectorEnabled" type="boolean" defaultValue="true">
+                <caption>Activer le multi-sélecteur</caption>
+                <description>Activer/désactiver le multi-sélecteur</description>
+            </property>
+            <property key="allowMultipleSelection" type="boolean" defaultValue="true">
+                <caption>Autoriser la sélection multiple</caption>
+                <description>Si désactivé, l'utilisateur ne pourra sélectionner qu'un seul élément à la fois</description>
+            </property>
+            <property key="itemsDataSource" type="datasource" isList="true" required="false">
+                <caption>Source de données</caption>
+                <description>Liste des éléments sélectionnables</description>
+            </property>
+            <property key="itemNameAttribute" type="attribute" required="false" dataSource="itemsDataSource">
+                <caption>Attribut d'affichage</caption>
+                <description>Attribut contenant le texte à afficher</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="selectedItemsAttribute" type="attribute" required="false">
+                <caption>Attribut de sélection</caption>
+                <description>Attribut qui recevra les noms des items sélectionnés (séparés par des virgules)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="onChange" type="action" required="false">
+                <caption>Action - onChange</caption>
+                <description>Action à exécuter lors de la modification de la sélection (avant validation)</description>
+            </property>
+            <property key="onSelectionChange" type="action" required="false">
+                <caption>Action - onSelectionChange</caption>
+                <description>Action à exécuter après la validation de la sélection</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Sélecteur de Plage de Dates">
+            <property key="dateRangePickerEnabled" type="boolean" defaultValue="false">
+                <caption>Activer le sélecteur de dates</caption>
+                <description>Affiche/cache le sélecteur de plage de dates</description>
+            </property>
+            <property key="startDateAttribute" type="attribute" required="false">
+                <caption>Start Date Attribute</caption>
+                <description>The attribute to store the start date</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="endDateAttribute" type="attribute" required="false">
+                <caption>End Date Attribute</caption>
+                <description>The attribute to store the end date</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="onDateChange" type="action" required="false">
+                <caption>Action - Changement de date</caption>
+                <description>Action à exécuter lors du changement de date</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Groupes de Boutons">
+            <property key="buttonGroupEnabled" type="boolean" defaultValue="false">
+                <caption>Activer les Groupes de Boutons</caption>
+                <description>Permet d'activer ou de désactiver les groupes de boutons</description>
+            </property>
+            <property key="firstGroupName" type="string" required="false">
+                <caption>Nom du Premier Groupe</caption>
+                <description>Nom pour identifier le premier groupe de boutons</description>
+            </property>
+            <property key="firstGroupButtons" type="object" isList="true" required="false">
+                <caption>Boutons du Premier Groupe</caption>
+                <description>Liste des boutons du premier groupe</description>
+                <properties>
+                    <propertyGroup caption="Configuration">
+                        <property key="label" type="string" required="true">
+                            <caption>Label</caption>
+                            <description>Texte du bouton</description>
+                        </property>
+                        <property key="icon" type="icon" required="false">
+                            <caption>Icône</caption>
+                            <description>Icône à afficher sur le bouton</description>
+                        </property>
+                        <property key="action" type="action" required="false">
+                            <caption>Action</caption>
+                            <description>Action à exécuter au clic</description>
+                        </property>
+                        <property key="defaultSelected" type="boolean" defaultValue="false">
+                            <caption>Sélectionné par défaut</caption>
+                            <description>Indique si le bouton est sélectionné par défaut</description>
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+            <property key="secondGroupName" type="string" required="false">
+                <caption>Nom du Second Groupe</caption>
+                <description>Nom pour identifier le second groupe de boutons</description>
+            </property>
+            <property key="secondGroupButtons" type="object" isList="true" required="false">
+                <caption>Boutons du Second Groupe</caption>
+                <description>Liste des boutons du second groupe</description>
+                <properties>
+                    <propertyGroup caption="Configuration">
+                        <property key="label" type="string" required="true">
+                            <caption>Label</caption>
+                            <description>Texte du bouton</description>
+                        </property>
+                        <property key="icon" type="icon" required="false">
+                            <caption>Icône</caption>
+                            <description>Icône à afficher sur le bouton</description>
+                        </property>
+                        <property key="action" type="action" required="false">
+                            <caption>Action</caption>
+                            <description>Action à exécuter au clic</description>
+                        </property>
+                        <property key="defaultSelected" type="boolean" defaultValue="false">
+                            <caption>Sélectionné par défaut</caption>
+                            <description>Indique si le bouton est sélectionné par défaut</description>
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

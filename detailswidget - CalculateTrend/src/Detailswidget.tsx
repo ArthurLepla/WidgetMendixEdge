@@ -165,7 +165,9 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         bufferTimeAttr,
         bufferUnitAttr,
         onModeChange,
-        onTimeChange
+        onTimeChange,
+        // Nouvel interrupteur : autoriser oui/non le réglage manuel de la granularité
+        allowManualGranularity = false
     } = props;
 
     // État pour gérer quel IPE est actif en mode double
@@ -271,11 +273,14 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         return calculateAutoGranularity();
     };
 
-    // La fonctionnalité est considérée comme configurée si les props de lecture et d'écriture sont présentes
-    const hasGranularityConfig = !!(displayModeAttr && bufferModeAttr);
+    // Le bouton Granularité est visible dès qu'on sait quel mode est affiché.
+    // La possibilité de l'ouvrir dépendra de `allowManualGranularity`.
+    const hasGranularityConfig = !!displayModeAttr;
 
     const uiGranularityMode = displayedMode.toLowerCase() as "auto" | "strict";
     const uiGranularityUnit = displayedUnit as "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "year";
+
+    const granularityDisabled = !allowManualGranularity || !isPreviewOK;
 
     // -------- Toast Info --------
     const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -706,7 +711,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     onGranularityValueChange={handleGranularityValueChange}
                     onGranularityUnitChange={handleGranularityUnitChange}
                     autoGranularity={getAutoGranularity()}
-                    isGranularityDisabled={!isPreviewOK}
+                    isGranularityDisabled={granularityDisabled}
                 />
             </Fragment>
         );
@@ -763,7 +768,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     onGranularityValueChange={handleGranularityValueChange}
                     onGranularityUnitChange={handleGranularityUnitChange}
                     autoGranularity={getAutoGranularity()}
-                    isGranularityDisabled={!isPreviewOK}
+                    isGranularityDisabled={granularityDisabled}
                 />
             </Fragment>
         );
@@ -792,7 +797,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 onGranularityValueChange={handleGranularityValueChange}
                 onGranularityUnitChange={handleGranularityUnitChange}
                 autoGranularity={getAutoGranularity()}
-                isGranularityDisabled={!isPreviewOK}
+                isGranularityDisabled={granularityDisabled}
             />
         </Fragment>
     );

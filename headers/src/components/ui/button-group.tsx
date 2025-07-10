@@ -1,10 +1,10 @@
-import { ReactElement, createElement, useCallback } from "react";
+import { ReactElement, useCallback, createElement } from "react";
 import { ActionValue, DynamicValue, WebIcon } from "mendix";
-import Button from "antd/es/button";
 import { Icon } from "mendix/components/web/Icon";
 import { cn } from "../../lib/utils";
 import { LoadingOverlay } from "../../components/LoadingOverlay";
 import { LoadingService } from "../services/LoadingService";
+import { Root as SegmentedControl, List, Trigger } from "./segmented-control";
 
 export interface ButtonGroupProps {
     className?: string;
@@ -30,47 +30,35 @@ export function ButtonGroup({
 }: ButtonGroupProps): ReactElement {
     const isLoading = LoadingService.isLoading();
 
-    const handleButtonClick = useCallback((button: { label: string; action?: ActionValue }) => {
-        onChange(button.label);
-        
-        if (button.action?.canExecute) {
-            LoadingService.executeAction(
-                button.action,
-                loadingMessage,
-                useSimpleLoader
-            );
-        }
-    }, [onChange, loadingMessage, useSimpleLoader]);
+    const handleValueChange = useCallback(
+        (newValue: string) => {
+            onChange(newValue);
+            const button = buttons.find(b => b.label === newValue);
+            if (button?.action?.canExecute) {
+                LoadingService.executeAction(button.action, loadingMessage, useSimpleLoader);
+            }
+        },
+        [onChange, buttons, loadingMessage, useSimpleLoader]
+    );
 
     return (
         <div className={cn("button-group-container", className)}>
-            <div className="button-group">
-                <div className="button-group-buttons">
-                    {buttons.map(button => {
-                        const isSelected = button.label === value;
-                        
-                        return (
-                            <Button
-                                key={button.label}
-                                type={isSelected ? "primary" : "default"}
-                                onClick={() => handleButtonClick(button)}
-                                className={cn(
-                                    "button-group-item",
-                                    isSelected && "ant-btn-primary"
-                                )}
-                                icon={button.icon?.value && <Icon icon={button.icon.value} />}
-                                title={button.label}
-                            >
-                                {button.label}
-                            </Button>
-                        );
-                    })}
-                </div>
-            </div>
-            <LoadingOverlay 
-                isLoading={isLoading}
-                message={LoadingService.getMessage()}
-            />
+            <SegmentedControl value={value} onValueChange={handleValueChange}>
+                <List>
+                    {buttons.map(button => (
+                        <Trigger
+                            key={button.label}
+                            value={button.label}
+                            title={button.label}
+                            disabled={button.action ? !button.action.canExecute : false}
+                        >
+                            {button.icon?.value && <Icon icon={button.icon.value} />}
+                            {button.label}
+                        </Trigger>
+                    ))}
+                </List>
+            </SegmentedControl>
+            <LoadingOverlay isLoading={isLoading} message={LoadingService.getMessage()} />
         </div>
     );
 }

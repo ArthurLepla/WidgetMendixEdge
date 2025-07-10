@@ -214,14 +214,14 @@ export function DateRangePicker({
     };
 
     return (
-        <div className={cn("tw-grid tw-gap-2 tw-font-barlow", className)}>
+        <div className={cn("tw-grid tw-gap-2 tw-font-barlow tw-w-full tw-min-w-[320px]", className)}>
             <Popover.Root open={open} onOpenChange={handlePopoverChange}>
                 <Popover.Trigger asChild>
                     <Button
                         id="date"
                         variant="outline"
                         className={cn(
-                            "tw-h-14 tw-justify-start tw-text-left tw-font-normal tw-bg-white",
+                            "!tw-h-12 !tw-min-h-[48px] !tw-py-3 tw-justify-start tw-text-left tw-font-normal tw-bg-white tw-text-lg",
                             !date && "tw-text-muted-foreground hover:tw-border-input",
                             "tw-shadow-sm"
                         )}

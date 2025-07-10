@@ -169,7 +169,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
           {/* Actions wrapper pour granularité, toggle et export */}
           <div className="chart-header-actions">
             {/* Granularity */}
-            {showGranularityControl && onGranularityModeChange && (
+            {showGranularityControl && hasData && onGranularityModeChange && (
               isCompact ? (
                 <GranularityPopover
                   mode={granularityMode}

@@ -59,9 +59,11 @@
     "vitest": "^3.2.0"
   },
   "dependencies": {
+    "@ark-ui/react": "^5.16.1",
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-tabs": "^1.1.5",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@tremor/react": "^3.18.7",
     "antd": "^5.26.1",
@@ -71,8 +73,9 @@
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.18.1",
     "lucide-react": "^0.469.0",
+    "merge-refs": "^1.2.2",
+    "motion": "^12.23.0",
     "tailwind-merge": "^2.6.0",
     "tslib": "^2.3.1",
     "xlsx": "^0.18.5"

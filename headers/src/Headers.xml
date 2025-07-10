@@ -119,6 +119,20 @@
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
+            <property key="parentNameAttribute" type="attribute" required="false" dataSource="itemsDataSource">
+                <caption>Attribut du parent</caption>
+                <description>Attribut contenant le nom de l'asset parent</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="levelAttribute" type="attribute" required="false" dataSource="itemsDataSource">
+                <caption>Niveau hiérarchique</caption>
+                <description>Attribut indiquant le niveau hiérarchique de l'asset (L0, L1, ...)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
             <property key="onChange" type="action" required="false">
                 <caption>Action - onChange</caption>
                 <description>Action à exécuter lors de la modification de la sélection (avant validation)</description>

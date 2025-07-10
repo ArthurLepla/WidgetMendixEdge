@@ -22,6 +22,7 @@ export interface DetailswidgetContainerProps {
     viewMode: ViewModeEnum;
     ipeMode: IpeModeEnum;
     energyType: EnergyTypeEnum;
+    allowManualGranularity: boolean;
     consumptionDataSource?: ListValue;
     timestampAttr?: ListAttributeValue<Date>;
     consumptionAttr?: ListAttributeValue<Big>;
@@ -92,6 +93,7 @@ export interface DetailswidgetPreviewProps {
     viewMode: ViewModeEnum;
     ipeMode: IpeModeEnum;
     energyType: EnergyTypeEnum;
+    allowManualGranularity: boolean;
     consumptionDataSource: {} | { caption: string } | { type: string } | null;
     timestampAttr: string;
     consumptionAttr: string;

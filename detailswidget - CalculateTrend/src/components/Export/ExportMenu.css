@@ -7,7 +7,7 @@
 
 .export-button {
   min-width: 22rem; /* Identique à la largeur du dropdown-menu */
-  font-size: 1.5rem; /* Texte du bouton plus grand */
+  font-size: 1.25rem; /* Standardisé à 1.25rem */
   font-weight: 700;
   background-color: #f8fafc;
   color: #4b5563;
@@ -46,7 +46,7 @@
 
 .export-button-text {
   font-weight: 600; /* Augmenté pour meilleure lisibilité */
-  font-size: 1.05rem; /* Augmenté de 20% par rapport à 0.875rem */
+  font-size: 1.25rem; /* Standardisé à 1.25rem */
 }
 
 .export-menu .dropdown-menu {
@@ -63,7 +63,7 @@
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.05);
   animation: fadeInSlideUp 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   display: block; /* Doit maintenant surcharger Bootstrap */
-  font-size: 1.15rem; /* Taille de base du texte augmentée */
+  font-size: 1.25rem; /* Standardisé à 1.25rem */
 }
 
 .dropdown-menu.visible {
@@ -82,7 +82,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem; /* Augmentation de la taille de base du texte de l'item */
+  font-size: 1.25rem; /* Standardisé à 1.25rem */
 }
 
 .dropdown-item:hover {
@@ -141,7 +141,7 @@
 }
 
 .dropdown-item-description {
-  font-size: 1.1rem; /* Texte de description plus grand */
+  font-size: 1.25rem; /* Standardisé à 1.25rem */
   color: #6b7280; /* Couleur plus foncée pour meilleur contraste */
   display: block;
   margin-top: 0.25rem; /* Ajustement du margin */
@@ -167,7 +167,7 @@
 }
 
 .dropdown-info-notice p {
-  font-size: 1.05rem; /* Taille augmentée */
+  font-size: 1.25rem; /* Standardisé à 1.25rem */
   color: #4b5563; /* Couleur plus foncée pour meilleure lisibilité */
   margin: 0;
   text-align: center;

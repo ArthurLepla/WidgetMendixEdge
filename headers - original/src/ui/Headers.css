@@ -1,0 +1,186 @@
+/* Import Barlow font */
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fallback font stack */
+.tw-font-barlow {
+  font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Multi-select Styles */
+.tw-relative .tw-sticky input {
+    height: 40px !important;
+    font-size: 16px !important;
+    padding-left: 40px !important;
+}
+
+.tw-relative .tw-sticky .lucide-search {
+    width: 20px !important;
+    height: 20px !important;
+    left: 12px !important;
+    color: #6B7280 !important;
+}
+
+/* Breadcrumb Styles */
+nav[aria-label="breadcrumb"] {
+    @apply tw-flex tw-items-center !important;
+    font-family: 'Barlow', sans-serif !important;
+    height: 40px !important;
+}
+
+nav[aria-label="breadcrumb"] ol {
+    @apply tw-flex tw-items-center !important;
+    gap: 12px !important;
+}
+
+nav[aria-label="breadcrumb"] a,
+nav[aria-label="breadcrumb"] span[role="link"] {
+    @apply tw-flex tw-items-center !important;
+    font-size: 16px !important;
+    color: #6B7280 !important;
+    font-weight: 500 !important;
+    line-height: 40px !important;
+}
+
+nav[aria-label="breadcrumb"] a:hover {
+    color: #18213A !important;
+}
+
+nav[aria-label="breadcrumb"] li[role="presentation"] {
+    @apply tw-flex tw-items-center !important;
+    height: 40px !important;
+    color: #6B7280 !important;
+}
+
+nav[aria-label="breadcrumb"] li[role="presentation"] svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+nav[aria-label="breadcrumb"] .anticon,
+nav[aria-label="breadcrumb"] .icon {
+    @apply tw-flex tw-items-center tw-justify-center !important;
+    height: 20px !important;
+    width: 20px !important;
+    margin-right: 8px !important;
+}
+
+nav[aria-label="breadcrumb"] .anticon svg,
+nav[aria-label="breadcrumb"] .icon svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* Button Group Styles */
+.button-group-container {
+    @apply tw-flex tw-flex-row tw-items-center !important;
+    gap: 8px !important;
+}
+
+.button-group {
+    @apply tw-flex tw-flex-row tw-items-center tw-w-full !important;
+}
+
+.button-group + .button-group {
+    @apply tw-ml-0 !important;
+}
+
+.button-group-buttons {
+    @apply tw-flex tw-items-center tw-rounded-lg tw-p-0.5 tw-w-full !important;
+    box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.button-group-buttons .button-group-item.ant-btn + .button-group-item.ant-btn {
+    @apply tw-ml-0.5 !important;
+}
+
+.button-group-item.ant-btn {
+    @apply tw-flex-1 tw-h-[40px] tw-px-4 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-md tw-font-normal tw-shadow-none tw-transition-all tw-duration-150 tw-ease-in-out !important;
+    color: #6B7280;
+    min-width: 100px !important;
+    flex: 1 1 0 !important;
+    font-family: 'Barlow', sans-serif !important;
+    font-size: 16px !important;
+}
+
+.button-group-item.ant-btn:hover {
+    @apply tw-text-[#18213A] !important;
+    transform: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.button-group-item.ant-btn-primary {
+    @apply tw-bg-[#18213A] tw-text-white tw-font-semibold !important;
+}
+
+.button-group-item.ant-btn-primary:hover {
+    @apply tw-bg-[#2d375e] tw-text-white !important;
+}
+
+.button-group-item .anticon {
+    @apply tw-flex tw-items-center tw-justify-center !important;
+    height: 20px !important;
+    width: 20px !important;
+    margin-right: 8px !important;
+}
+
+.button-group-item .anticon svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* Ajout d'une transition fluide */
+.button-group-item.ant-btn {
+    transition: all 0.2s ease-in-out !important;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}

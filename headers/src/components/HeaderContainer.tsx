@@ -2,7 +2,7 @@
 import { ReactElement, createElement, useState } from "react";
 import { cn } from "../lib/utils";
 import { DateRangePicker } from "./ui/date-range-picker";
-import { MultiSelect } from "./ui/multi-select";
+import { TreeSelect } from "./TreeSelect";
 import { BreadcrumbNav } from "./ui/breadcrumb-nav";
 import { EnergySelector } from "./ui/energy-selector";
 import { ButtonGroup } from "./ui/button-group";
@@ -32,6 +32,8 @@ export function HeaderContainer({
     allowMultipleSelection = true,
     itemsDataSource,
     itemNameAttribute,
+    parentNameAttribute,
+    levelAttribute,
     selectedItemsAttribute,
     startDateAttribute,
     endDateAttribute,
@@ -137,17 +139,21 @@ export function HeaderContainer({
 
                     {/* Right section - Selectors */}
                     <div className="tw-flex tw-flex-col lg:tw-flex-row tw-items-stretch tw-space-y-4 lg:tw-space-y-0 lg:tw-space-x-4 xl:tw-space-x-6">
-                        <MultiSelect
-                            enabled={multiSelectorEnabled}
-                            allowMultiple={allowMultipleSelection}
-                            dataSource={itemsDataSource}
-                            displayAttribute={itemNameAttribute}
-                            selectedAttribute={selectedItemsAttribute}
-                            placeholder="Sélectionner..."
-                            className="tw-w-full xl:tw-w-[320px] tw-font-barlow"
-                            onChange={onChange}
-                            onSelectionChange={onSelectionChange}
-                        />
+                        {multiSelectorEnabled && (
+                            <TreeSelect
+                                class="tw-w-full xl:tw-w-[320px] tw-font-barlow"
+                                itemsDataSource={itemsDataSource}
+                                itemNameAttribute={itemNameAttribute}
+                                parentNameAttribute={parentNameAttribute}
+                                levelAttribute={levelAttribute}
+                                selectedItemsAttribute={selectedItemsAttribute}
+                                allowMultipleSelection={allowMultipleSelection}
+                                placeholder="Sélectionner des assets..."
+                                variant="minimal"
+                                onChange={onChange}
+                                onSelectionChange={onSelectionChange}
+                            />
+                        )}
                         
                         {dateRangePickerEnabled && (
                             <DateRangePicker 

@@ -31,7 +31,7 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
       <select
         value={hours}
         onChange={handleHourChange}
-        className="tw-flex-1 tw-h-10 tw-rounded-md tw-border tw-border-input tw-bg-transparent tw-px-3 tw-py-1 tw-text-base focus:tw-ring-2 focus:tw-ring-primary/20 tw-outline-none"
+        className="tw-flex-1 tw-h-14 tw-rounded-md tw-border tw-border-input tw-bg-transparent tw-px-3 tw-py-1 tw-text-base focus:tw-ring-2 focus:tw-ring-primary/20 tw-outline-none"
       >
         {Array.from({ length: 24 }, (_, i) => (
           <option key={i} value={i}>
@@ -43,7 +43,7 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
       <select
         value={minutes}
         onChange={handleMinuteChange}
-        className="tw-flex-1 tw-h-10 tw-rounded-md tw-border tw-border-input tw-bg-transparent tw-px-3 tw-py-1 tw-text-base focus:tw-ring-2 focus:tw-ring-primary/20 tw-outline-none"
+        className="tw-flex-1 tw-h-14 tw-rounded-md tw-border tw-border-input tw-bg-transparent tw-px-3 tw-py-1 tw-text-base focus:tw-ring-2 focus:tw-ring-primary/20 tw-outline-none"
       >
         {Array.from({ length: 60 }, (_, i) => (
           <option key={i} value={i}>

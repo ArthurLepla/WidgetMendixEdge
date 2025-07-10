@@ -72,6 +72,8 @@ export interface HeadersContainerProps {
     itemsDataSource?: ListValue;
     itemNameAttribute?: ListAttributeValue<string>;
     selectedItemsAttribute?: EditableValue<string>;
+    parentNameAttribute?: ListAttributeValue<string>;
+    levelAttribute?: ListAttributeValue<string>;
     onChange?: ActionValue;
     onSelectionChange?: ActionValue;
     dateRangePickerEnabled: boolean;
@@ -115,6 +117,8 @@ export interface HeadersPreviewProps {
     itemsDataSource: {} | { caption: string } | { type: string } | null;
     itemNameAttribute: string;
     selectedItemsAttribute: string;
+    parentNameAttribute: string;
+    levelAttribute: string;
     onChange: {} | null;
     onSelectionChange: {} | null;
     dateRangePickerEnabled: boolean;
