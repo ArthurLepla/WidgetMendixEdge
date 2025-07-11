@@ -6,6 +6,7 @@ import { DetailswidgetContainerProps } from "../typings/DetailswidgetProps";
 import { energyConfigs } from "./utils/energy";
 import { IPECard } from "./components/IPECard";
 import { ChartContainer } from "./components/ChartContainer";
+import { getAutoGranularity } from "./lib/utils";
 
 // Fonction pour générer des données simulées pour le mode dev
 function generateSimulatedData(
@@ -204,7 +205,6 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         day: "day",
         week: "week",
         month: "month",
-        quarter: "quarter",
         year: "year"
     };
 
@@ -236,50 +236,16 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         }
     };
 
-    const calculateAutoGranularity = (): { value: number; unit: string } => {
-        if (!data1.length) return { value: 5, unit: "minutes" };
-        const timestamps = data1.map(d => d.timestamp.getTime());
-        const diffHours = (Math.max(...timestamps) - Math.min(...timestamps)) / (1000 * 60 * 60);
-        if (diffHours <= 1) return { value: 5, unit: "minutes" };
-        if (diffHours <= 24) return { value: 30, unit: "minutes" };
-        if (diffHours <= 168) return { value: 1, unit: "heure" };
-        if (diffHours <= 720) return { value: 1, unit: "jour" };
-        return { value: 1, unit: "semaine" };
-    };
-
-    // Nouvelle fonction : priorité aux attributs envoyés par le microflow ; fallback dev
-    const unitDisplayMap: Record<string, string> = {
-        second: "s",
-        minute: "min",
-        hour: "h",
-        day: "j",
-        week: "sem",
-        month: "mois",
-        quarter: "trim",
-        year: "an"
-    };
-
-    const getAutoGranularity = (): { value: number; unit: string } => {
-        // Si les attributs sont disponibles (value !== undefined) → utiliser ceux-ci
-        if (displayTimeAttr?.value && displayUnitAttr?.value) {
-            const v = displayTimeAttr.value.toNumber();
-            const uEnum = displayUnitAttr.value.toString();
-            return {
-                value: v,
-                unit: unitDisplayMap[uEnum] ?? uEnum
-            };
-        }
-        // Sinon, on garde l'ancienne logique (devMode, absence de données)
-        return calculateAutoGranularity();
-    };
-
     // Le bouton Granularité est visible dès qu'on sait quel mode est affiché.
     // La possibilité de l'ouvrir dépendra de `allowManualGranularity`.
     const hasGranularityConfig = !!displayModeAttr;
 
     const uiGranularityMode = displayedMode.toLowerCase() as "auto" | "strict";
-    const uiGranularityUnit = displayedUnit as "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-
+    const uiGranularityUnit = (displayedUnit => {
+        if (displayedUnit === "quarter") return "month";
+        return displayedUnit as "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
+    })(displayedUnit);
+    
     const granularityDisabled = !allowManualGranularity || !isPreviewOK;
 
     // -------- Toast Info --------
@@ -610,6 +576,13 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         : currentProps.startDate?.value;
     const effectiveEndDate = devMode ? simulatedEndDate ?? undefined : currentProps.endDate?.value;
 
+    const autoGranularity = useMemo(() => {
+        if (!effectiveStartDate || !effectiveEndDate) {
+            return { value: 5, unit: "minute" };
+        }
+        return getAutoGranularity(effectiveStartDate, effectiveEndDate);
+    }, [effectiveStartDate, effectiveEndDate]);
+
     const filteredDataForExport = useMemo(() => {
         if (!effectiveStartDate || !effectiveEndDate) return currentProps.data;
         return currentProps.data.filter(item => {
@@ -710,7 +683,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     onGranularityModeChange={handleGranularityModeChange}
                     onGranularityValueChange={handleGranularityValueChange}
                     onGranularityUnitChange={handleGranularityUnitChange}
-                    autoGranularity={getAutoGranularity()}
+                    autoGranularity={autoGranularity}
                     isGranularityDisabled={granularityDisabled}
                 />
             </Fragment>
@@ -767,7 +740,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     onGranularityModeChange={handleGranularityModeChange}
                     onGranularityValueChange={handleGranularityValueChange}
                     onGranularityUnitChange={handleGranularityUnitChange}
-                    autoGranularity={getAutoGranularity()}
+                    autoGranularity={autoGranularity}
                     isGranularityDisabled={granularityDisabled}
                 />
             </Fragment>
@@ -796,7 +769,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 onGranularityModeChange={handleGranularityModeChange}
                 onGranularityValueChange={handleGranularityValueChange}
                 onGranularityUnitChange={handleGranularityUnitChange}
-                autoGranularity={getAutoGranularity()}
+                autoGranularity={autoGranularity}
                 isGranularityDisabled={granularityDisabled}
             />
         </Fragment>

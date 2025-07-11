@@ -1,0 +1,10 @@
+{
+  "extends": "@mendix/pluggable-widgets-tools/configs/tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": ["./assets/*"]
+    }
+  },
+  "include": ["./src", "./typings", "./assets"]
+}

@@ -1,0 +1,93 @@
+{"log":"ERROR - Connector: An error has occurred while handling the request. [User 'MxAdmin' with session id 'e125c891-XXXX-XXXX-XXXX-XXXXXXXX3171' and roles 'Administrator']\n","stream":"stdout","time":"2025-07-03T14:22:58.886975083Z"}
+{"log":"com.mendix.webui.WebUIException: Exception while executing runtime operation\n","stream":"stdout","time":"2025-07-03T14:22:58.887026682Z"}
+{"log":"\u0009at com.mendix.webui.actions.client.RuntimeOperationAction.$anonfun$apply$1(RuntimeOperationAction.scala:59)\n","stream":"stdout","time":"2025-07-03T14:22:58.887033874Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887040318Z"}
+{"log":"Caused by: com.mendix.modules.microflowengine.MicroflowException: Failed to commit\n","stream":"stdout","time":"2025-07-03T14:22:58.887045844Z"}
+{"log":"\u0009at Smart.GetRapportData_2.nested.cc15cb30-c124-40d9-85ff-086bc231ff03 [0 of 1] (Change : 'Change 'Usine' (ConsoTotalElec)')\n","stream":"stdout","time":"2025-07-03T14:22:58.887062387Z"}
+{"log":"\u0009at Smart.GetRapportData_2 (ListLoop : '')\n","stream":"stdout","time":"2025-07-03T14:22:58.887068775Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.88707466Z"}
+{"log":"Advanced stacktrace:\n","stream":"stdout","time":"2025-07-03T14:22:58.887080315Z"}
+{"log":"\u0009at com.mendix.modules.microflowengine.MicroflowUtil$.processException(MicroflowUtil.scala:73)\n","stream":"stdout","time":"2025-07-03T14:22:58.887121035Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887128324Z"}
+{"log":"Caused by: com.mendix.core.CoreRuntimeException: Failed to commit\n","stream":"stdout","time":"2025-07-03T14:22:58.887137697Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.doCommit(TransactionCore.scala:164)\n","stream":"stdout","time":"2025-07-03T14:22:58.88730308Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887325207Z"}
+{"log":"Caused by: com.mendix.core.CoreRuntimeException: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.core.CoreException: com.mendix.core.CoreRuntimeException: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.datastorage.exception.UpdateConflictException\n","stream":"stdout","time":"2025-07-03T14:22:58.887358765Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.executeSync(ActionManager.scala:117)\n","stream":"stdout","time":"2025-07-03T14:22:58.887366429Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887700305Z"}
+{"log":"Caused by: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.core.CoreException: com.mendix.core.CoreRuntimeException: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.datastorage.exception.UpdateConflictException\n","stream":"stdout","time":"2025-07-03T14:22:58.887711452Z"}
+{"log":"\u0009at com.mendix.util.classloading.Runner$.withContextClassLoader(Runner.scala:23)\n","stream":"stdout","time":"2025-07-03T14:22:58.887714536Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887716954Z"}
+{"log":"Caused by: com.mendix.core.CoreException: com.mendix.core.CoreRuntimeException: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.datastorage.exception.UpdateConflictException\n","stream":"stdout","time":"2025-07-03T14:22:58.887719186Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.SyncEventExtendedAction.executeAction(SyncEventExtendedAction.scala:29)\n","stream":"stdout","time":"2025-07-03T14:22:58.887721697Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887724023Z"}
+{"log":"Caused by: com.mendix.core.CoreRuntimeException: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.datastorage.exception.UpdateConflictException\n","stream":"stdout","time":"2025-07-03T14:22:58.8877628Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.executeSync(ActionManager.scala:117)\n","stream":"stdout","time":"2025-07-03T14:22:58.887794968Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.887802919Z"}
+{"log":"Caused by: com.mendix.systemwideinterfaces.MendixRuntimeException: com.mendix.datastorage.exception.UpdateConflictException\n","stream":"stdout","time":"2025-07-03T14:22:58.88807796Z"}
+{"log":"\u0009at com.mendix.util.classloading.Runner$.withContextClassLoader(Runner.scala:23)\n","stream":"stdout","time":"2025-07-03T14:22:58.888091396Z"}
+{"log":"\n","stream":"stdout","time":"2025-07-03T14:22:58.888094148Z"}
+{"log":"Caused by: com.mendix.datastorage.exception.UpdateConflictException: null\n","stream":"stdout","time":"2025-07-03T14:22:58.888096372Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.withPreparedStatement(JdbcDataStore.scala:1150)\n","stream":"stdout","time":"2025-07-03T14:22:58.88809872Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.$anonfun$execModificationQueries$1(JdbcDataStore.scala:885)\n","stream":"stdout","time":"2025-07-03T14:22:58.888109181Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.$anonfun$execModificationQueries$1$adapted(JdbcDataStore.scala:885)\n","stream":"stdout","time":"2025-07-03T14:22:58.888111938Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.$anonfun$executeWithUcViolationHandling$1(JdbcDataStore.scala:1058)\n","stream":"stdout","time":"2025-07-03T14:22:58.888114367Z"}
+{"log":"\u0009at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.scala:17)\n","stream":"stdout","time":"2025-07-03T14:22:58.88811676Z"}
+{"log":"\u0009at scala.util.Try$.apply(Try.scala:217)\n","stream":"stdout","time":"2025-07-03T14:22:58.888119157Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.executeWithUcViolationHandling(JdbcDataStore.scala:1058)\n","stream":"stdout","time":"2025-07-03T14:22:58.888125013Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.doModificationQueries$1(JdbcDataStore.scala:888)\n","stream":"stdout","time":"2025-07-03T14:22:58.888138207Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.$anonfun$execModificationQueries$3(JdbcDataStore.scala:891)\n","stream":"stdout","time":"2025-07-03T14:22:58.888269375Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.executeWithRetry(JdbcDataStore.scala:904)\n","stream":"stdout","time":"2025-07-03T14:22:58.888280454Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.execModificationQueries(JdbcDataStore.scala:891)\n","stream":"stdout","time":"2025-07-03T14:22:58.888297624Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.execUpdateQueries(JdbcDataStore.scala:816)\n","stream":"stdout","time":"2025-07-03T14:22:58.888300549Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.$anonfun$store$1(JdbcDataStore.scala:371)\n","stream":"stdout","time":"2025-07-03T14:22:58.888307995Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.$anonfun$store$1$adapted(JdbcDataStore.scala:368)\n","stream":"stdout","time":"2025-07-03T14:22:58.888310553Z"}
+{"log":"\u0009at scala.collection.immutable.List.map(List.scala:247)\n","stream":"stdout","time":"2025-07-03T14:22:58.888334133Z"}
+{"log":"\u0009at scala.collection.immutable.List.map(List.scala:79)\n","stream":"stdout","time":"2025-07-03T14:22:58.888339803Z"}
+{"log":"\u0009at com.mendix.connectionbus.connections.jdbc.JdbcDataStore.store(JdbcDataStore.scala:368)\n","stream":"stdout","time":"2025-07-03T14:22:58.888369816Z"}
+{"log":"\u0009at com.mendix.connectionbus.store.EntityStorer.storeDataSetInstance(EntityStorer.scala:179)\n","stream":"stdout","time":"2025-07-03T14:22:58.888394309Z"}
+{"log":"\u0009at com.mendix.connectionbus.store.EntityStorer.handleUpdateRequest(EntityStorer.scala:155)\n","stream":"stdout","time":"2025-07-03T14:22:58.888431476Z"}
+{"log":"\u0009at com.mendix.connectionbus.store.EntityStorer.handleRequest(EntityStorer.scala:116)\n","stream":"stdout","time":"2025-07-03T14:22:58.888447297Z"}
+{"log":"\u0009at com.mendix.connectionbus.store.EntityStorer.store(EntityStorer.scala:40)\n","stream":"stdout","time":"2025-07-03T14:22:58.888466731Z"}
+{"log":"\u0009at com.mendix.connectionbus.RequestAnalyzer.doRequest(RequestAnalyzer.scala:45)\n","stream":"stdout","time":"2025-07-03T14:22:58.888493511Z"}
+{"log":"\u0009at com.mendix.connectionbus.ConnectionBusImpl.doRequest(ConnectionBusImpl.scala:483)\n","stream":"stdout","time":"2025-07-03T14:22:58.888518887Z"}
+{"log":"\u0009at com.mendix.basis.action.user.CommitAction.commit(CommitAction.scala:155)\n","stream":"stdout","time":"2025-07-03T14:22:58.888541853Z"}
+{"log":"\u0009at com.mendix.basis.action.user.CommitAction.$anonfun$commitPersistableObjects$5(CommitAction.scala:113)\n","stream":"stdout","time":"2025-07-03T14:22:58.888571755Z"}
+{"log":"\u0009at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)\n","stream":"stdout","time":"2025-07-03T14:22:58.88859502Z"}
+{"log":"\u0009at scala.util.Try$.apply(Try.scala:217)\n","stream":"stdout","time":"2025-07-03T14:22:58.888600701Z"}
+{"log":"\u0009at com.mendix.basis.action.user.CommitAction.commitPersistableObjects(CommitAction.scala:113)\n","stream":"stdout","time":"2025-07-03T14:22:58.888631769Z"}
+{"log":"\u0009at com.mendix.basis.action.user.CommitAction.executeAction(CommitAction.scala:59)\n","stream":"stdout","time":"2025-07-03T14:22:58.888655301Z"}
+{"log":"\u0009at com.mendix.basis.action.user.CommitAction.executeAction(CommitAction.scala:31)\n","stream":"stdout","time":"2025-07-03T14:22:58.888830958Z"}
+{"log":"\u0009at com.mendix.systemwideinterfaces.core.UserAction.execute(UserAction.java:63)\n","stream":"stdout","time":"2025-07-03T14:22:58.888840645Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.CoreActionHandlerImpl.doCall(CoreActionHandlerImpl.scala:71)\n","stream":"stdout","time":"2025-07-03T14:22:58.888843746Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.CoreActionHandlerImpl.call(CoreActionHandlerImpl.scala:48)\n","stream":"stdout","time":"2025-07-03T14:22:58.888846219Z"}
+{"log":"\u0009at com.mendix.core.actionmanagement.internal.InternalCoreAction.call(InternalCoreAction.java:66)\n","stream":"stdout","time":"2025-07-03T14:22:58.888848664Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.$anonfun$executeSync$2(ActionManager.scala:114)\n","stream":"stdout","time":"2025-07-03T14:22:58.88885111Z"}
+{"log":"\u0009at com.mendix.util.classloading.Runner$.withContextClassLoader(Runner.scala:20)\n","stream":"stdout","time":"2025-07-03T14:22:58.888857951Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.executeSync(ActionManager.scala:114)\n","stream":"stdout","time":"2025-07-03T14:22:58.888961466Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.SyncEventExtendedAction.executeAction(SyncEventExtendedAction.scala:26)\n","stream":"stdout","time":"2025-07-03T14:22:58.88897224Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.EventExtendedAction.execute(EventExtendedAction.scala:61)\n","stream":"stdout","time":"2025-07-03T14:22:58.888975101Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.CoreActionHandlerImpl.doCall(CoreActionHandlerImpl.scala:71)\n","stream":"stdout","time":"2025-07-03T14:22:58.888981718Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.CoreActionHandlerImpl.call(CoreActionHandlerImpl.scala:48)\n","stream":"stdout","time":"2025-07-03T14:22:58.889005436Z"}
+{"log":"\u0009at com.mendix.core.actionmanagement.internal.InternalCoreAction.call(InternalCoreAction.java:66)\n","stream":"stdout","time":"2025-07-03T14:22:58.889031991Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.$anonfun$executeSync$2(ActionManager.scala:114)\n","stream":"stdout","time":"2025-07-03T14:22:58.88905873Z"}
+{"log":"\u0009at com.mendix.util.classloading.Runner$.withContextClassLoader(Runner.scala:20)\n","stream":"stdout","time":"2025-07-03T14:22:58.889106601Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.executeSync(ActionManager.scala:114)\n","stream":"stdout","time":"2025-07-03T14:22:58.889118775Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.$anonfun$executeInTransactionSync$1(ActionManager.scala:122)\n","stream":"stdout","time":"2025-07-03T14:22:58.889145792Z"}
+{"log":"\u0009at scala.util.Try$.apply(Try.scala:217)\n","stream":"stdout","time":"2025-07-03T14:22:58.889157638Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.tryExecute$1(ActionManager.scala:122)\n","stream":"stdout","time":"2025-07-03T14:22:58.889184274Z"}
+{"log":"\u0009at com.mendix.basis.actionmanagement.ActionManager.executeInTransactionSync(ActionManager.scala:123)\n","stream":"stdout","time":"2025-07-03T14:22:58.889210364Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.doStore$1(TransactionCore.scala:206)\n","stream":"stdout","time":"2025-07-03T14:22:58.889234157Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.storeObjectsAndAutoCommittedObjects(TransactionCore.scala:214)\n","stream":"stdout","time":"2025-07-03T14:22:58.889267213Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.doCommit(TransactionCore.scala:143)\n","stream":"stdout","time":"2025-07-03T14:22:58.889288989Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commit(TransactionCore.scala:116)\n","stream":"stdout","time":"2025-07-03T14:22:58.889311834Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commit$(TransactionCore.scala:110)\n","stream":"stdout","time":"2025-07-03T14:22:58.889335432Z"}
+{"log":"\u0009at com.mendix.basis.component.InternalCore.commit(InternalCore.scala:22)\n","stream":"stdout","time":"2025-07-03T14:22:58.889360262Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commitWithEvents(TransactionCore.scala:66)\n","stream":"stdout","time":"2025-07-03T14:22:58.889381942Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commit(TransactionCore.scala:25)\n","stream":"stdout","time":"2025-07-03T14:22:58.889404319Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commit$(TransactionCore.scala:24)\n","stream":"stdout","time":"2025-07-03T14:22:58.889427437Z"}
+{"log":"\u0009at com.mendix.basis.component.InternalCore.commit(InternalCore.scala:22)\n","stream":"stdout","time":"2025-07-03T14:22:58.88945419Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commit(TransactionCore.scala:20)\n","stream":"stdout","time":"2025-07-03T14:22:58.889472331Z"}
+{"log":"\u0009at com.mendix.basis.component.TransactionCore.commit$(TransactionCore.scala:20)\n","stream":"stdout","time":"2025-07-03T14:22:58.889494595Z"}
+{"log":"\u0009at com.mendix.basis.component.InternalCore.commit(InternalCore.scala:22)\n","stream":"stdout","time":"2025-07-03T14:22:58.889516149Z"}
+{"log":"\u0009at 

@@ -2,15 +2,16 @@
 /* eslint-disable linebreak-style */
 import * as React from "react";
 import { createElement } from "react";
-import { cn } from "../../lib/utils";
+import styles from "./time-picker.module.css";
 
 interface TimePickerProps {
   value: Date;
   onChange: (date: Date) => void;
   className?: string;
+  disabled?: boolean;
 }
 
-export function TimePicker({ value, onChange, className }: TimePickerProps) {
+export function TimePicker({ value, onChange, className, disabled = false }: TimePickerProps) {
   const hours = value.getHours();
   const minutes = value.getMinutes();
 
@@ -27,11 +28,12 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
   };
 
   return (
-    <div className={cn("tw-flex tw-items-center tw-gap-2 tw-w-full", className)}>
+    <div className={`${styles.container} ${className || ''}`}>
       <select
         value={hours}
         onChange={handleHourChange}
-        className="tw-flex-1 tw-h-14 tw-rounded-md tw-border tw-border-input tw-bg-transparent tw-px-3 tw-py-1 tw-text-base focus:tw-ring-2 focus:tw-ring-primary/20 tw-outline-none"
+        disabled={disabled}
+        className={styles.select}
       >
         {Array.from({ length: 24 }, (_, i) => (
           <option key={i} value={i}>
@@ -39,11 +41,12 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
           </option>
         ))}
       </select>
-      <span className="tw-text-base tw-font-medium tw-text-muted-foreground">:</span>
+      <span className={styles.separator}>:</span>
       <select
         value={minutes}
         onChange={handleMinuteChange}
-        className="tw-flex-1 tw-h-14 tw-rounded-md tw-border tw-border-input tw-bg-transparent tw-px-3 tw-py-1 tw-text-base focus:tw-ring-2 focus:tw-ring-primary/20 tw-outline-none"
+        disabled={disabled}
+        className={styles.select}
       >
         {Array.from({ length: 60 }, (_, i) => (
           <option key={i} value={i}>

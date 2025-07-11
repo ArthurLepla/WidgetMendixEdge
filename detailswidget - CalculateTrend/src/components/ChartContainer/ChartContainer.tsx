@@ -34,7 +34,7 @@ interface ChartContainerProps {
   showGranularityControl?: boolean
   granularityMode?: "auto" | "strict"
   granularityValue?: number
-  granularityUnit?: "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "year"
+  granularityUnit?: "second" | "minute" | "hour" | "day" | "week" | "month" | "year"
   onGranularityModeChange?: (mode: "Auto" | "Strict") => void
   onGranularityValueChange?: (value: number) => void
   onGranularityUnitChange?: (unit: string) => void
@@ -123,6 +123,9 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   const [isVisible, setIsVisible] = useState(false)
   const [isCompact, setIsCompact] = useState(false)
 
+  // Corrige l'unité de granularité pour la compatibilité des graphiques
+  const safeGranularityUnit = granularityUnit === "second" ? "minute" : granularityUnit;
+
   // Calcul de la durée d'analyse pour validation granularité
   const analysisDurationMs = startDate && endDate ? endDate.getTime() - startDate.getTime() : undefined;
 
@@ -174,7 +177,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
                 <GranularityPopover
                   mode={granularityMode}
                   value={granularityValue}
-                  unit={granularityUnit}
+                  unit={safeGranularityUnit}
                   onModeChange={onGranularityModeChange}
                   onValueChange={onGranularityValueChange!}
                   onUnitChange={onGranularityUnitChange!}
@@ -186,7 +189,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
                 <GranularityControl
                   mode={granularityMode}
                   value={granularityValue}
-                  unit={granularityUnit}
+                  unit={safeGranularityUnit}
                   onModeChange={onGranularityModeChange}
                   onValueChange={onGranularityValueChange!}
                   onUnitChange={onGranularityUnitChange!}
@@ -231,6 +234,9 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
               height="350px"
               startDate={startDate}
               endDate={endDate}
+              granularityMode={granularityMode}
+              granularityValue={granularityValue}
+              granularityUnit={safeGranularityUnit}
             />
           </div>
         )}
@@ -245,7 +251,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
               endDate={endDate}
               granularityMode={granularityMode}
               granularityValue={granularityValue}
-              granularityUnit={granularityUnit}
+              granularityUnit={safeGranularityUnit}
             />
           </div>
         )}

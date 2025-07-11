@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { ReactElement, createElement, useState } from "react";
 import { cn } from "../lib/utils";
-import { DateRangePicker } from "./ui/date-range-picker";
-import { TreeSelect } from "./TreeSelect";
+import { TreeSelect } from "./ui/TreeSelect";
+import { DateRangePickerV2 } from "./ui/DateRangePickerV2";
 import { BreadcrumbNav } from "./ui/breadcrumb-nav";
 import { EnergySelector } from "./ui/energy-selector";
 import { ButtonGroup } from "./ui/button-group";
@@ -53,12 +53,6 @@ export function HeaderContainer({
     onSelectionChange,
     homeAction
 }: HeadersContainerProps): ReactElement {
-    console.log("HeaderContainer props:", {
-        hasStartDate: !!startDateAttribute,
-        hasEndDate: !!endDateAttribute,
-        hasOnDateChange: !!onDateChange
-    });
-
     const [selectedFirstGroup, setSelectedFirstGroup] = useState<string>(
         firstGroupButtons?.find(btn => btn.defaultSelected)?.label || firstGroupButtons?.[0]?.label || ""
     );
@@ -156,7 +150,7 @@ export function HeaderContainer({
                         )}
                         
                         {dateRangePickerEnabled && (
-                            <DateRangePicker 
+                            <DateRangePickerV2 
                                 startDateAttribute={startDateAttribute}
                                 endDateAttribute={endDateAttribute}
                                 onDateChange={onDateChange}
@@ -164,19 +158,7 @@ export function HeaderContainer({
                                     "tw-w-full",
                                     "lg:tw-w-[280px]",
                                     "xl:tw-w-[320px]",
-                                    "tw-font-barlow",
-                                    "[&_.rdp-button]:!tw-text-lg",
-                                    "[&_.rdp-caption]:!tw-text-xl",
-                                    "[&_button>span]:!tw-text-lg",
-                                    "[&_input]:!tw-text-lg",
-                                    "[&_.rdp-head_button]:!tw-text-lg",
-                                    "[&_.rdp]:!tw-p-4",
-                                    "[&_.rdp-months]:!tw-gap-4",
-                                    "[&_div[role=dialog]]:!tw-min-w-[900px]",
-                                    "[&_.rdp-cell]:!tw-w-14",
-                                    "[&_.rdp-cell]:!tw-h-14",
-                                    "[&_.rdp-day]:!tw-w-14",
-                                    "[&_.rdp-day]:!tw-h-14"
+                                    "tw-font-barlow"
                                 )}
                             />
                         )}

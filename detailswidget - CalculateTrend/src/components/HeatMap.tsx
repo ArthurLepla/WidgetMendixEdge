@@ -4,6 +4,7 @@ import { EChartsOption } from "echarts";
 import { Big } from "big.js";
 import { EnergyConfig } from "../utils/energy";
 import { NoDataMessage } from "./NoDataMessage";
+import { getAutoGranularity, Granularity, MENDIX_UNIT_TO_MS } from "../lib/utils";
 
 interface HeatMapProps {
     data: Array<{
@@ -16,23 +17,32 @@ interface HeatMapProps {
     endDate?: Date;
     granularityMode?: "auto" | "strict";
     granularityValue?: number;
-    granularityUnit?: string;
+    granularityUnit?: Granularity["unit"];
 }
 
-type DisplayMode = "day" | "week" | "month";
+// Modes d'affichage: "weekly" est une vue calendaire verticale (<= 31 jours).
+// "calendarWide" est la vue type GitHub (> 31 jours).
+type SmartDisplayMode = "hourly" | "daily" | "weekly" | "calendarWide";
 
-interface HeatMapPoint {
-    x: number;
-    y: string;
-    value: number | null;
+interface HeatmapConfig {
+    mode: SmartDisplayMode;
+    aggregationPeriod: number;
+    xLabels: string[];
+    yLabels: string[];
+    maxCells: number;
+    monthLabels?: { index: number; label: string }[];
 }
 
-type TimeInterval = {
-    type: "minute" | "hour" | "day";
-    value: number;  // 5 pour 5 minutes, 1 pour 1 heure, etc.
-};
-
-export const HeatMap = ({ data, energyConfig, height = "400px", startDate, endDate, granularityMode, granularityValue, granularityUnit }: HeatMapProps): React.ReactElement => {
+export const HeatMap = ({
+    data,
+    energyConfig,
+    height = "400px",
+    startDate,
+    endDate,
+    granularityMode = "auto",
+    granularityValue,
+    granularityUnit
+}: HeatMapProps): React.ReactElement => {
     const hasData = data && data.length > 0;
 
     const options: EChartsOption = useMemo(() => {
@@ -40,640 +50,475 @@ export const HeatMap = ({ data, energyConfig, height = "400px", startDate, endDa
             return {};
         }
 
-        // Détecter l'intervalle de temps entre les données
-        const detectTimeInterval = (): TimeInterval => {
-            // Si la granularité est définie par l'utilisateur, l'utiliser en priorité
-            if (granularityMode === "strict" && granularityValue && granularityUnit) {
-                return convertGranularityToTimeInterval(granularityValue, granularityUnit);
-            }
-            
-            // Sinon, utiliser la détection automatique existante
-            const sortedData = [...data].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-            const intervals: number[] = [];
-            
-            for (let i = 1; i < sortedData.length; i++) {
-                const diff = sortedData[i].timestamp.getTime() - sortedData[i-1].timestamp.getTime();
-                intervals.push(diff);
-            }
+        const durationMs = endDate.getTime() - startDate.getTime();
+        const durationDays = durationMs / (1000 * 60 * 60 * 24);
 
-            // Calculer l'intervalle le plus fréquent
-            const intervalCounts = new Map<number, number>();
-            intervals.forEach(interval => {
-                intervalCounts.set(interval, (intervalCounts.get(interval) || 0) + 1);
-            });
+        const resolvedGranularity: Granularity =
+            granularityMode === "strict" && granularityValue && granularityUnit
+                ? { value: granularityValue, unit: granularityUnit }
+                : getAutoGranularity(startDate, endDate);
 
-            let mostCommonInterval = 0;
-            let maxCount = 0;
-            intervalCounts.forEach((count, interval) => {
-                if (count > maxCount) {
-                    maxCount = count;
-                    mostCommonInterval = interval;
+        const intervalMs = resolvedGranularity.value * (MENDIX_UNIT_TO_MS[resolvedGranularity.unit] || 0);
+        if (intervalMs === 0) return {};
+
+        const toLocalISOString = (date: Date) => {
+            const pad = (num: number) => num.toString().padStart(2, "0");
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        };
+
+        const parseLocalDate = (dateString: string) => new Date(`${dateString}T00:00:00`);
+
+        const getWeekOfYear = (date: Date): number => {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        };
+
+        const getSmartDisplayConfig = (): HeatmapConfig => {
+            if (durationDays <= 2) {
+                return {
+                    mode: "hourly",
+                    aggregationPeriod: Math.max(intervalMs, 3600000),
+                    xLabels: [],
+                    yLabels: [],
+                    maxCells: 48
+                };
+            }
+            if (durationDays <= 7) {
+                return {
+                    mode: "daily",
+                    aggregationPeriod: 3600000 * 4,
+                    xLabels: ["00h-04h", "04h-08h", "08h-12h", "12h-16h", "16h-20h", "20h-24h"],
+                    yLabels: [],
+                    maxCells: 42
+                };
+            }
+            if (durationDays <= 31) {
+                return {
+                    mode: "weekly",
+                    aggregationPeriod: 86400000,
+                    xLabels: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+                    yLabels: [],
+                    maxCells: 35
+                };
+            }
+            return {
+                mode: "calendarWide",
+                aggregationPeriod: 86400000,
+                xLabels: [],
+                yLabels: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+                maxCells: 371
+            };
+        };
+
+        const displayConfig = getSmartDisplayConfig();
+
+        const aggregateData = () => {
+            const aggregated = new Map<string, { value: number; count: number }>();
+            data.forEach(item => {
+                if (item.timestamp >= startDate && item.timestamp <= endDate) {
+                    let key = "";
+                    const date = new Date(item.timestamp);
+                    switch (displayConfig.mode) {
+                        case "hourly": {
+                            const dayStr = toLocalISOString(date);
+                            const hourGroup = Math.floor(date.getHours() / (displayConfig.aggregationPeriod / 3600000));
+                            const hour = hourGroup * (displayConfig.aggregationPeriod / 3600000);
+                            key = `${dayStr}_${hour}`;
+                            break;
+                        }
+                        case "daily": {
+                            const dayStr = toLocalISOString(date);
+                            const periodIndex = Math.floor(date.getHours() / 4);
+                            key = `${dayStr}_${periodIndex}`;
+                            break;
+                        }
+                        case "weekly": {
+                            const dayOfWeek = (date.getDay() + 6) % 7;
+                            const weekStart = new Date(date);
+                            weekStart.setDate(date.getDate() - dayOfWeek);
+                            weekStart.setHours(0, 0, 0, 0);
+                            key = `${toLocalISOString(weekStart)}_${dayOfWeek}`;
+                            break;
+                        }
+                        case "calendarWide":
+                            key = toLocalISOString(date);
+                            break;
+                    }
+                    const existing = aggregated.get(key) || { value: 0, count: 0 };
+                    aggregated.set(key, {
+                        value: existing.value + item.value.toNumber(),
+                        count: existing.count + 1
+                    });
                 }
             });
-
-            // Convertir en minutes/heures/jours
-            const minutes = mostCommonInterval / (1000 * 60);
-            if (minutes <= 60) {
-                return { type: "minute", value: Math.round(minutes) };
-            }
-            
-            const hours = minutes / 60;
-            if (hours <= 24) {
-                return { type: "hour", value: Math.round(hours) };
-            }
-
-            return { type: "day", value: Math.round(hours / 24) };
+            return aggregated;
         };
 
-        // Fonction pour convertir la granularité utilisateur en TimeInterval
-        const convertGranularityToTimeInterval = (value: number, unit: string): TimeInterval => {
-            switch (unit) {
-                case "minute":
-                    return { type: "minute", value };
-                case "hour":
-                    return { type: "hour", value };
-                case "day":
-                    return { type: "day", value };
-                case "week":
-                    return { type: "day", value: value * 7 }; // Convertir semaines en jours
-                case "month":
-                    return { type: "day", value: value * 30 }; // Approximation : 1 mois = 30 jours
-                case "quarter":
-                    return { type: "day", value: value * 90 }; // Approximation : 1 trimestre = 90 jours
-                case "year":
-                    return { type: "day", value: value * 365 }; // 1 année = 365 jours
-                default:
-                    return { type: "minute", value: 5 }; // Fallback par défaut
-            }
-        };
+        const aggregatedData = aggregateData();
 
-        const getDurationInDays = (start: Date, end: Date): number => {
-            return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        };
+        const buildChartData = () => {
+            let points: any[] = [];
+            let xLabels: string[] = [];
+            let yLabels: string[] = [];
 
-        const getDisplayMode = (durationInDays: number, interval: TimeInterval): DisplayMode => {
-            // Si l'intervalle est en heures (4h ou 8h), on force le mode "day"
-            if (interval.type === "hour" && (interval.value === 4 || interval.value === 8)) {
-                return "day";
-            }
-            
-            // Sinon, on applique la logique standard
-            if (durationInDays <= 7) return "day";
-            if (durationInDays <= 31) return "week";
-            return "month";
-        };
-
-        const timeInterval = detectTimeInterval();
-        const durationInDays = getDurationInDays(startDate, endDate);
-        const displayMode = getDisplayMode(durationInDays, timeInterval);
-
-        // Fonction d'agrégation des données par bucket temporel
-        const aggregateDataByBuckets = (timeInterval: TimeInterval) => {
-            const bucketMap = new Map<string, number[]>();
-            
-            // Filtrer et grouper les données par buckets
-            data.filter(item => 
-                item.timestamp >= startDate && 
-                item.timestamp <= endDate
-            ).forEach(item => {
-                const bucketKey = getBucketKey(item.timestamp, timeInterval, displayMode);
-                if (!bucketMap.has(bucketKey)) {
-                    bucketMap.set(bucketKey, []);
+            switch (displayConfig.mode) {
+                case "hourly": {
+                    const aggregationHours = displayConfig.aggregationPeriod / 3600000;
+                    const hoursInDay = Array.from({ length: 24 / aggregationHours }, (_, i) => i * aggregationHours);
+                    xLabels = hoursInDay.map(h => `${h}h`);
+                    const daysSet = new Set<string>();
+                    aggregatedData.forEach((_, key) => {
+                        const [day] = key.split("_");
+                        daysSet.add(day);
+                    });
+                    yLabels = Array.from(daysSet).sort();
+                    yLabels.forEach((day, yIdx) => {
+                        hoursInDay.forEach((hour, xIdx) => {
+                            const key = `${day}_${hour}`;
+                            const data = aggregatedData.get(key);
+                            points.push([xIdx, yIdx, data ? data.value : null]);
+                        });
+                    });
+                    break;
                 }
-                bucketMap.get(bucketKey)!.push(item.value.toNumber());
-            });
+                case "daily": {
+                    xLabels = displayConfig.xLabels;
+                    const allDays: string[] = [];
+                    if (startDate && endDate) {
+                        let current = new Date(startDate);
+                        current.setHours(0, 0, 0, 0);
+                        while (current <= endDate) {
+                            allDays.push(toLocalISOString(current));
+                            current.setDate(current.getDate() + 1);
+                        }
+                    }
+                    yLabels = allDays;
+                    allDays.forEach((day, yIdx) => {
+                        (displayConfig.xLabels as string[]).forEach((_, xIdx) => {
+                            const key = `${day}_${xIdx}`;
+                            const data = aggregatedData.get(key);
+                            points.push([xIdx, yIdx, data ? data.value : null]);
+                        });
+                    });
+                    break;
+                }
+                case "weekly": {
+                    xLabels = displayConfig.xLabels;
+                    const allWeeks: string[] = [];
+                    if (startDate && endDate) {
+                        let current = new Date(startDate);
+                        current.setHours(0, 0, 0, 0);
+                        const dayOfWeek = (current.getDay() + 6) % 7;
+                        current.setDate(current.getDate() - dayOfWeek);
+                        while (current <= endDate) {
+                            allWeeks.push(toLocalISOString(current));
+                            current.setDate(current.getDate() + 7);
+                        }
+                    }
+                    const displayWeeks = allWeeks.slice(-8);
+                    yLabels = displayWeeks;
+                    displayWeeks.forEach((week, yIdx) => {
+                        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+                            const key = `${week}_${dayIndex}`;
+                            const data = aggregatedData.get(key);
+                            points.push([dayIndex, yIdx, data ? data.value : null]);
+                        }
+                    });
+                    break;
+                }
+                case "calendarWide": {
+                    yLabels = displayConfig.yLabels;
+                    if (!startDate || !endDate) break;
 
-            // Calculer la somme pour chaque bucket
-            const aggregatedData = new Map<string, number>();
-            bucketMap.forEach((values, key) => {
-                const sum = values.reduce((acc, val) => acc + val, 0);
-                aggregatedData.set(key, sum);
-            });
+                    const gridStartDate = new Date(startDate);
+                    gridStartDate.setDate(gridStartDate.getDate() - gridStartDate.getDay());
+                    gridStartDate.setHours(0, 0, 0, 0);
 
-            return aggregatedData;
-        };
+                    const weekPositions: Date[] = [];
+                    const monthLabels: { index: number; label: string }[] = [];
+                    let currentMonth = -1;
 
-        // Fonction pour générer la clé de bucket temporel
-        const getBucketKey = (timestamp: Date, interval: TimeInterval, mode: DisplayMode): string => {
-            const date = new Date(timestamp);
-            let x: number;
-            let y: string;
+                    for (let d = new Date(gridStartDate); d <= endDate; d.setDate(d.getDate() + 7)) {
+                        weekPositions.push(new Date(d));
+                        if (d.getMonth() !== currentMonth) {
+                            currentMonth = d.getMonth();
+                            monthLabels.push({
+                                index: weekPositions.length - 1,
+                                label: d.toLocaleDateString("fr-FR", { month: "short" })
+                            });
+                        }
+                    }
+                    xLabels = weekPositions.map(d => toLocalISOString(d));
+                    displayConfig.monthLabels = monthLabels;
+                    displayConfig.xLabels = xLabels;
 
-            switch (mode) {
-                case "day":
-                    if (interval.type === "minute" && interval.value === 5) {
-                        x = Math.floor(date.getMinutes() / 5);
-                        y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date.getHours().toString().padStart(2, "0")}`;
-                    } else if (interval.type === "minute") {
-                        // Aggreger selon la granularité utilisateur
-                        const bucketMinutes = Math.floor(date.getMinutes() / interval.value) * interval.value;
-                        const bucketHour = date.getHours();
-                        const totalBucketMinutes = bucketHour * 60 + bucketMinutes;
-                        x = Math.floor(totalBucketMinutes / interval.value);
-                        y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-                    } else if (interval.type === "hour") {
-                        const bucketHour = Math.floor(date.getHours() / interval.value) * interval.value;
-                        x = Math.floor(bucketHour / interval.value);
-                        y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-                    } else {
-                        x = date.getHours();
-                        y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+                    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                        const weekIndex = Math.floor((d.getTime() - gridStartDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+                        const dayIndex = d.getDay();
+                        const key = toLocalISOString(d);
+                        const data = aggregatedData.get(key);
+                        points.push({
+                            value: [weekIndex, dayIndex, data ? data.value : null],
+                            name: key
+                        });
                     }
                     break;
-                case "week":
-                    x = date.getDay() === 0 ? 6 : date.getDay() - 1;
-                    y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-W${Math.ceil((date.getDate() + new Date(date.getFullYear(), date.getMonth(), 1).getDay()) / 7)}`;
-                    break;
-                case "month":
-                    if (interval.type === "day" && interval.value > 1) {
-                        // Aggreger par plusieurs jours
-                        const bucketDay = Math.floor((date.getDate() - 1) / interval.value) * interval.value + 1;
-                        x = Math.floor((bucketDay - 1) / interval.value);
-                        y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-                    } else {
-                        x = date.getDate();
-                        y = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-                    }
-                    break;
+                }
             }
-
-            return `${x}-${y}`;
+            return { points, xLabels, yLabels };
         };
 
-        // Générer les points pour la heatmap
-        const generateHeatmapPoints = () => {
-            const points: Array<HeatMapPoint> = [];
-            const xSet = new Set<number>();
-            const ySet = new Set<string>();
+        const { points, xLabels, yLabels } = buildChartData();
+        const maxVal = Math.max(0, ...points.map((p: any) => (Array.isArray(p) ? p[2] : p.value[2]) || 0));
 
-            // Obtenir les données agrégées par buckets
-            const aggregatedData = aggregateDataByBuckets(timeInterval);
-            
-            // Créer un Map pour stocker les données agrégées
-            const dataMap = new Map<string, number>();
-            aggregatedData.forEach((value, key) => {
-                dataMap.set(key, value);
-            });
-            
-            // Les données sont déjà agrégées dans dataMap, plus besoin de traitement individuel
-
-            // Générer tous les buckets temporels possibles selon la granularité
-            const generateTimeBuckets = () => {
-                const buckets: Array<{x: number, y: string, key: string}> = [];
-                const currentDate = new Date(startDate);
-
-                // Selon le type de granularité, nous devons adapter la génération des buckets
-                switch (displayMode) {
-                    case "day":
-                        // Générer les buckets pour chaque jour
-                        while (currentDate <= endDate) {
-                            const year = currentDate.getFullYear();
-                            const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-                            const day = currentDate.getDate().toString().padStart(2, "0");
-
-                            if (timeInterval.type === "minute" && timeInterval.value === 5) {
-                                // Cas spécial 5 minutes : par heure
-                                for (let hour = 0; hour < 24; hour++) {
-                                    const hours = hour.toString().padStart(2, "0");
-                                    const y = `${year}-${month}-${day}-${hours}`;
-                                    for (let min = 0; min < 60; min += 5) {
-                                        const x = min / 5;
-                                        const key = `${x}-${y}`;
-                                        buckets.push({ x, y, key });
-                                    }
-                                }
-                            } else if (timeInterval.type === "minute") {
-                                // Buckets par intervalle de minutes personnalisé
-                                const y = `${year}-${month}-${day}`;
-                                for (let totalMinutes = 0; totalMinutes < 24 * 60; totalMinutes += timeInterval.value) {
-                                    const x = Math.floor(totalMinutes / timeInterval.value);
-                                    const key = `${x}-${y}`;
-                                    buckets.push({ x, y, key });
-                                }
-                            } else if (timeInterval.type === "hour") {
-                                // Buckets par intervalle d'heures personnalisé
-                                const y = `${year}-${month}-${day}`;
-                                for (let hour = 0; hour < 24; hour += timeInterval.value) {
-                                    const x = Math.floor(hour / timeInterval.value);
-                                    const key = `${x}-${y}`;
-                                    buckets.push({ x, y, key });
-                                }
-                            }
-                            currentDate.setDate(currentDate.getDate() + 1);
+        const getAdaptiveConfig = () => {
+            const baseConfig = {
+                textStyle: {
+                    fontFamily: "Barlow, sans-serif",
+                    color: "#18213e"
+                },
+                tooltip: {
+                    position: "top",
+                    formatter: (params: any) => {
+                        const { value, color, name } = params;
+                        let header = "";
+                        let dataValue = Array.isArray(value) ? value[2] : value;
+                        if (typeof value === "object" && value !== null && "value" in value) {
+                            dataValue = value.value[2];
                         }
-                        break;
 
-                    case "week":
-                        // Générer les buckets par semaine
-                        while (currentDate <= endDate) {
-                            const year = currentDate.getFullYear();
-                            const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-                            const weekNum = Math.ceil((currentDate.getDate() + new Date(year, currentDate.getMonth(), 1).getDay()) / 7);
-                            const x = currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1;
-                            const y = `${year}-${month}-W${weekNum}`;
-                            const key = `${x}-${y}`;
-                            buckets.push({ x, y, key });
-                            currentDate.setDate(currentDate.getDate() + 1);
-                        }
-                        break;
-
-                    case "month":
-                        // Générer les buckets par mois
-                        while (currentDate <= endDate) {
-                            const year = currentDate.getFullYear();
-                            const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-                            
-                            if (timeInterval.type === "day" && timeInterval.value > 1) {
-                                // Buckets par groupe de jours
-                                const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
-                                for (let day = 1; day <= daysInMonth; day += timeInterval.value) {
-                                    const x = Math.floor((day - 1) / timeInterval.value);
-                                    const y = `${year}-${month}`;
-                                    const key = `${x}-${y}`;
-                                    buckets.push({ x, y, key });
-                                }
-                                // Passer au mois suivant
-                                currentDate.setMonth(currentDate.getMonth() + 1, 1);
-                            } else {
-                                // Un bucket par jour du mois
-                                const x = currentDate.getDate();
-                                const y = `${year}-${month}`;
-                                const key = `${x}-${y}`;
-                                buckets.push({ x, y, key });
-                                currentDate.setDate(currentDate.getDate() + 1);
+                        if (displayConfig.mode === "calendarWide") {
+                            const date = parseLocalDate(name);
+                            header = date.toLocaleDateString("fr-FR", {
+                                weekday: "long",
+                                day: "numeric",
+                                month: "long"
+                            });
+                        } else {
+                            const [xIdx, yIdx] = value;
+                            if (displayConfig.mode === "weekly") {
+                                const weekStartDate = parseLocalDate(yLabels[yIdx]);
+                                const cellDate = new Date(weekStartDate);
+                                cellDate.setDate(weekStartDate.getDate() + xIdx);
+                                header = cellDate.toLocaleDateString("fr-FR", {
+                                    weekday: "long",
+                                    day: "numeric",
+                                    month: "long"
+                                });
+                            } else if (displayConfig.mode === "hourly") {
+                                header = `${parseLocalDate(yLabels[yIdx]).toLocaleDateString("fr-FR", {
+                                    day: "numeric",
+                                    month: "long"
+                                })} - ${(xLabels as string[])[xIdx]}`;
+                            } else if (displayConfig.mode === "daily") {
+                                header = `${parseLocalDate(yLabels[yIdx]).toLocaleDateString("fr-FR", {
+                                    day: "numeric",
+                                    month: "long"
+                                })} - ${(xLabels as string[])[xIdx]}`;
                             }
                         }
-                        break;
+
+                        const formattedValue =
+                            dataValue === null || dataValue === -1
+                                ? "Aucune donnée"
+                                : `${dataValue.toLocaleString("fr-FR", {
+                                      maximumFractionDigits: 2
+                                  })} ${energyConfig.unit}`;
+
+                        const marker = `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`;
+
+                        return `
+                            <div style="font-size:14px; font-weight:600;">${header}</div>
+                            <div style="font-size:12px; margin-top:4px;">${marker}${formattedValue}</div>
+                        `;
+                    }
                 }
-
-                return buckets;
             };
 
-            // Générer tous les buckets possibles et créer les points
-            const timeBuckets = generateTimeBuckets();
-            timeBuckets.forEach(bucket => {
-                xSet.add(bucket.x);
-                ySet.add(bucket.y);
-                points.push({
-                    x: bucket.x,
-                    y: bucket.y,
-                    value: dataMap.get(bucket.key) ?? null
+            if (displayConfig.mode === "calendarWide") {
+                const monthLabels = displayConfig.monthLabels || [];
+                const xAxisLabels = xLabels.map((_label, index) => {
+                    const monthLabel = monthLabels.find(l => l.index === index);
+                    return monthLabel ? monthLabel.label : "";
                 });
-            });
+                return {
+                    ...baseConfig,
+                    grid: { left: "3%", right: "8%", top: 60, bottom: "20%", containLabel: true },
+                    xAxis: {
+                        type: "category",
+                        data: xAxisLabels,
+                        position: "bottom",
+                        axisTick: { show: false },
+                        axisLine: { show: false },
+                        axisLabel: { interval: 0, color: "#666", fontWeight: "bold", fontSize: 12 }
+                    },
+                    yAxis: {
+                        type: "category",
+                        data: yLabels,
+                        inverse: true,
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        axisLabel: { show: false }
+                    }
+                };
+            }
 
             return {
-                points,
-                xValues: Array.from(xSet).sort((a, b) => a - b),
-                yValues: Array.from(ySet).sort((a, b) => a.localeCompare(b))
+                ...baseConfig,
+                grid: {
+                    left: "12%",
+                    right: "10%",
+                    top: "15%",
+                    bottom: (xLabels as string[]).length > 7 ? "25%" : "20%",
+                    containLabel: true
+                },
+                xAxis: {
+                    type: "category",
+                    data: xLabels,
+                    splitArea: { show: true },
+                    axisLabel: {
+                        fontSize: (xLabels as string[]).length > 10 ? 10 : 12
+                    }
+                },
+                yAxis: {
+                    type: "category",
+                    data: yLabels,
+                    inverse: true,
+                    splitArea: { show: true },
+                    axisLabel: {
+                        fontSize: yLabels.length > 10 ? 10 : 12,
+                        formatter: (value: string) => {
+                            const d = parseLocalDate(value);
+                            if (displayConfig.mode === "weekly") {
+                                return `S${getWeekOfYear(d)}`;
+                            }
+                            if (displayConfig.mode === "hourly" || displayConfig.mode === "daily") {
+                                return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+                            }
+                            return value;
+                        }
+                    }
+                }
             };
         };
 
-        const { points, xValues, yValues } = generateHeatmapPoints();
+        const adaptiveConfig = getAdaptiveConfig();
 
-        // Générer les labels pour l'axe X adaptés à la granularité
-        const getXLabel = (value: number): string => {
-            switch (displayMode) {
-                case "day":
-                    if (timeInterval.type === "minute" && timeInterval.value === 5) {
-                        // Pour l'intervalle 5min, afficher uniquement les minutes
-                        const minutes = value * timeInterval.value;
-                        return `${minutes.toString().padStart(2, "0")}`;
-                    } else if (timeInterval.type === "minute") {
-                        // Pour les intervalles personnalisés de minutes
-                        const totalMinutes = value * timeInterval.value;
-                        const hours = Math.floor(totalMinutes / 60);
-                        const minutes = totalMinutes % 60;
-                        if (timeInterval.value >= 60) {
-                            // Si >= 1h, afficher seulement l'heure
-                            return `${hours.toString().padStart(2, "0")}h`;
-                        } else {
-                            // Sinon afficher heure:minute
-                            return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-                        }
-                    } else if (timeInterval.type === "hour") {
-                        // Pour les intervalles d'heures personnalisés
-                        const startHour = value * timeInterval.value;
-                        if (timeInterval.value === 1) {
-                            return `${startHour.toString().padStart(2, "0")}h`;
-                        } else {
-                            const endHour = startHour + timeInterval.value;
-                            return `${startHour.toString().padStart(2, "0")}h-${endHour.toString().padStart(2, "0")}h`;
-                        }
-                    }
-                    return `${value.toString().padStart(2, "0")}:00`;
-                case "week":
-                    const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-                    return days[value];
-                case "month":
-                    if (timeInterval.type === "day" && timeInterval.value > 1) {
-                        // Pour les groupes de jours
-                        const startDay = value * timeInterval.value + 1;
-                        const endDay = Math.min(startDay + timeInterval.value - 1, 31);
-                        return `${startDay}-${endDay}`;
-                    }
-                    return value.toString().padStart(2, "0");
+        const getTitle = () => {
+            const baseTitle = `Consommation ${energyConfig.label.toLowerCase()}`;
+            switch (displayConfig.mode) {
+                case "hourly":
+                    return `${baseTitle} - Vue horaire`;
+                case "daily":
+                    return `${baseTitle} - Vue journalière`;
+                case "weekly":
+                    return `${baseTitle} - Vue hebdomadaire`;
+                case "calendarWide":
+                    return `${baseTitle} - Vue calendaire`;
+                default:
+                    return baseTitle;
             }
         };
-
-        const getYLabel = (value: string): string => {
-            const [year, month, detail, hour] = value.split("-");
-            
-            switch (displayMode) {
-                case "day":
-                    if (timeInterval.type === "minute" && timeInterval.value === 5) {
-                        // Pour l'intervalle 5min, afficher l'heure
-                        return `${hour}h`;
-                    }
-                    if (timeInterval.type === "hour" || timeInterval.type === "minute") {
-                        return `${parseInt(detail).toString().padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
-                    }
-                    return `${parseInt(detail).toString().padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
-                case "week":
-                    if (detail.startsWith("W")) {
-                        const weekNum = detail.substring(1);
-                        return `Semaine ${weekNum} - ${month.padStart(2, "0")}/${year}`;
-                    }
-                    return value;
-                case "month":
-                    return `${month.padStart(2, "0")}/${year}`;
-            }
-        };
-
-        const xLabels = xValues.map(getXLabel);
-        const yLabels = yValues.map(getYLabel);
-
-        // Réorganiser les données pour l'affichage
-        const adjustedPoints = points.map(point => [
-            xValues.indexOf(point.x),
-            yValues.indexOf(point.y),
-            point.value
-        ]);
 
         return {
-            textStyle: {
-                fontFamily: "Barlow, sans-serif",
-                color: "#18213e"
-            },
+            ...adaptiveConfig,
             title: {
-                text: `Répartition de la consommation ${energyConfig.label.toLowerCase()}`,
+                text: getTitle(),
                 left: "center",
                 top: 10,
                 textStyle: {
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: 600,
-                    color: "#18213e",
-                    fontFamily: "Barlow, sans-serif"
+                    color: "#18213e"
                 }
             },
-            tooltip: {
-                position: "top",
-                trigger: "item",
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderColor: "#e2e8f0",
-                borderWidth: 1,
-                padding: [12, 16],
-                className: "heatmap-tooltip",
-                formatter: (params: any) => {
-                    const [x, y, value] = params.value;
-                    const yLabel = yLabels[y];
-                    const xLabel = xLabels[x];
-                    
-                    let formattedDate = "";
-                    let formattedValue = "";
-
-                    switch (displayMode) {
-                        case "day":
-                            if (timeInterval.type === "minute" && timeInterval.value === 5) {
-                                // Format attendu: "JJ/MM/YYYY" dans yLabel et "HH" dans yLabel original
-                                // Récupérer depuis l'original yValues[y]
-                                const originalY = yValues[y]; // Format: "YYYY-MM-DD-HH"
-                                const [year, month, day, hour] = originalY.split("-");
-                                const minutes = (parseInt(xLabel) * 5).toString().padStart(2, "0");
-                                formattedDate = `${day}/${month}/${year} ${hour}:${minutes}`;
-                            } else if (timeInterval.type === "minute") {
-                                // Format attendu dans yLabel: "JJ/MM/YYYY"
-                                const dateParts = yLabel.split("/");
-                                if (dateParts.length >= 3) {
-                                    const [day, month, year] = dateParts;
-                                    const [hours, minutes] = xLabel.split(":");
-                                    formattedDate = `${day}/${month}/${year} ${hours || "00"}:${minutes || "00"}`;
-                                } else {
-                                    formattedDate = `${yLabel} ${xLabel}`;
-                                }
-                            } else if (timeInterval.type === "hour") {
-                                // Format attendu dans yLabel: "JJ/MM/YYYY"
-                                const dateParts = yLabel.split("/");
-                                if (dateParts.length >= 3) {
-                                    const [day, month, year] = dateParts;
-                                    const startHour = xLabel.split("h-")[0] || xLabel;
-                                    formattedDate = `${day}/${month}/${year} ${startHour}:00`;
-                                } else {
-                                    formattedDate = `${yLabel} ${xLabel}`;
-                                }
-                            } else {
-                                // Format par défaut
-                                const dateParts = yLabel.split("/");
-                                if (dateParts.length >= 3) {
-                                    const [day, month, year] = dateParts;
-                                    formattedDate = `${day}/${month}/${year} ${xLabel}`;
-                                } else {
-                                    formattedDate = `${yLabel} ${xLabel}`;
-                                }
-                            }
-                            break;
-                        case "week":
-                            // Format: "Lun/Mar/etc." pour xLabel et "Semaine X - MM/YYYY" pour yLabel
-                            formattedDate = `${xLabel} ${yLabel}`;
-                            break;
-                        case "month":
-                            // Format: "DD" pour xLabel et "MM/YYYY" pour yLabel
-                            formattedDate = `${xLabel}/${yLabel}`;
-                            break;
-                        default:
-                            formattedDate = `${yLabel} ${xLabel}`;
-                    }
-
-                    if (value === null || value === 0) {
-                        formattedValue = "Aucune donnée";
-                    } else {
-                        formattedValue = `${value.toFixed(2)} ${energyConfig.unit}`;
-                    }
-
-                    return `
-                    <div class="tw-text-base">
-                        <div class="tw-font-semibold tw-mb-2 tw-text-[#18213e]">
-                            ${formattedDate}
-                        </div>
-                        <div class="tw-text-[#18213e] tw-opacity-80">
-                            ${formattedValue}
-                        </div>
-                    </div>`;
+            visualMap: {
+                min: 0,
+                max: maxVal,
+                calculable: true,
+                orient: displayConfig.mode === "calendarWide" ? "vertical" : "horizontal",
+                left: displayConfig.mode === "calendarWide" ? "right" : "center",
+                bottom: displayConfig.mode === "calendarWide" ? "center" : "5%",
+                itemWidth: 15,
+                itemHeight: displayConfig.mode === "calendarWide" ? 120 : 120,
+                text: ["Max", "Min"],
+                textStyle: {
+                    fontSize: 10
                 },
-                extraCssText: "box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-radius: 8px; min-width: 200px;"
-            },
-            grid: {
-                left: "10%",
-                right: "10%",
-                top: "15%",
-                bottom: "25%",
-                containLabel: true
-            },
-            xAxis: {
-                type: "category",
-                data: xLabels,
-                splitArea: {
-                    show: true,
-                    areaStyle: {
-                        color: ["rgba(250,250,250,0.3)", "rgba(245,245,245,0.3)"]
-                    }
-                },
-                axisLabel: {
-                    color: "#18213e",
-                    fontFamily: "Barlow, sans-serif",
-                    fontSize: 12,
-                    rotate: displayMode === "day" ? 0 : 45,
-                    interval: 0,
-                    formatter: (value: string) => {
-                        if (displayMode === "month" && value.startsWith("Semaine")) {
-                            return value.replace("Semaine", "S");
-                        }
-                        return value;
-                    }
-                },
-                axisLine: {
-                    lineStyle: {
-                        color: "#e2e8f0"
-                    }
-                }
-            },
-            yAxis: {
-                type: "category",
-                data: yLabels,
-                inverse: true,
-                splitArea: {
-                    show: true,
-                    areaStyle: {
-                        color: ["rgba(250,250,250,0.3)", "rgba(245,245,245,0.3)"]
-                    }
-                },
-                axisLabel: {
-                    color: "#18213e",
-                    fontFamily: "Barlow, sans-serif",
-                    fontSize: 12,
-                    formatter: (value: string) => {
-                        // Raccourcir les labels si nécessaire
-                        if (value.length > 25) {
-                            return value.substring(0, 22) + "...";
-                        }
-                        return value;
-                    }
-                },
-                axisLine: {
-                    lineStyle: {
-                        color: "#e2e8f0"
-                    }
+                inRange: {
+                    color: ["#f0f0f0", energyConfig.color + "40", energyConfig.color + "80", energyConfig.color]
                 }
             },
             series: [
                 {
                     name: "Consommation",
                     type: "heatmap",
-                    data: adjustedPoints.filter(([_, __, value]) => value !== null),
-                    label: {
-                        show: false
+                    data: points.filter((p: any) => (Array.isArray(p) ? p[2] !== null : p.value[2] !== null)),
+                    label: { show: false },
+                    itemStyle: {
+                        borderColor: "#fff",
+                        borderWidth: displayConfig.mode === "calendarWide" ? 2 : 1,
+                        borderRadius: 3
                     },
                     emphasis: {
                         itemStyle: {
-                            borderColor: "#fff",
-                            borderWidth: 2,
-                            shadowBlur: 15,
-                            shadowColor: energyConfig.color + "80"
+                            shadowBlur: 5,
+                            shadowColor: "rgba(0, 0, 0, 0.2)"
                         }
-                    },
-                    itemStyle: {
-                        borderRadius: 3,
-                        borderColor: "#fff",
-                        borderWidth: 1.5,
-                        opacity: 0.9
                     }
                 },
                 {
                     name: "Pas de données",
                     type: "heatmap",
-                    data: adjustedPoints.filter(([_, __, value]) => value === null).map(([x, y]) => [x, y, 0]),
-                    label: {
-                        show: false
-                    },
-                    emphasis: {
-                        itemStyle: {
-                            borderColor: "#fff",
-                            borderWidth: 2,
-                            shadowBlur: 15,
-                            shadowColor: "#99999980"
-                        }
-                    },
+                    data: points
+                        .filter((p: any) => (Array.isArray(p) ? p[2] === null : p.value[2] === null))
+                        .map((p: any) => {
+                            if (!Array.isArray(p)) {
+                                return { value: [p.value[0], p.value[1], -1], name: p.name };
+                            }
+                            return [p[0], p[1], -1];
+                        }),
                     itemStyle: {
-                        borderRadius: 3,
-                        borderColor: "#fff",
-                        borderWidth: 1.5,
-                        opacity: 0.3,
-                        color: "#f5f5f5"
-                    }
+                        color: "#f9fafb",
+                        borderColor: "#e5e7eb",
+                        borderWidth: 1,
+                        borderRadius: 2
+                    },
+                    label: { show: false },
+                    emphasis: { disabled: true }
                 }
-            ],
-            visualMap: {
-                min: 0,
-                max: Math.max(...data.map(item => item.value.toNumber())),
-                calculable: true,
-                orient: "horizontal",
-                left: "center",
-                bottom: "8%",
-                itemWidth: 20,
-                itemHeight: 120,
-                showLabel: true,
-                precision: 1,
-                textStyle: {
-                    color: "#18213e",
-                    fontFamily: "Barlow, sans-serif",
-                    fontSize: 12,
-                    fontWeight: 500
-                },
-                formatter: (value: number) => {
-                    if (value === 0) {
-                        return "Aucune consommation";
-                    }
-                    return `${value.toFixed(1)} ${energyConfig.unit}`;
-                },
-                text: ["Consommation élevée", "Consommation faible"],
-                inRange: {
-                    color: [
-                        energyConfig.color + "10", // Couleur très légère pour 0
-                        energyConfig.color + "30",
-                        energyConfig.color + "45",
-                        energyConfig.color + "60",
-                        energyConfig.color + "75",
-                        energyConfig.color + "90",
-                        energyConfig.color
-                    ]
-                }
-            },
-            animation: true,
-            animationDuration: 1000,
-            animationEasing: "cubicInOut"
+            ]
         };
     }, [data, energyConfig, hasData, startDate, endDate, granularityMode, granularityValue, granularityUnit]);
+
+    const adaptiveHeight = useMemo(() => {
+        if (!options.series) return height;
+
+        const titleText = (options.title as any)?.text || "";
+
+        if (titleText.includes("Vue calendaire")) {
+            return "300px";
+        }
+        if (titleText.includes("Vue hebdomadaire")) {
+            return "400px";
+        }
+        return "500px";
+    }, [options, height]);
 
     return (
         <div className="widget-detailswidget tw-w-full tw-bg-white tw-rounded-xl tw-shadow-lg tw-p-6 tw-border tw-border-gray-100 tw-transition-shadow tw-duration-300 hover:tw-shadow-xl">
             {hasData ? (
-                <ReactECharts option={options} style={{ height }} opts={{ renderer: "svg" }} />
-            ) : (
-                <NoDataMessage 
-                    energyConfig={energyConfig} 
-                    startDate={startDate}
-                    endDate={endDate}
+                <ReactECharts
+                    option={options}
+                    style={{ height: adaptiveHeight }}
+                    opts={{ renderer: "svg" }}
+                    notMerge={true}
+                    lazyUpdate={true}
                 />
+            ) : (
+                <NoDataMessage energyConfig={energyConfig} startDate={startDate} endDate={endDate} />
             )}
         </div>
     );
-}; 
+};

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="mendix.pdfreportwidget.PDFReportWidget" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    
+    <name>PDF Report Widget</name>
+    <description>Widget pour générer des rapports PDF avec une structure de données hiérarchique configurable.</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="General">
+            <systemProperty key="Name"/>
+            <property key="reportTitle" type="string" required="true">
+                <caption>Titre du rapport</caption>
+                <description>Le titre qui apparaîtra en haut du PDF</description>
+            </property>
+            <property key="reportDescription" type="textTemplate" required="false">
+                <caption>Description du rapport</caption>
+                <description>Description qui apparaîtra sur la page de couverture</description>
+            </property>
+            <property key="companyLogo" type="image" required="false">
+                <caption>Logo de l'entreprise</caption>
+                <description>Logo qui apparaîtra sur la page de couverture</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Data Handling">
+            <property key="fetchDataAction" type="action" required="false">
+                <caption>Action de récupération des données</caption>
+                <description>Exécuter ce microflow/nanoflow pour charger les données initiales du rapport depuis une source externe (ex: API).</description>
+            </property>
+            <property key="reportLevels" type="object" isList="true" required="true">
+                <caption>Niveaux de Données du Rapport (après récupération)</caption>
+                <description>Configurer chaque niveau hiérarchique. Ces données sont attendues après l'exécution de l'action de récupération (si configurée).</description>
+                <properties>
+                    <propertyGroup caption="Level Definition">
+                        <property key="levelEntitySource" type="datasource" isList="true" required="true">
+                            <caption>Source de données pour ce niveau</caption>
+                            <description>Sélectionnez l'entité pour ce niveau hiérarchique.</description>
+                        </property>
+                        <property key="levelDisplayNameAttribute" type="attribute" dataSource="levelEntitySource" required="true">
+                            <caption>Attribut Nom du Niveau</caption>
+                            <description>Attribut contenant le nom/identifiant des objets de ce niveau (ex: Machine.Nom).</description>
+                            <attributeTypes>
+                                <attributeType name="String"/>
+                            </attributeTypes>
+                        </property>
+                        <property key="levelTypeIdentifier" type="string" required="true" defaultValue="Niveau">
+                            <caption>Identifiant du Type de Niveau</caption>
+                            <description>Un nom pour ce type de niveau (ex: 'Machine', 'Atelier', 'Secteur'). Utilisé pour l'organisation du rapport.</description>
+                        </property>
+                    </propertyGroup>
+
+                    <propertyGroup caption="Parent Hierarchy (Optional)">
+                        <property key="parent1LevelDescription" type="string" required="false">
+                            <caption>Parent 1: Description Libellé</caption>
+                            <description>Libellé pour le parent de niveau 1 (ex: 'Nom Atelier'). Utilisé pour structurer les données.</description>
+                        </property>
+                        <property key="parent1NameFromAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Parent 1: Attribut Nom Parent</caption>
+                            <description>Attribut de l'entité de ce niveau contenant le nom du parent de niveau 1.</description>
+                            <attributeTypes><attributeType name="String"/></attributeTypes>
+                        </property>
+
+                        <property key="parent2LevelDescription" type="string" required="false">
+                            <caption>Parent 2: Description Libellé</caption>
+                            <description>Libellé pour le parent de niveau 2 (ex: 'Nom Secteur'). Utilisé pour structurer les données.</description>
+                        </property>
+                        <property key="parent2NameFromAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Parent 2: Attribut Nom Parent</caption>
+                            <description>Attribut de l'entité de ce niveau contenant le nom du parent de niveau 2.</description>
+                            <attributeTypes><attributeType name="String"/></attributeTypes>
+                        </property>
+                        
+                        <!-- Potentiellement ajouter Parent 3 ici sur le même modèle -->
+
+                    </propertyGroup>
+
+                    <propertyGroup caption="Consumption Configuration">
+                        <property key="consumptionDataSourceType" type="enumeration" defaultValue="singleAttributeWithEnergyType">
+                            <caption>Type de Source de Données de Consommation</caption>
+                            <description>Choisir comment les données de consommation sont structurées pour ce niveau.</description>
+                            <enumerationValues>
+                                <enumerationValue key="singleAttributeWithEnergyType">Attribut unique de conso + type d'énergie</enumerationValue>
+                                <enumerationValue key="multipleAttributesPerEnergyType">Attributs multiples par type d'énergie</enumerationValue>
+                                <enumerationValue key="none">Pas de données de consommation pour ce niveau</enumerationValue>
+                            </enumerationValues>
+                        </property>
+                        
+                        <property key="singleTotalConsumptionAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Consommation Totale Unique</caption>
+                            <description>Attribut pour la valeur de consommation totale (si type 'Attribut unique').</description>
+                            <attributeTypes>
+                                <attributeType name="Decimal"/>
+                                <attributeType name="Integer"/>
+                                <attributeType name="Long"/>
+                            </attributeTypes>
+                        </property>
+                        <property key="energyTypeAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Type d'Énergie</caption>
+                            <description>Attribut (String/Enum) indiquant le type d'énergie (ex: 'Elec', 'Gaz', 'Eau', 'Air') (si type 'Attribut unique').</description>
+                            <attributeTypes>
+                                <attributeType name="String"/>
+                                <attributeType name="Enum"/>
+                            </attributeTypes>
+                        </property>
+
+                        <property key="consoElecAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Consommation Électrique</caption>
+                            <description>Attribut pour la consommation électrique (si type 'Attributs multiples').</description>
+                             <attributeTypes><attributeType name="Decimal"/><attributeType name="Integer"/><attributeType name="Long"/></attributeTypes>
+                        </property>
+                        <property key="consoGazAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Consommation Gaz</caption>
+                            <description>Attribut pour la consommation de gaz (si type 'Attributs multiples').</description>
+                             <attributeTypes><attributeType name="Decimal"/><attributeType name="Integer"/><attributeType name="Long"/></attributeTypes>
+                        </property>
+                        <property key="consoEauAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Consommation Eau</caption>
+                            <description>Attribut pour la consommation d'eau (si type 'Attributs multiples').</description>
+                             <attributeTypes><attributeType name="Decimal"/><attributeType name="Integer"/><attributeType name="Long"/></attributeTypes>
+                        </property>
+                        <property key="consoAirAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Consommation Air</caption>
+                            <description>Attribut pour la consommation d'air (si type 'Attributs multiples').</description>
+                             <attributeTypes><attributeType name="Decimal"/><attributeType name="Integer"/><attributeType name="Long"/></attributeTypes>
+                        </property>
+                        <property key="isElecRelevantAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Pertinence Conso Électrique (Bool)</caption>
+                            <description>Attribut booléen indiquant si la conso élec est pertinente/active.</description>
+                            <attributeTypes><attributeType name="Boolean"/></attributeTypes>
+                        </property>
+                        <property key="isGazRelevantAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Pertinence Conso Gaz (Bool)</caption>
+                            <description>Attribut booléen indiquant si la conso gaz est pertinente/active.</description>
+                            <attributeTypes><attributeType name="Boolean"/></attributeTypes>
+                        </property>
+                        <property key="isEauRelevantAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Pertinence Conso Eau (Bool)</caption>
+                            <description>Attribut booléen indiquant si la conso eau est pertinente/active.</description>
+                            <attributeTypes><attributeType name="Boolean"/></attributeTypes>
+                        </property>
+                         <property key="isAirRelevantAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Pertinence Conso Air (Bool)</caption>
+                            <description>Attribut booléen indiquant si la conso air est pertinente/active.</description>
+                            <attributeTypes><attributeType name="Boolean"/></attributeTypes>
+                        </property>
+                    </propertyGroup>
+
+                    <propertyGroup caption="Production Configuration (Optional)">
+                        <property key="productionAttribute" type="attribute" dataSource="levelEntitySource" required="false">
+                            <caption>Attribut Production</caption>
+                            <description>Attribut contenant la valeur de production pour ce niveau.</description>
+                            <attributeTypes>
+                                <attributeType name="Decimal"/>
+                                <attributeType name="Integer"/>
+                                <attributeType name="Long"/>
+                            </attributeTypes>
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Date Range Filter">
+            <property key="dateStart" type="attribute" required="true">
+                <caption>Date de début</caption>
+                <description>Date de début pour filtrer les données (appliqué à l'attribut timestamp de chaque niveau).</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="dateEnd" type="attribute" required="true">
+                <caption>Date de fin</caption>
+                <description>Date de fin pour filtrer les données (appliqué à l'attribut timestamp de chaque niveau).</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Visualization">
+            <property key="showCharts" type="boolean" defaultValue="true">
+                <caption>Afficher les graphiques</caption>
+                <description>Inclure des graphiques dans le rapport (fonctionnalité à redéfinir).</description>
+            </property>
+            <property key="chartType" type="enumeration" defaultValue="line">
+                <caption>Type de graphique principal</caption>
+                <description>Le type de graphique à afficher (fonctionnalité à redéfinir).</description>
+                <enumerationValues>
+                    <enumerationValue key="line">Ligne</enumerationValue>
+                    <enumerationValue key="bar">Barre</enumerationValue>
+                    <enumerationValue key="pie">Camembert</enumerationValue>
+                </enumerationValues>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

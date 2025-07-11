@@ -1,17 +1,17 @@
 /* eslint-disable prettier/prettier */
 import * as React from "react";
-import { createElement } from "react";
+import { createElement, Fragment } from "react";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { cn } from "../../lib/utils";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { TimePicker } from "./time-picker";
 import * as Popover from "@radix-ui/react-popover";
-//import { ReactElement } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { EditableValue, ActionValue, ValueStatus } from "mendix";
+import styles from "./date-range-picker.module.css";
 
 interface DatePreset {
   label: string;
@@ -53,6 +53,69 @@ const presets: DatePreset[] = [
     }
   }
 ];
+
+// Sous-composant pour la colonne des préréglages
+const PresetsColumn: React.FC<{ onSelect: (preset: DatePreset) => void }> = ({ onSelect }) => (
+    <div className={styles.presets}>
+        <div className={styles.presetsTitle}>Périodes</div>
+        {presets.map((preset) => (
+            <motion.button
+                key={preset.label}
+                className={styles.presetButton}
+                onClick={() => onSelect(preset)}
+                whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                whileTap={{ scale: 0.98 }}
+            >
+                {preset.label}
+            </motion.button>
+        ))}
+    </div>
+);
+
+// Sous-composant pour la vue calendrier et les sélecteurs de temps
+const CalendarView: React.FC<{
+    selected: DateRange | undefined;
+    onSelect: (range: DateRange | undefined) => void;
+    onFromTimeChange: (date: Date) => void;
+    onToTimeChange: (date: Date) => void;
+}> = ({ selected, onSelect, onFromTimeChange, onToTimeChange }) => (
+    <div className={styles.calendarContainer}>
+        <Calendar
+            initialFocus
+            mode="range"
+            defaultMonth={selected?.from}
+            selected={selected}
+            onSelect={onSelect}
+            numberOfMonths={2}
+        />
+        <div className={styles.timePickerContainer}>
+            <div>
+                <div className={styles.timePickerLabel}>Début</div>
+                <TimePicker 
+                    value={selected?.from || new Date()} 
+                    onChange={onFromTimeChange} 
+                    disabled={!selected?.from}
+                />
+            </div>
+            <div>
+                <div className={styles.timePickerLabel}>Fin</div>
+                <TimePicker 
+                    value={selected?.to || new Date()} 
+                    onChange={onToTimeChange} 
+                    disabled={!selected?.to}
+                />
+            </div>
+        </div>
+    </div>
+);
+
+// Sous-composant pour le pied de page avec les boutons d'action
+const ActionFooter: React.FC<{ onCancel: () => void; onApply: () => void; }> = ({ onCancel, onApply }) => (
+    <div className={styles.footer}>
+        <Button variant="outline" data-variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button onClick={onApply} data-variant="primary">Appliquer</Button>
+    </div>
+);
 
 export interface DateRangePickerProps {
     className?: string;
@@ -158,10 +221,23 @@ export function DateRangePicker({
     };
 
     const handlePresetSelect = (preset: DatePreset) => {
-        console.log("handlePresetSelect called with preset:", preset.label);
         const range = preset.getValue();
-        console.log("Preset range:", range);
-        setTempDate(range);
+        // Appliquer directement la plage et mettre à jour Mendix
+        setDate(range);
+
+        if (startDateAttribute?.status === ValueStatus.Available && range.from) {
+            startDateAttribute.setValue(range.from);
+        }
+        if (endDateAttribute?.status === ValueStatus.Available && range.to) {
+            endDateAttribute.setValue(range.to);
+        }
+
+        if (onDateChange?.canExecute) {
+            onDateChange.execute();
+        }
+
+        // Fermer le popover
+        setOpen(false);
     };
 
     const handleApply = () => {
@@ -214,122 +290,68 @@ export function DateRangePicker({
     };
 
     return (
-        <div className={cn("tw-grid tw-gap-2 tw-font-barlow tw-w-full tw-min-w-[320px]", className)}>
+        <div className={`${styles.dateRangePicker} ${className || ''}`}>
             <Popover.Root open={open} onOpenChange={handlePopoverChange}>
                 <Popover.Trigger asChild>
                     <Button
                         id="date"
                         variant="outline"
-                        className={cn(
-                            "!tw-h-12 !tw-min-h-[48px] !tw-py-3 tw-justify-start tw-text-left tw-font-normal tw-bg-white tw-text-lg",
-                            !date && "tw-text-muted-foreground hover:tw-border-input",
-                            "tw-shadow-sm"
-                        )}
+                        className={`${styles.triggerButton} ${!date ? styles.triggerButtonMuted : ''}`}
                     >
-                        <CalendarIcon className="tw-mr-4 tw-h-6 tw-w-6 tw-text-muted-foreground" />
-                        {date?.from ? (
-                            date.to ? (
-                                <React.Fragment>
-                                    {format(date.from, "dd MMM, yyyy HH:mm", { locale: fr })} -{" "}
-                                    {format(date.to, "dd MMM, yyyy HH:mm", { locale: fr })}
-                                </React.Fragment>
-                            ) : (
-                                format(date.from, "dd MMM, yyyy HH:mm", { locale: fr })
-                            )
-                        ) : (
-                            <span className="tw-text-lg">Sélectionner une plage de dates</span>
-                        )}
+                        <CalendarIcon className={styles.triggerIcon} />
+                        <span className={styles.triggerText}>
+                            {date?.from && date.to
+                                ? `${format(date.from, "dd MMM yyyy, HH:mm", { locale: fr })} - ${format(date.to, "dd MMM yyyy, HH:mm", { locale: fr })}`
+                                : "Sélectionner une plage de dates"}
+                        </span>
                     </Button>
                 </Popover.Trigger>
-                <Popover.Portal>
-                    <Popover.Content 
-                        className="tw-w-auto tw-p-0 tw-bg-popover tw-rounded-lg tw-border tw-shadow-lg tw-flex tw-z-50" 
-                        align="end"
-                        side="bottom"
-                        sideOffset={5}
-                        alignOffset={0}
-                        avoidCollisions={true}
-                    >
-                        <div className="tw-flex tw-flex-col tw-gap-3 tw-p-5 tw-border-r tw-min-w-[200px]">
-                            <div className="tw-text-lg tw-font-medium tw-mb-2 tw-font-barlow">Périodes prédéfinies</div>
-                            {presets.map((preset) => (
-                                <Button
-                                    key={preset.label}
-                                    variant="ghost"
-                                    className="tw-justify-start tw-font-barlow"
-                                    onClick={() => handlePresetSelect(preset)}
+                <AnimatePresence>
+                    {open && (
+                        <Popover.Portal forceMount>
+                            <Popover.Content
+                                asChild
+                                className={styles.popoverContent}
+                                align="end"
+                                side="bottom"
+                                sideOffset={8}
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ type: "spring", damping: 30, stiffness: 350 }}
                                 >
-                                    {preset.label}
-                                </Button>
-                            ))}
-                        </div>
-                        <div className="tw-flex tw-flex-col tw-p-4">
-                            <div className="tw-p-5 tw-border-b">
-                                <div className="tw-text-xl tw-font-medium tw-mb-3">Sélectionner une plage de dates</div>
-                                <div className="tw-flex tw-items-center tw-gap-3">
-                                    <CalendarIcon className="tw-h-6 tw-w-6 tw-text-muted-foreground" />
-                                    <span className="tw-text-lg">
-                                        {tempDate?.from && tempDate?.to ? (
-                                            <React.Fragment>
-                                                {format(tempDate.from, "dd MMM, yyyy HH:mm", { locale: fr })} -{" "}
-                                                {format(tempDate.to, "dd MMM, yyyy HH:mm", { locale: fr })}
-                                            </React.Fragment>
-                                        ) : (
-                                            "Sélectionner les dates..."
-                                        )}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="tw-p-5">
-                                <div className="tw-flex tw-gap-8">
-                                    <Calendar
-                                        className="tw-font-barlow"
-                                        initialFocus
-                                        mode="range"
-                                        defaultMonth={tempDate?.from}
-                                        selected={tempDate}
-                                        onSelect={handleSelect}
-                                        numberOfMonths={2}
-                                    />
-                                </div>
-
-                                {tempDate?.from && (
-                                    <div className="tw-mt-5 tw-space-y-4">
-                                        <div className="tw-flex tw-items-center tw-gap-5">
-                                            <div className="tw-flex-1">
-                                                <div className="tw-text-base tw-font-medium tw-mb-2">Début:</div>
-                                                <TimePicker value={tempDate.from} onChange={handleFromTimeChange} />
+                                    <div className={styles.container}>
+                                        <PresetsColumn onSelect={handlePresetSelect} />
+                                        <div className={styles.mainContent}>
+                                            <div className={styles.header}>
+                                                <CalendarIcon className={styles.headerIcon} size={24} /> {/* Increased icon size */}
+                                                <span className={styles.headerText}>
+                                                    {tempDate?.from && tempDate?.to ? (
+                                                        <Fragment>
+                                                            {format(tempDate.from, "dd MMM yyyy, HH:mm", { locale: fr })} -{" "}
+                                                            {format(tempDate.to, "dd MMM yyyy, HH:mm", { locale: fr })}
+                                                        </Fragment>
+                                                    ) : (
+                                                        "Sélectionnez une date de début et de fin"
+                                                    )}
+                                                </span>
                                             </div>
-                                            {tempDate.to && (
-                                                <div className="tw-flex-1">
-                                                    <div className="tw-text-base tw-font-medium tw-mb-2">Fin:</div>
-                                                    <TimePicker value={tempDate.to} onChange={handleToTimeChange} />
-                                                </div>
-                                            )}
+                                            <CalendarView 
+                                                selected={tempDate}
+                                                onSelect={handleSelect}
+                                                onFromTimeChange={handleFromTimeChange}
+                                                onToTimeChange={handleToTimeChange}
+                                            />
+                                            <ActionFooter onCancel={handleCancel} onApply={handleApply} />
                                         </div>
                                     </div>
-                                )}
-                            </div>
-
-                            <div className="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-border-t tw-p-5">
-                                <Button
-                                    variant="outline"
-                                    className="tw-text-lg"
-                                    onClick={handleCancel}
-                                >
-                                    Annuler
-                                </Button>
-                                <Button
-                                    className="tw-text-lg"
-                                    onClick={handleApply}
-                                >
-                                    Appliquer
-                                </Button>
-                            </div>
-                        </div>
-                    </Popover.Content>
-                </Popover.Portal>
+                                </motion.div>
+                            </Popover.Content>
+                        </Popover.Portal>
+                    )}
+                </AnimatePresence>
             </Popover.Root>
         </div>
     );

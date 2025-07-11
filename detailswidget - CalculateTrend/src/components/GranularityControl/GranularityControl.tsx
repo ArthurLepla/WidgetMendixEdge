@@ -15,7 +15,7 @@ import "./GranularityControl.css";
 export interface GranularityControlProps {
   mode: "auto" | "strict";
   value: number;
-  unit: "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "year";
+  unit: "minute" | "hour" | "day" | "week" | "month" | "year";
   onModeChange: (mode: "Auto" | "Strict") => void;
   onValueChange: (value: number) => void;
   onUnitChange: (unit: string) => void;
@@ -56,7 +56,6 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     day: "jours",
     week: "semaines",
     month: "mois",
-    quarter: "trimestres",
     year: "années"
   };
 
@@ -66,7 +65,6 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     day: "jour", 
     week: "semaine",
     month: "mois",
-    quarter: "trimestre",
     year: "année"
   };
 
@@ -76,7 +74,6 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     day: 24 * 60 * 60 * 1000,
     week: 7 * 24 * 60 * 60 * 1000,
     month: 30 * 24 * 60 * 60 * 1000,
-    quarter: 3 * 30 * 24 * 60 * 60 * 1000,
     year: 365 * 24 * 60 * 60 * 1000
   };
 
@@ -118,7 +115,6 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
       day: [1, 2, 3, 5, 7, 10, 14, 21, 30],
       week: [1, 2, 3, 4, 6, 8, 12],
       month: [1, 2, 3, 4, 6, 12],
-      quarter: [1, 2, 3, 4],
       year: [1, 2, 3, 5]
     };
     
@@ -127,7 +123,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
       const bucketMs = opt * unitMsMap[unitType];
       if (bucketMs > analysisDurationMs) return false;
       const points = Math.ceil(analysisDurationMs / bucketMs);
-      return points <= 100;
+      return points <= 2000; // Augmentation de la limite de 100 à 2000
     }) || [];
   }, [analysisDurationMs, unitMsMap]);
 
@@ -148,7 +144,6 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
         day: [1, 2, 3, 5, 7, 14],
         week: [1, 2, 3, 4],
         month: [1, 2, 3, 6],
-        quarter: [1, 2],
         year: [1, 2]
       };
       

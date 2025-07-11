@@ -1,0 +1,197 @@
+/*
+ * DateRangePicker Component Styles
+ * Minimalist, readable, and consistent design.
+ */
+
+.popoverContent {
+    background-color: white;
+    border-radius: 0.75rem; /* 12px */
+    border: 1px solid #e5e7eb; /* gray-200 */
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    display: flex;
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px; /* Base font size */
+    min-width: 820px; /* Increased width */
+    max-width: 90vw;
+}
+
+.presets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Increased gap */
+    padding: 1.5rem; /* Increased padding */
+    border-right: 1px solid #f3f4f6; /* gray-100 */
+    background-color: #f9fafb; /* gray-50 */
+    min-width: 240px; /* Increased width */
+}
+
+.presetsTitle {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937; /* gray-800 */
+}
+
+.presetButton {
+    justify-content: flex-start !important;
+    font-weight: 500 !important; /* Medium weight */
+    font-size: 1.05rem !important; /* Slightly larger */
+    color: #4b5563 !important; /* gray-600 */
+    padding: 0.875rem 1.25rem !important; /* Increased padding */
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0.5rem !important; /* Larger radius */
+    text-align: left !important;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.presetButton:hover {
+    background-color: #e5e7eb !important; /* gray-200 */
+    color: #111827 !important; /* gray-900 */
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Permet au contenu principal de prendre l'espace restant */
+}
+
+.header {
+    padding: 1.5rem; /* Increased padding */
+    border-bottom: 1px solid #f3f4f6; /* gray-100 */
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Increased gap */
+}
+
+.headerIcon {
+    color: #9ca3af; /* gray-400 */
+}
+
+.headerText {
+    font-size: 1.25rem; /* 20px */
+    color: #1f2937; /* gray-800 */
+    font-weight: 500;
+}
+
+.calendarContainer {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column; /* Aligne les calendriers et les sélecteurs de temps verticalement */
+    flex: 1; /* Permet au conteneur de grandir */
+    gap: 2rem; /* Espace entre le calendrier et les sélecteurs de temps */
+
+    /* Variables pour la taille des polices du calendrier */
+    --rdp-cell-size: 48px !important;
+    --rdp-caption-font-size: 1.25rem !important; /* Taille du nom du mois (ex: "juillet 2025") */
+    --rdp-head_cell-font-size: 1rem !important; /* Taille des jours de la semaine (lu, ma, me...) */
+    --rdp-day-font-size: 1.125rem !important; /* Taille des numéros des jours */
+    --rdp-nav-button-size: 40px;
+}
+
+.timePickerContainer {
+    margin-top: 1.5rem; /* Increased margin */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem; /* Increased gap */
+    padding: 1.5rem; /* Increased padding */
+    border-top: 1px solid #f3f4f6; /* gray-100 */
+}
+
+.timePickerLabel {
+    font-size: 1.05rem; /* 17px */
+    font-weight: 500;
+    margin-bottom: 0.75rem; /* Increased margin */
+    color: #374151; /* gray-700 */
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem; /* Increased gap */
+    padding: 1.5rem; /* Increased padding */
+    background-color: #f9fafb; /* gray-50 */
+    border-top: 1px solid #f3f4f6; /* gray-100 */
+}
+
+.footer button {
+    font-size: 1.05rem !important;
+    padding: 0.875rem 1.5rem !important; /* Larger buttons */
+    border-radius: 0.5rem !important; /* Larger radius */
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Specific styles for primary and outline buttons */
+.footer button[data-variant="primary"] {
+    background-color: #18213e !important;
+    color: white !important;
+    border: 1px solid #18213e !important;
+}
+
+.footer button[data-variant="primary"]:hover {
+    background-color: #2a3b6a !important;
+}
+
+.footer button[data-variant="outline"] {
+    background-color: transparent !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.footer button[data-variant="outline"]:hover {
+    background-color: #f9fafb !important;
+    border-color: #9ca3af !important;
+}
+
+
+.dateRangePicker {
+    font-family: 'Barlow', sans-serif;
+    min-width: 320px;
+}
+
+.triggerButton {
+    height: 44px; /* Harmonized height */
+    min-height: 44px; /* Harmonized height */
+    width: 100%;
+    justify-content: flex-start;
+    text-align: center;
+    font-weight: 400;
+    background-color: white;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    border: 1px solid #e5e7eb; /* gray-200 */
+    border-radius: 0.5rem;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.triggerButton:hover {
+    background-color: #f9fafb; /* gray-50 */
+    border-color: #d1d5db; /* gray-300 */
+}
+
+.triggerButtonMuted {
+    color: #6b7280; /* gray-500 */
+}
+
+.triggerIcon {
+    margin-right: 0.75rem;
+    height: 1.25rem; /* 20px */
+    width: 1.25rem; /* 20px */
+    color: #6b7280; /* gray-500 */
+}
+
+.triggerText {
+    font-size: 1.3rem; /* Harmonized font size (18px) */
+    line-height: 1.5rem;
+}
+
+.container {
+    display: flex;
+} 

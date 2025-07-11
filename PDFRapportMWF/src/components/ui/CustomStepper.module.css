@@ -1,0 +1,51 @@
+/* Stepper simplifié - apparence discrète et non-cliquable */
+.stepperContainer {
+    padding: 16px 0;
+    background: transparent;
+}
+
+/* S'assurer que les étapes n'ont pas l'air cliquables */
+.stepperContainer :global(.ant-steps-item) {
+    cursor: default !important;
+}
+
+.stepperContainer :global(.ant-steps-item-title) {
+    cursor: default !important;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Désactiver tous les effets hover pour éviter l'impression cliquable */
+.stepperContainer :global(.ant-steps-item-icon:hover) {
+    transform: none !important;
+}
+
+.stepperContainer :global(.ant-steps-item-container) {
+    cursor: default !important;
+}
+
+.stepperContainer :global(.ant-steps-item-container:hover) {
+    opacity: 1 !important;
+}
+
+/* Forcer la couleur verte pour les étapes finies */
+:where(.css-dev-only-do-not-override-n05tm3).ant-steps .ant-steps-item-finish.ant-steps-item-custom .ant-steps-item-icon > .ant-steps-icon {
+    background-color: #38a13c !important;
+    border-color: #38a13c !important;
+    color: #38a13c !important;
+}
+
+:where(.css-dev-only-do-not-override-n05tm3).ant-steps .ant-steps-item-finish .ant-steps-item-title {
+    color: #38a13c !important;
+}
+
+/* Responsive - taille réduite sur mobile */
+@media (max-width: 768px) {
+    .stepperContainer {
+        padding: 12px 0;
+    }
+    
+    .stepperContainer :global(.ant-steps-item-title) {
+        font-size: 12px;
+    }
+} 
