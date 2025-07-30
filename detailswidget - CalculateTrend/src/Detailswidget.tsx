@@ -168,7 +168,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         onModeChange,
         onTimeChange,
         // Nouvel interrupteur : autoriser oui/non le réglage manuel de la granularité
-        allowManualGranularity = false
+        enableAdvancedGranularity
     } = props;
 
     // État pour gérer quel IPE est actif en mode double
@@ -246,7 +246,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         return displayedUnit as "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
     })(displayedUnit);
     
-    const granularityDisabled = !allowManualGranularity || !isPreviewOK;
+    const granularityDisabled = !enableAdvancedGranularity || !isPreviewOK;
 
     // -------- Toast Info --------
     const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -578,9 +578,29 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
     const autoGranularity = useMemo(() => {
         if (!effectiveStartDate || !effectiveEndDate) {
-            return { value: 5, unit: "minute" };
+            return { value: 5, unit: "minutes" };
         }
-        return getAutoGranularity(effectiveStartDate, effectiveEndDate);
+        const granularity = getAutoGranularity(effectiveStartDate, effectiveEndDate);
+        const unitLabels: Record<string, string> = {
+            minute: "minutes",
+            hour: "heures", 
+            day: "jours",
+            week: "semaines",
+            month: "mois",
+            year: "années"
+        };
+        
+        return {
+            value: granularity.value,
+            unit: granularity.value === 1 
+                ? granularity.unit === "minute" ? "minute" 
+                  : granularity.unit === "hour" ? "heure"
+                  : granularity.unit === "day" ? "jour"
+                  : granularity.unit === "week" ? "semaine"
+                  : granularity.unit === "month" ? "mois"
+                  : "année"
+                : unitLabels[granularity.unit] || "minutes"
+        };
     }, [effectiveStartDate, effectiveEndDate]);
 
     const filteredDataForExport = useMemo(() => {
@@ -676,7 +696,8 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     showExportButton={hasData}
                     title={`Consommation ${energyConfig.label.toLowerCase()}`}
                     noDataContent={!hasData ? <NoDataMessage /> : undefined}
-                    showGranularityControl={hasGranularityConfig}
+                    showGranularityControl={hasGranularityConfig && enableAdvancedGranularity}
+                    showSimpleGranularity={hasGranularityConfig && !enableAdvancedGranularity}
                     granularityMode={uiGranularityMode}
                     granularityValue={displayedTime}
                     granularityUnit={uiGranularityUnit}
@@ -733,7 +754,8 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     ipe2Name={ipe2Name}
                     activeIPE={activeIPE}
                     onIPEToggle={setActiveIPE}
-                    showGranularityControl={hasGranularityConfig}
+                    showGranularityControl={hasGranularityConfig && enableAdvancedGranularity}
+                    showSimpleGranularity={hasGranularityConfig && !enableAdvancedGranularity}
                     granularityMode={uiGranularityMode}
                     granularityValue={displayedTime}
                     granularityUnit={uiGranularityUnit}
@@ -762,7 +784,8 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 extraHeaderContent={ipeCards}
                 title={`Vue Générale ${energyConfig.label.toLowerCase()}`}
                 noDataContent={!hasData ? <NoDataMessage /> : undefined}
-                showGranularityControl={hasGranularityConfig}
+                showGranularityControl={hasGranularityConfig && enableAdvancedGranularity}
+                showSimpleGranularity={hasGranularityConfig && !enableAdvancedGranularity}
                 granularityMode={uiGranularityMode}
                 granularityValue={displayedTime}
                 granularityUnit={uiGranularityUnit}

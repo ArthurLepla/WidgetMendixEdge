@@ -86,8 +86,8 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   onDayMouseEnter
 }) => {
   const daysInMonth = getDaysInMonth(month);
-  const startDay = getDay(startOfMonth(month)); // 0 = Sunday, 1 = Monday
-  const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+  const startDay = (getDay(startOfMonth(month)) + 6) % 7; // Ajustement pour commencer par lundi (0 = lundi)
+  const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D']; // Lundi en premier
   
   const handleDayClick = (day: number) => {
     const date = new Date(month.getFullYear(), month.getMonth(), day);
@@ -110,31 +110,31 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   
   const rangeFrom = selected?.from ? startOfDay(selected.from) : null;
   const rangeTo = selected?.to ? startOfDay(selected.to) : (hoveredDate ? startOfDay(hoveredDate) : null);
-
+  
   return (
     <div className="drp-calendar">
       <div className="drp-calendar-header">
-        <button
+          <button
           type="button"
-          className="drp-calendar-nav"
-          onClick={() => navigateMonth('prev')}
+            className="drp-calendar-nav"
+            onClick={() => navigateMonth('prev')}
           disabled={disablePrev || hidePrev}
           aria-label="Mois précédent"
-        >
-          <ChevronLeft size={18} />
-        </button>
+          >
+            <ChevronLeft size={18} />
+          </button>
         <h3 className="drp-calendar-title">
           {format(month, 'MMMM yyyy', { locale: fr })}
         </h3>
-        <button
+          <button
           type="button"
-          className="drp-calendar-nav"
-          onClick={() => navigateMonth('next')}
+            className="drp-calendar-nav"
+            onClick={() => navigateMonth('next')}
           disabled={disableNext || hideNext}
           aria-label="Mois suivant"
-        >
-          <ChevronRight size={18} />
-        </button>
+          >
+            <ChevronRight size={18} />
+          </button>
       </div>
       <div className="drp-calendar-grid">
         {weekDays.map((day) => (
@@ -173,17 +173,17 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
           if (isEnd) classNames.push('drp-calendar-day--range-end');
 
           return (
-            <motion.button
-              key={day}
+          <motion.button
+            key={day}
               className={classNames.join(' ')}
-              onClick={() => handleDayClick(day)}
+            onClick={() => handleDayClick(day)}
               onMouseEnter={() => onDayMouseEnter?.(dayDate)}
-              whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              type="button"
-            >
-              {day}
-            </motion.button>
+            type="button"
+          >
+            {day}
+          </motion.button>
           );
         })}
       </div>
@@ -276,7 +276,7 @@ const TimePicker: React.FC<{
     newDate.setHours(hourValue);
     onChange(newDate);
   };
-
+  
   return (
     <div className={`drp-time-input ${disabled ? 'drp-time-input--disabled' : ''}`}>
       <Clock size={16} className="drp-time-input-icon" />
@@ -367,15 +367,63 @@ export function DateRangePickerV2({
   const [tempDate, setTempDate] = React.useState<DateRange | undefined>(date);
   const [open, setOpen] = React.useState(false);
   const [hoveredDate, setHoveredDate] = React.useState<Date | null>(null);
-  const [leftMonth, setLeftMonth] = React.useState(new Date());
-  const [rightMonth, setRightMonth] = React.useState(() => {
-    const next = new Date();
-    next.setMonth(next.getMonth() + 1);
-    return next;
-  });
+  
+  // Fonction utilitaire pour calculer les mois à afficher
+  const calculateMonthsToDisplay = (selectedDate?: DateRange) => {
+    if (selectedDate?.from) {
+      const leftMonth = new Date(selectedDate.from.getFullYear(), selectedDate.from.getMonth(), 1);
+      let rightMonth;
+      
+      if (selectedDate.to) {
+        const endMonth = new Date(selectedDate.to.getFullYear(), selectedDate.to.getMonth(), 1);
+        // Si les dates sont dans le même mois, afficher le mois suivant à droite
+        if (leftMonth.getTime() === endMonth.getTime()) {
+          rightMonth = new Date(leftMonth);
+          rightMonth.setMonth(rightMonth.getMonth() + 1);
+        } else {
+          rightMonth = endMonth;
+        }
+      } else {
+        // Si seulement la date de début est définie, afficher le mois suivant à droite
+        rightMonth = new Date(leftMonth);
+        rightMonth.setMonth(rightMonth.getMonth() + 1);
+      }
+      
+      return { leftMonth, rightMonth };
+    }
+    
+    // Comportement par défaut si aucune date sélectionnée
+    const defaultLeft = new Date();
+    const defaultRight = new Date();
+    defaultRight.setMonth(defaultRight.getMonth() + 1);
+    return { leftMonth: defaultLeft, rightMonth: defaultRight };
+  };
+  
+  // Initialiser les mois en fonction de la plage sélectionnée
+  const initialMonths = calculateMonthsToDisplay(date);
+  const [leftMonth, setLeftMonth] = React.useState(initialMonths.leftMonth);
+  const [rightMonth, setRightMonth] = React.useState(initialMonths.rightMonth);
   
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   
+  // Mettre à jour les mois affichés quand la plage sélectionnée change
+  React.useEffect(() => {
+    if (date?.from || date?.to) {
+      const newMonths = calculateMonthsToDisplay(date);
+      setLeftMonth(newMonths.leftMonth);
+      setRightMonth(newMonths.rightMonth);
+    }
+  }, [date?.from, date?.to]);
+
+  // Remettre les calendriers sur la plage sélectionnée quand le popover s'ouvre
+  React.useEffect(() => {
+    if (open) {
+      const newMonths = calculateMonthsToDisplay(date);
+      setLeftMonth(newMonths.leftMonth);
+      setRightMonth(newMonths.rightMonth);
+    }
+  }, [open, date]);
+
   // Debug: Surveiller les changements d'état
   React.useEffect(() => {
     console.log('DateRangePickerV2: State changed - open:', open);

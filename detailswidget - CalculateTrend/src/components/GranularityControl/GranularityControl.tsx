@@ -1,6 +1,6 @@
 import { createElement, useState, useEffect, useRef } from "react";
 import React from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Zap, 
   Settings2, 
@@ -77,11 +77,15 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     year: 365 * 24 * 60 * 60 * 1000
   };
 
+  const closeMenu = React.useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
   // Fermer le menu si on clique à l'extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        closeMenu();
         setShowSuggestions(false);
       }
     };
@@ -93,7 +97,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, closeMenu]);
 
   // Sync avec les changements externes
   useEffect(() => {
@@ -192,7 +196,11 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
   };
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
+    if (isOpen) {
+      closeMenu();
+    } else {
+      setIsOpen(true);
+    }
     setShowSuggestions(false);
   };
 
@@ -222,27 +230,16 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
   return (
     <div className="granularity-control" ref={menuRef}>
       {/* Bouton principal */}
-      <motion.button 
+      <button 
         onClick={toggleMenu}
         className={`granularity-button ${isOpen ? 'open' : ''}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
         disabled={isDisabled}
-        whileHover={{ 
-          scale: 1.02, 
-          boxShadow: "0 8px 12px -2px rgba(0, 0, 0, 0.12)" 
-        }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
         style={{ willChange: "transform" }}
       >
         <div className="granularity-button-content">
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Settings2 size={18} className="granularity-button-icon" />
-          </motion.div>
+          <Settings2 size={18} className="granularity-button-icon" />
           <span className="granularity-button-text">
             {pendingMode === "auto" ? (
               <span>Auto: {autoGranularity.value} {autoGranularity.unit}</span>
@@ -250,330 +247,248 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
               <span>Manuel: {pendingTime} {pendingTime === 1 ? unitLabelsSingular[pendingUnit] : unitLabels[pendingUnit]}</span>
             )}
           </span>
+          <div 
+            className={`granularity-chevron-wrapper${isOpen ? ' open' : ''}`}
+            style={{ marginLeft: '0.5rem' }}
+          >
+            <ChevronDown 
+              size={18} 
+              className={`granularity-chevron${isOpen ? ' open' : ''}`}
+              style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              aria-hidden="true"
+            />
+          </div>
         </div>
-      </motion.button>
-      
-      {/* Menu déroulant avec AnimatePresence */}
-      <AnimatePresence>
+      </button>
+      {/* Menu déroulant avec AnimatePresence pour animation fluide */}
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div 
             className="granularity-dropdown-menu"
             role="menu"
             aria-orientation="vertical"
-            initial={{ 
-              opacity: 0, 
-              y: -10,
-              scale: 0.95 
-            }}
-            animate={{ 
-              opacity: 1, 
-              y: 0,
-              scale: 1 
-            }}
-            exit={{ 
-              opacity: 0, 
-              y: -10,
-              scale: 0.95 
-            }}
+            initial={{ opacity: 0, y: 6, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.95 }}
             transition={{ 
               duration: 0.2,
-              ease: [0.25, 0.46, 0.45, 0.94]
+              ease: [0.25, 1, 0.5, 1]
             }}
-            style={{ willChange: "transform, opacity" }}
+            style={{ 
+              willChange: "transform, opacity",
+              transformOrigin: "top center"
+            }}
           >
             {/* Header */}
-            <motion.div 
-              className="granularity-dropdown-header"
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
+            <div className="granularity-dropdown-header">
               <h3 className="granularity-dropdown-title">Configuration de la granularité</h3>
-            </motion.div>
-
+            </div>
             {/* Content */}
-            <motion.div 
-              className="granularity-dropdown-content"
-              layout
-              transition={{ 
-                duration: 0.3,
-                ease: [0.25, 0.46, 0.45, 0.94]
-              }}
-              style={{ 
-                willChange: "height",
-                overflow: "hidden"
-              }}
-            >
-              {/* Mode Selection */}
-              <motion.div 
-                className="granularity-section"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 }}
-              >
-                <div className="granularity-section-title">Mode</div>
-                <SegmentGroup.Root 
-                  value={pendingMode}
-                  onValueChange={(e) => handleModeToggle(e.value as "auto" | "strict")}
+            <div className="granularity-dropdown-content">
+                {/* Mode Selection */}
+                <div 
+                  className="granularity-section"
                 >
-                  <SegmentGroup.Indicator />
-                  <SegmentGroup.Item value="auto">
-                    <SegmentGroup.ItemText>
-                      <div className="segment-item-content">
-                        <Zap size={18} className="segment-item-icon" />
-                        <span className="segment-item-label">Auto</span>
-                      </div>
-                    </SegmentGroup.ItemText>
-                    <SegmentGroup.ItemControl />
-                    <SegmentGroup.ItemHiddenInput />
-                  </SegmentGroup.Item>
-                  <SegmentGroup.Item value="strict">
-                    <SegmentGroup.ItemText>
-                      <div className="segment-item-content">
-                        <Settings2 size={18} className="segment-item-icon" />
-                        <span className="segment-item-label">Manuel</span>
-                      </div>
-                    </SegmentGroup.ItemText>
-                    <SegmentGroup.ItemControl />
-                    <SegmentGroup.ItemHiddenInput />
-                  </SegmentGroup.Item>
-                </SegmentGroup.Root>
-              </motion.div>
-
-              {/* Auto Mode Display */}
-              <AnimatePresence mode="wait">
-                {pendingMode === "auto" && (
-                  <motion.div 
-                    key="auto-mode"
-                    className="granularity-section"
-                    initial={{ 
-                      opacity: 0, 
-                      maxHeight: 0,
-                      scaleY: 0.95
-                    }}
-                    animate={{ 
-                      opacity: 1, 
-                      maxHeight: "200px",
-                      scaleY: 1
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      maxHeight: 0,
-                      scaleY: 0.95
-                    }}
-                    transition={{ 
-                      duration: 0.3,
-                      ease: [0.25, 0.46, 0.45, 0.94]
-                    }}
-                    style={{ 
-                      willChange: "transform, opacity, max-height",
-                      overflow: "hidden",
-                      transformOrigin: "top"
-                    }}
+                  <div className="granularity-section-title">Mode</div>
+                  <SegmentGroup.Root 
+                    value={pendingMode}
+                    onValueChange={(e) => handleModeToggle(e.value as "auto" | "strict")}
                   >
-                    <motion.div 
-                      className="granularity-auto-display"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 }}
-                    >
-                      <Clock size={16} style={{ color: palette.electric.color }} />
-                      <div className="granularity-auto-text">
-                        <span className="granularity-auto-label">
-                          Granularité automatique
-                          {modeChangedDueToTimeRange && (
-                            <motion.span 
-                              style={{ color: palette.gas.color, fontStyle: 'italic' }}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -10 }}
-                            >
-                              {" "}(recalculée)
-                            </motion.span>
-                          )}
-                        </span>
-                        <span className="granularity-auto-value">
-                          {autoGranularity.value} {autoGranularity.unit}
-                        </span>
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                )}
-
-                {/* Strict Mode Controls */}
-                {pendingMode === "strict" && (
-                  <motion.div 
-                    key="strict-mode"
-                    className="granularity-section"
-                    initial={{ 
-                      opacity: 0, 
-                      maxHeight: 0,
-                      scaleY: 0.95
-                    }}
-                    animate={{ 
-                      opacity: 1, 
-                      maxHeight: "400px",
-                      scaleY: 1
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      maxHeight: 0,
-                      scaleY: 0.95
-                    }}
-                    transition={{ 
-                      duration: 0.3,
-                      ease: [0.25, 0.46, 0.45, 0.94]
-                    }}
-                    style={{ 
-                      willChange: "transform, opacity, max-height",
-                      overflow: "hidden",
-                      transformOrigin: "top"
-                    }}
-                  >
-                    <motion.div 
-                      className="granularity-section-title"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                    >
-                      Configuration manuelle
-                    </motion.div>
-                    
-                    {/* Value Selection */}
-                    <motion.div 
-                      className="granularity-control-group"
-                      initial={{ opacity: 0, x: -15 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <label className="granularity-control-label">Valeur</label>
-                      <div className="granularity-select-wrapper">
-                        <select 
-                          value={pendingTime}
-                          onChange={(e) => handleValueChange(Number(e.target.value))}
-                          className="granularity-select"
-                        >
-                          {availableValues.map(val => (
-                            <option key={val} value={val}>
-                              {val}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </motion.div>
-
-                    {/* Unit Selection */}
-                    <motion.div 
-                      className="granularity-control-group"
-                      initial={{ opacity: 0, x: -15 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <label className="granularity-control-label">Unité</label>
-                      <div className="granularity-select-wrapper">
-                        <select 
-                          value={pendingUnit}
-                          onChange={(e) => handleUnitChange(e.target.value)}
-                          className="granularity-select"
-                        >
-                          {availableUnits.map(unitKey => (
-                            <option key={unitKey} value={unitKey}>
-                              {unitLabels[unitKey]}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </motion.div>
-
-                    {/* Suggestions */}
-                    {suggestions.length > 0 && (
-                      <motion.div 
-                        className="granularity-suggestions"
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        <div className="granularity-suggestions-header">
-                          <Lightbulb size={14} style={{ color: palette.gas.color }} />
-                          <span>Suggestions optimales</span>
-                          <motion.button
-                            onClick={() => setShowSuggestions(!showSuggestions)}
-                            className="granularity-suggestions-toggle"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <motion.div
-                              animate={{ rotate: showSuggestions ? 180 : 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <ChevronDown size={14} />
-                            </motion.div>
-                          </motion.button>
+                    <SegmentGroup.Indicator />
+                    <SegmentGroup.Item value="auto">
+                      <SegmentGroup.ItemText>
+                        <div className="segment-item-content">
+                          <Zap size={18} className="segment-item-icon" />
+                          <span className="segment-item-label">Auto</span>
                         </div>
-                        
-                        <AnimatePresence mode="wait">
-                          {showSuggestions && (
-                            <motion.div
-                              className="granularity-suggestions-list"
-                              layout
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ 
-                                duration: 0.25,
-                                ease: [0.25, 0.46, 0.45, 0.94],
-                                height: { duration: 0.3 }
-                              }}
-                              style={{ 
-                                willChange: "height, opacity",
-                                overflow: "hidden"
-                              }}
+                      </SegmentGroup.ItemText>
+                      <SegmentGroup.ItemControl />
+                      <SegmentGroup.ItemHiddenInput />
+                    </SegmentGroup.Item>
+                    <SegmentGroup.Item value="strict">
+                      <SegmentGroup.ItemText>
+                        <div className="segment-item-content">
+                          <Settings2 size={18} className="segment-item-icon" />
+                          <span className="segment-item-label">Manuel</span>
+                        </div>
+                      </SegmentGroup.ItemText>
+                      <SegmentGroup.ItemControl />
+                      <SegmentGroup.ItemHiddenInput />
+                    </SegmentGroup.Item>
+                  </SegmentGroup.Root>
+                </div>
+
+                {/* Auto Mode Display */}
+                <AnimatePresence mode="wait">
+                  {pendingMode === "auto" && (
+                    <div 
+                      key="auto-mode"
+                      className="granularity-section"
+                    >
+                      <div 
+                        className="granularity-auto-display"
+                      >
+                        <Clock size={16} style={{ color: palette.electric.color }} />
+                        <div className="granularity-auto-text">
+                          <span className="granularity-auto-label">
+                            Granularité automatique
+                            {modeChangedDueToTimeRange && (
+                              <motion.span 
+                                style={{ color: palette.gas.color, fontStyle: 'italic' }}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                              >
+                                {" "}(recalculée)
+                              </motion.span>
+                            )}
+                          </span>
+                          <span className="granularity-auto-value">
+                            {autoGranularity.value} {autoGranularity.unit}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Strict Mode Controls */}
+                  {pendingMode === "strict" && (
+                    <div 
+                      key="strict-mode"
+                      className="granularity-section"
+                    >
+                      <div 
+                        className="granularity-section-title"
+                      >
+                        Configuration manuelle
+                      </div>
+                      
+                      {/* Value Selection */}
+                      <div 
+                        className="granularity-control-group"
+                      >
+                        <label className="granularity-control-label">Valeur</label>
+                        <div className="granularity-select-wrapper">
+                          <select 
+                            value={pendingTime}
+                            onChange={(e) => handleValueChange(Number(e.target.value))}
+                            className="granularity-select"
+                          >
+                            {availableValues.map(val => (
+                              <option key={val} value={val}>
+                                {val}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Unit Selection */}
+                      <div 
+                        className="granularity-control-group"
+                      >
+                        <label className="granularity-control-label">Unité</label>
+                        <div className="granularity-select-wrapper">
+                          <select 
+                            value={pendingUnit}
+                            onChange={(e) => handleUnitChange(e.target.value)}
+                            className="granularity-select"
+                          >
+                            {availableUnits.map(unitKey => (
+                              <option key={unitKey} value={unitKey}>
+                                {unitLabels[unitKey]}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Suggestions */}
+                      {suggestions.length > 0 && (
+                        <div 
+                          className="granularity-suggestions"
+                        >
+                          <div className="granularity-suggestions-header">
+                            <Lightbulb size={14} style={{ color: palette.gas.color }} />
+                            <span>Suggestions optimales</span>
+                            <motion.button
+                              onClick={() => setShowSuggestions(!showSuggestions)}
+                              className="granularity-suggestions-toggle"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
                             >
-                              {suggestions.map((suggestion, idx) => (
-                                <motion.button
-                                  key={`${suggestion.unit}-${suggestion.value}`}
-                                  onClick={() => handleSuggestionClick(suggestion)}
-                                  className="granularity-suggestion-item"
-                                  layout
-                                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                  transition={{ 
-                                    delay: idx * 0.05,
-                                    duration: 0.2,
-                                    ease: [0.25, 0.46, 0.45, 0.94]
-                                  }}
-                                  whileHover={{ 
-                                    scale: 1.02, 
-                                    backgroundColor: "#f8fafc",
-                                    transition: { duration: 0.15 }
-                                  }}
-                                  whileTap={{ scale: 0.98 }}
-                                  style={{ willChange: "transform" }}
-                                >
-                                  <div className="granularity-suggestion-text">
-                                    <span className="granularity-suggestion-title">
-                                      {suggestion.value} {suggestion.value === 1 
-                                        ? unitLabelsSingular[suggestion.unit] 
-                                        : unitLabels[suggestion.unit]
-                                      }
-                                    </span>
-                                    <span className="granularity-suggestion-desc">
-                                      {suggestion.points} points
-                                    </span>
-                                  </div>
-                                  <Check size={14} style={{ color: palette.electric.color }} />
-                                </motion.button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                              <motion.div
+                                animate={{ rotate: showSuggestions ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <ChevronDown size={14} />
+                              </motion.div>
+                            </motion.button>
+                          </div>
+                          
+                          <AnimatePresence mode="wait">
+                            {showSuggestions && (
+                              <motion.div
+                                className="granularity-suggestions-list"
+                                layout
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ 
+                                  duration: 0.25,
+                                  ease: [0.25, 0.46, 0.45, 0.94],
+                                  height: { duration: 0.3 }
+                                }}
+                                style={{ 
+                                  willChange: "height, opacity",
+                                  overflow: "hidden"
+                                }}
+                              >
+                                {suggestions.map((suggestion, idx) => (
+                                  <motion.button
+                                    key={`${suggestion.unit}-${suggestion.value}`}
+                                    onClick={() => handleSuggestionClick(suggestion)}
+                                    className="granularity-suggestion-item"
+                                    layout
+                                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                    transition={{ 
+                                      delay: idx * 0.05,
+                                      duration: 0.2,
+                                      ease: [0.25, 0.46, 0.45, 0.94]
+                                    }}
+                                    whileHover={{ 
+                                      scale: 1.02, 
+                                      backgroundColor: "#f8fafc",
+                                      transition: { duration: 0.15 }
+                                    }}
+                                    whileTap={{ scale: 0.98 }}
+                                    style={{ willChange: "transform" }}
+                                  >
+                                    <div className="granularity-suggestion-text">
+                                      <span className="granularity-suggestion-title">
+                                        {suggestion.value} {suggestion.value === 1 
+                                          ? unitLabelsSingular[suggestion.unit] 
+                                          : unitLabels[suggestion.unit]
+                                        }
+                                      </span>
+                                      <span className="granularity-suggestion-desc">
+                                        {suggestion.points} points
+                                      </span>
+                                    </div>
+                                    <Check size={14} style={{ color: palette.electric.color }} />
+                                  </motion.button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
           </motion.div>
         )}
       </AnimatePresence>

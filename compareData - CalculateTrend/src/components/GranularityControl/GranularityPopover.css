@@ -1,0 +1,429 @@
+/* GranularityPopover.css - Design cohérent avec ExportMenu - Thème clair avec font size augmentée */
+.granularity-config-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 47px;
+  width: 47px;
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-size: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.granularity-config-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(56, 161, 60, 0.3), transparent);
+  transition: left 0.4s ease;
+}
+
+.granularity-config-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.granularity-config-button:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  border-color: #38a13c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #38a13c;
+  transform: translateY(-1px) scale(1.05);
+}
+
+.granularity-config-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.granularity-config-button:focus {
+  outline: 2px solid #38a13c;
+  outline-offset: 2px;
+}
+
+/* Animation subtile pour indiquer l'interactivité */
+@keyframes pulse-config {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(56, 161, 60, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 0 4px rgba(56, 161, 60, 0.1);
+    transform: scale(1.02);
+  }
+}
+
+.granularity-config-button:not(:disabled) {
+  animation: pulse-config 3s ease-in-out infinite;
+}
+
+/* Stop l'animation au hover */
+.granularity-config-button:hover:not(:disabled) {
+  animation: none;
+}
+
+/* Radix Dialog overlay */
+.granularity-dialog-overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.granularity-dialog-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 36rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: scaleIn 0.2s ease;
+  z-index: 1001;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Header */
+.granularity-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.75rem 1.75rem 1.25rem 1.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  background: #f9fafb;
+  border-radius: 12px 12px 0 0;
+}
+
+.granularity-popover-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.granularity-popover-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  font-size: 1.25rem;
+}
+
+.granularity-popover-close:hover {
+  background: rgba(107, 114, 128, 0.1);
+  color: #374151;
+}
+
+.granularity-popover-close:focus {
+  outline: 2px solid #38a13c;
+  outline-offset: 2px;
+}
+
+/* Content */
+.granularity-popover-content {
+  padding: 1.75rem;
+}
+
+/* Override pour le composant dans la popover */
+.granularity-popover-content .granularity-control {
+  position: static;
+  z-index: auto;
+}
+
+.granularity-popover-content .granularity-button {
+  width: 100%;
+  min-width: auto;
+  font-size: 1.25rem;
+  padding: 1.375rem 1.69rem;
+}
+
+.granularity-popover-content .granularity-button-text {
+  font-size: 1.25rem;
+}
+
+.granularity-popover-content .granularity-dropdown-menu {
+  position: static;
+  margin-top: 1.25rem;
+  width: 100%;
+  min-width: auto;
+  right: auto;
+  left: auto;
+  box-shadow: none;
+  border: 1px solid #e5e7eb;
+}
+
+.granularity-popover-content .granularity-dropdown-title {
+  font-size: 1.25rem;
+}
+
+.granularity-popover-content .granularity-section-title {
+  font-size: 1.25rem;
+}
+
+.granularity-popover-content .granularity-mode-button {
+  font-size: 1.25rem;
+  padding: 1.06rem 1.375rem;
+}
+
+.granularity-popover-content .granularity-auto-label {
+  font-size: 1.25rem;
+}
+
+.granularity-popover-content .granularity-auto-value {
+  font-size: 1.25rem;
+}
+
+.granularity-popover-content .granularity-control-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.granularity-popover-content .granularity-select {
+  font-size: 1.25rem;
+  padding: 1.06rem 1.375rem;
+}
+
+.granularity-popover-content .granularity-suggestion-title {
+  font-size: 1.25rem;
+}
+
+.granularity-popover-content .granularity-suggestion-desc {
+  font-size: 1.25rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .granularity-dialog-content {
+    width: 95%;
+    max-width: 28rem;
+  }
+  
+  .granularity-popover-header {
+    padding: 1.25rem;
+  }
+  
+  .granularity-popover-title {
+    font-size: 1.25rem;
+  }
+  
+  .granularity-popover-content {
+    padding: 1.25rem;
+  }
+  
+  .granularity-popover-content .granularity-button {
+    font-size: 1.25rem;
+    padding: 0.9rem 1.1rem;
+  }
+  
+  .granularity-popover-content .granularity-dropdown-title {
+    font-size: 1.25rem;
+  }
+  
+  .granularity-popover-content .granularity-section-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* SegmentGroup Ark UI - Style officiel selon principes 8-point spacing */
+[data-scope='segment-group'][data-part='root'] {
+  position: relative;
+  display: flex;
+  align-items: stretch; /* Force les items à utiliser toute la hauteur */
+  width: 100%;
+  height: 48px; /* Hauteur fixe pour utiliser l'espace optimal */
+  padding: 4px; /* Réduit pour optimiser l'espace interne */
+  background-color: #f1f3f5;
+  border-radius: 8px;
+  gap: 2px; /* Gap minimal pour maximiser l'espace des items */
+  margin-bottom: 0; /* Suppression du margin-bottom parasite */
+}
+
+[data-scope='segment-group'][data-part='item'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 12px; /* Padding horizontal optimisé */
+  width: 100%;
+  height: 100%; /* Utilise toute la hauteur du conteneur */
+  text-align: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  transition: all 0.2s ease;
+  flex: 1; /* Assure une répartition équitable de l'espace */
+}
+
+[data-scope='segment-group'][data-part='item'][data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+[data-scope='segment-group'][data-part='item'][data-focus] {
+  outline: none;
+}
+
+/* États interactifs améliorés */
+[data-scope='segment-group'][data-part='item']:hover:not([data-disabled]) {
+  background-color: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+[data-scope='segment-group'][data-part='item'][data-state='checked'] {
+  color: #18213e;
+  font-weight: 600;
+}
+
+[data-scope='segment-group'][data-part='item'][data-state='checked']:hover {
+  background-color: transparent; /* L'indicateur blanc fournit déjà le feedback visuel */
+}
+
+/* Suppression de tous les outlines et focus visibles indésirables */
+[data-scope='segment-group'] * {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-scope='segment-group'] *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-scope='segment-group'][data-part='indicator'] {
+  width: var(--width);
+  height: var(--height);
+  left: var(--left);
+  top: var(--top);
+  position: absolute;
+  box-shadow:
+    rgba(0, 0, 0, 0.08) 0px 2px 4px,
+    rgba(0, 0, 0, 0.06) 0px 1px 2px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 6px; /* Cohérent avec les items */
+  transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1); /* Transition fluide pour les changements de position */
+  /* Optimisation performance */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+[data-scope='segment-group'][data-part='item-text'][data-disabled] {
+  opacity: 0.4;
+}
+
+/* Structure optimisée pour les items du segment group */
+.segment-item-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Espacement augmenté entre icône et texte */
+  width: 100%;
+  height: 100%; /* Utilise toute la hauteur */
+  min-width: 0; /* Permet la réduction si nécessaire */
+}
+
+.segment-item-icon {
+  flex-shrink: 0; /* Empêche la réduction de l'icône */
+  color: currentColor;
+  transition: all 0.2s ease;
+  width: 18px; /* Taille icône augmentée */
+  height: 18px;
+}
+
+.segment-item-label {
+  font-size: 1.1rem; /* Taille augmentée pour meilleure lisibilité */
+  font-weight: 600; /* Poids augmenté pour plus de présence */
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: currentColor;
+  transition: all 0.2s ease;
+}
+
+/* Responsive adaptations pour les segments */
+@media (max-width: 768px) {
+  [data-scope='segment-group'][data-part='root'] {
+    height: 44px; /* Hauteur légèrement réduite sur tablette */
+  }
+  
+  .segment-item-content {
+    gap: 6px; /* Espacement maintenu sur tablette */
+  }
+  
+  .segment-item-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .segment-item-label {
+    font-size: 1rem; /* Texte maintenu sur tablette */
+    font-weight: 600;
+  }
+  
+  [data-scope='segment-group'][data-part='item'] {
+    padding: 0 10px; /* Padding optimisé */
+  }
+}
+
+@media (max-width: 480px) {
+  [data-scope='segment-group'][data-part='root'] {
+    height: 40px; /* Hauteur réduite sur mobile */
+    padding: 3px; /* Padding réduit du conteneur */
+    gap: 1px;
+  }
+  
+  .segment-item-content {
+    gap: 4px; /* Espacement minimal sur très petit écran */
+  }
+  
+  .segment-item-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .segment-item-label {
+    font-size: 0.9rem; /* Texte légèrement réduit mais lisible */
+    font-weight: 600;
+  }
+  
+  [data-scope='segment-group'][data-part='item'] {
+    padding: 0 8px; /* Padding minimal */
+  }
+}
+
+/* Forcer le thème clair - suppression des styles dark mode */
+/* Nous gardons uniquement le thème clair pour assurer la cohérence */ 

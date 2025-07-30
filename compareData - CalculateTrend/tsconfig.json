@@ -1,0 +1,9 @@
+{
+  "extends": "@mendix/pluggable-widgets-tools/configs/tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "jsxFactory": "createElement",
+    "jsxFragmentFactory": "Fragment"
+  },
+  "include": ["./src", "./typings"]
+}

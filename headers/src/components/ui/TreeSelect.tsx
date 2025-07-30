@@ -344,6 +344,47 @@ export const TreeSelect: React.FC<TreeSelectProps> = ({
     return null;
   }, []);
 
+  // Fonction pour trouver tous les parents d'un nœud
+  const findParentPath = useCallback((nodes: TreeNode[], targetLabel: string, path: string[] = []): string[] | null => {
+    for (const node of nodes) {
+      if (node.label === targetLabel) {
+        return path;
+      }
+      if (node.children) {
+        const result = findParentPath(node.children, targetLabel, [...path, node.uniqueId]);
+        if (result) return result;
+      }
+    }
+    return null;
+  }, []);
+
+  // Auto-expansion des parents des éléments sélectionnés
+  useEffect(() => {
+    if (treeData.length > 0 && selectedLabels.length > 0) {
+      const parentsToExpand = new Set<string>();
+      
+      // Ajouter les parents de base (racines)
+      treeData.forEach(node => parentsToExpand.add(node.uniqueId));
+      
+      // Pour chaque élément sélectionné, trouver ses parents
+      selectedLabels.forEach(label => {
+        const parentPath = findParentPath(treeData, label);
+        if (parentPath) {
+          parentPath.forEach(parentId => parentsToExpand.add(parentId));
+        }
+      });
+      
+      const newExpandedIds = Array.from(parentsToExpand);
+      if (JSON.stringify(newExpandedIds.sort()) !== JSON.stringify(expandedIds.sort())) {
+        setExpandedIds(newExpandedIds);
+      }
+    } else if (treeData.length > 0 && expandedIds.length === 0) {
+      // Auto-expand des nœuds racine uniquement s'il n'y a pas de sélection
+      const rootIds = treeData.map(node => node.uniqueId);
+      setExpandedIds(rootIds);
+    }
+  }, [treeData, selectedLabels, findParentPath]);
+
   // Mettre à jour les `selectedNodes` lorsque les labels ou les données de l'arbre changent
   useEffect(() => {
     if (treeData.length > 0) {
@@ -405,20 +446,22 @@ export const TreeSelect: React.FC<TreeSelectProps> = ({
     });
   }, []);
 
-  // Remove selected
-  const removeSelected = useCallback((labelToRemove: string) => {
-    console.log(`[TreeSelect] Removing: ${labelToRemove}`);
+  // removeSelected callback removed as individual badge deletion is no longer necessary
+
+  // Clear all selections
+  const clearAllSelections = useCallback(() => {
+    console.log('[TreeSelect] Clearing all selections');
     
-    const newSelectedLabels = selectedLabels.filter(label => label !== labelToRemove);
-    setSelectedLabels(newSelectedLabels);
+    setSelectedLabels([]);
+    setSelectedNodes([]);
 
     if (selectedItemsAttribute && selectedItemsAttribute.status === "available") {
-      selectedItemsAttribute.setValue(newSelectedLabels.join(','));
+      selectedItemsAttribute.setValue('');
     }
 
     if (onChange?.canExecute) onChange.execute();
     if (onSelectionChange?.canExecute) onSelectionChange.execute();
-  }, [selectedLabels, selectedItemsAttribute, onChange, onSelectionChange]);
+  }, [selectedItemsAttribute, onChange, onSelectionChange]);
 
   // Click outside
   useEffect(() => {
@@ -473,6 +516,10 @@ export const TreeSelect: React.FC<TreeSelectProps> = ({
     if (selectedNodes.length === 0) return placeholder;
     if (!allowMultipleSelection) return selectedNodes[0].label;
     if (selectedNodes.length === 1) return selectedNodes[0].label;
+    if (selectedNodes.length === 2) {
+      return selectedNodes.map(node => node.label).join(', ');
+    }
+    // Pour 3+ éléments, texte générique car les badges affichent les détails
     return `${selectedNodes.length} éléments sélectionnés`;
   };
 
@@ -489,45 +536,32 @@ export const TreeSelect: React.FC<TreeSelectProps> = ({
               {getDisplayText()}
             </span>
             
-            {allowMultipleSelection && selectedNodes.length > 1 && (
-              <div className="tree-select__tags">
-                {selectedNodes.slice(0, 2).map((node) => (
-                  <motion.span
-                    key={node.originalId}
-                    className="tree-select__tag"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                  >
-                    {node.label}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSelected(node.label);
-                      }}
-                      className="tree-select__tag-remove"
-                      type="button"
-                    >
-                      <X size={12} />
-                    </button>
-                  </motion.span>
-                ))}
-                {selectedNodes.length > 2 && (
-                  <span className="tree-select__tag-count">
-                    +{selectedNodes.length - 2}
-                  </span>
-                )}
-              </div>
-            )}
+            {/* Badge display removed to avoid duplication with placeholder text when more than two items are selected */}
           </div>
           
-          <motion.div 
-            className="tree-select__arrow" 
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown size={18} />
-          </motion.div>
+          <div className="tree-select__actions">
+            {selectedNodes.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearAllSelections();
+                }}
+                className="tree-select__clear-all"
+                type="button"
+                title="Effacer toute la sélection"
+              >
+                <X size={16} />
+              </button>
+            )}
+            
+            <motion.div 
+              className="tree-select__arrow" 
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown size={18} />
+            </motion.div>
+          </div>
         </div>
       </motion.div>
 

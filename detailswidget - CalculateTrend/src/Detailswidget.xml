@@ -40,7 +40,7 @@
                         <enumerationValue key="IPE">IPE</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="allowManualGranularity" type="boolean" defaultValue="false">
+                <property key="enableAdvancedGranularity" type="boolean" defaultValue="false">
                     <caption>Autoriser réglage manuel de la granularité</caption>
                     <description>Lorsque cette option est désactivée, l'utilisateur voit la granularité actuelle mais ne peut pas l'ajuster.</description>
                 </property>

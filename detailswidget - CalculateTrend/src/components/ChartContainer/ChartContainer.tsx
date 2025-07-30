@@ -32,6 +32,7 @@ interface ChartContainerProps {
   activeIPE?: 1 | 2
   onIPEToggle?: (ipe: 1 | 2) => void
   showGranularityControl?: boolean
+  showSimpleGranularity?: boolean
   granularityMode?: "auto" | "strict"
   granularityValue?: number
   granularityUnit?: "second" | "minute" | "hour" | "day" | "week" | "month" | "year"
@@ -80,6 +81,21 @@ const IPEToggle = ({
   </ToggleGroup.Root>
 );
 
+// Nouveau composant pour affichage simple de la granularité
+const SimpleGranularityDisplay = ({ 
+  autoGranularity 
+}: { 
+  autoGranularity: { value: number; unit: string } 
+}) => {
+  return (
+    <div className="simple-granularity-display">
+      <div className="simple-granularity-label">
+        Granularité : <span className="simple-granularity-value">{autoGranularity.value} {autoGranularity.unit}</span>
+      </div>
+    </div>
+  )
+}
+
 function getEnergyIcon(label: string | undefined, color: string) {
   if (!label) return <BarChart3 size={36} color={color} />
 
@@ -111,6 +127,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   activeIPE = 1,
   onIPEToggle,
   showGranularityControl = false,
+  showSimpleGranularity = false,
   granularityMode = "auto",
   granularityValue = 5,
   granularityUnit = "minute",
@@ -171,8 +188,8 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
 
           {/* Actions wrapper pour granularité, toggle et export */}
           <div className="chart-header-actions">
-            {/* Granularity */}
-            {showGranularityControl && hasData && onGranularityModeChange && (
+            {/* Granularity Control - Mode Avancé */}
+            {showGranularityControl && onGranularityModeChange && (
               isCompact ? (
                 <GranularityPopover
                   mode={granularityMode}
@@ -198,6 +215,11 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
                   isDisabled={isGranularityDisabled}
                 />
               )
+            )}
+
+            {/* Simple Granularity Display - Mode Standard */}
+            {showSimpleGranularity && (
+              <SimpleGranularityDisplay autoGranularity={autoGranularity} />
             )}
 
             {/* Toggle IPE */}

@@ -159,6 +159,10 @@
   animation: granularity-fadeInSlideUp 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.granularity-fadeOut {
+  animation: granularity-fadeOutSlideDown 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
 .granularity-slideIn {
   animation: granularity-slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -171,6 +175,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes granularity-fadeOutSlideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
   }
 }
 
@@ -509,9 +524,12 @@
 }
 
 /* Focus et accessibilité */
-.granularity-button:focus {
+.granularity-button:focus-visible {
   outline: 2px solid #4b5563;
   outline-offset: 2px;
+}
+.granularity-button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .granularity-mode-button:focus {

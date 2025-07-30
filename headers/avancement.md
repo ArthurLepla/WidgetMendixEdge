@@ -1,5 +1,18 @@
 # Avancement du Projet Headers
 
+## [28 Janvier 2025] - Amélioration UX DateRangePickerV2 - Navigation automatique
+
+### ⌛ Changement :
+Amélioration du composant `DateRangePickerV2` pour qu'il s'ouvre automatiquement sur la plage de dates sélectionnée. Ajout d'une fonction utilitaire `calculateMonthsToDisplay()` qui positionne intelligemment les calendaires gauche et droite en fonction de la plage sélectionnée, et d'un effet qui remet les calendriers sur la bonne position à chaque ouverture du popover.
+
+### 🤔 Analyse :
+Cette amélioration UX élimine la friction utilisateur en évitant de devoir naviguer manuellement vers les dates sélectionnées à chaque ouverture. Pour les workflows impliquant des modifications fréquentes de plages temporelles, cela réduit significativement le nombre de clics et améliore l'efficacité. L'implémentation respecte les principes FSM en gérant clairement les états d'ouverture/fermeture et la synchronisation des vues calendriers.
+
+### 💜 Prochaines étapes :
+- Tester le comportement avec des plages de dates dans des années différentes
+- Valider que la navigation manuelle reste fluide après l'ouverture automatique
+- Considérer l'ajout d'une animation de transition lors du positionnement automatique
+
 ## [12 Juillet 2025] - Intégration de DateRangePickerV2 dans HeaderContainer
 
 ### ⌛ Changement :
@@ -554,3 +567,45 @@ L'architecture respecte les principes UI/UX modernes : saisie libre sans interru
 **Analyse** : Amélioration significative du design et de l'UX. Le nouveau style de plage est plus clair et esthétique. La réorganisation du layout rend l'utilisation du composant plus confortable sur des écrans de taille moyenne.
 
 **Prochaines étapes** : Aucune. 
+
+### ✨ Améliorations UX du TreeSelect
+
+**Problème identifié** : Plusieurs points d'friction dans l'utilisation du TreeSelect :
+1. Les éléments enfants sélectionnés étaient difficiles à localiser (parents fermés)
+2. Pas de moyen rapide pour effacer toute la sélection
+3. Placeholder de multisélection peu informatif ("X éléments sélectionnés")
+
+**Solution implémentée** :
+
+**Auto-expansion intelligente** :
+- Nouvelle fonction `findParentPath()` qui remonte récursivement la hiérarchie
+- `useEffect` qui auto-expand tous les parents des éléments sélectionnés à l'ouverture
+- Les utilisateurs voient immédiatement leurs sélections, même profondément enfouies
+
+**Bouton de suppression globale** :
+- Croix discrète à côté de la flèche du trigger
+- Apparaît uniquement quand il y a des sélections
+- Fonction `clearAllSelections()` avec gestion complète des états Mendix
+
+**Placeholder contextuel amélioré** :
+- 1 élément : affiche le nom complet
+- 2 éléments : "Item1, Item2"
+- 3+ éléments : "Item1, Item2 +X autres"
+- Plus informatif et élégant que le texte générique précédent
+
+**Analyse** : Ces améliorations transforment significativement l'expérience utilisateur du TreeSelect. L'auto-expansion élimine la frustration de chercher ses sélections, le bouton de suppression améliore l'efficacité, et le placeholder contextuel donne une meilleure visibilité du contenu sélectionné.
+
+**Prochaines étapes** : Aucune. 
+
+## [29 Juillet 2025] - Suppression des badges de multi-sélection du TreeSelect
+
+### ⌛ Changement :
+Suppression de l'affichage des badges (tags) dans le `TreeSelect` lorsque plus de deux éléments sont sélectionnés. Cela évite la duplication d'informations avec le placeholder et allège visuellement le composant.
+
+### 🤔 Analyse :
+La simplification améliore l'expérience utilisateur en supprimant un visuel redondant et potentiel source de confusion. Le code est plus léger (bloc JSX supprimé) et la lisibilité de la sélection repose désormais uniquement sur le placeholder contextuel, cohérent avec le design système.
+
+### 💜 Prochaines étapes :
+- Vérifier la cohérence visuelle sur différentes largeurs d'écran.
+- Mettre à jour la documentation utilisateur pour préciser le nouveau comportement.
+- Envisager un test visuel automatisé pour prévenir toute régression future. 

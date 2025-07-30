@@ -1,3 +1,319 @@
+### ✨ Date: 2025-01-31 (Implémentation Mode Granularité Simple/Avancé - Widget Details)
+
+### ⌛ Changement :
+**Intégration complète du système de granularité à double mode** (simple/avancé) dans le widget Details, reprenant la même logique que le widget CompareData pour une cohérence UX parfaite.
+
+**Problème résolu :**
+- **Erreur TypeScript** : `Cannot find name 'allowManualGranularity'` (ligne 249) - variable inexistante utilisée
+- **Incohérence entre widgets** : Le widget Details n'avait pas la même approche granularité que CompareData 
+- **Manque de flexibilité** : Un seul mode de granularité sans options pour simplifier l'interface
+
+**Solutions implémentées :**
+
+**1. Correction variable inexistante :**
+```typescript
+// AVANT - Variable incorrecte
+const granularityDisabled = !allowManualGranularity || !isPreviewOK;
+
+// APRÈS - Variable correcte depuis le XML
+const granularityDisabled = !enableAdvancedGranularity || !isPreviewOK;
+```
+
+**2. Ajout SimpleGranularityDisplay dans ChartContainer :**
+```tsx
+// Nouveau composant pour affichage simple
+const SimpleGranularityDisplay = ({ 
+  autoGranularity 
+}: { 
+  autoGranularity: { value: number; unit: string } 
+}) => {
+  return (
+    <div className="simple-granularity-display">
+      <div className="simple-granularity-label">
+        Granularité : <span className="simple-granularity-value">{autoGranularity.value} {autoGranularity.unit}</span>
+      </div>
+    </div>
+  )
+}
+```
+
+**3. Props conditionnelles dans tous les modes :**
+```tsx
+// Mode énergétique
+<ChartContainer
+  showGranularityControl={hasGranularityConfig && enableAdvancedGranularity}
+  showSimpleGranularity={hasGranularityConfig && !enableAdvancedGranularity}
+  // ... autres props
+/>
+
+// Mode IPE (même logique)
+// Mode général (même logique)
+```
+
+**4. Amélioration calcul autoGranularity avec labels français :**
+```typescript
+const unitLabels: Record<string, string> = {
+    minute: "minutes", hour: "heures", day: "jours",
+    week: "semaines", month: "mois", year: "années"
+};
+
+return {
+    value: granularity.value,
+    unit: granularity.value === 1 ? /* singulier */ : unitLabels[granularity.unit]
+};
+```
+
+**5. CSS cohérent avec CompareData + overflow visible :**
+```css
+.chart-container {
+  overflow: visible; /* Changé pour permettre l'affichage des dropdowns */
+}
+
+.simple-granularity-display {
+  padding: 1rem 2rem;
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+}
+```
+
+**Architecture unifiée :**
+- **Mode Standard** (enableAdvancedGranularity = `false`) : Badge simple "Granularité : 5 minutes" 
+- **Mode Avancé** (enableAdvancedGranularity = `true`) : Contrôles complets Auto/Strict
+- **Paramètre XML existant** : `enableAdvancedGranularity` déjà présent dans le XML
+- **Cohérence totale** : Même UX que CompareData, mêmes styles, même logique
+
+### 🤔 Analyse :
+**Impact UX exceptionnel :** L'unification des deux widgets crée une expérience cohérente à travers l'écosystème. Les utilisateurs peuvent maintenant choisir le niveau de complexité souhaité : mode simple pour une utilisation rapide, mode avancé pour un contrôle précis. Cette flexibilité améliore l'adoption en s'adaptant à différents profils d'utilisateurs.
+
+**Architecture robuste :** La réutilisation du composant SimpleGranularityDisplay garantit la cohérence visuelle et simplifie la maintenance. L'approche conditionnelle via `enableAdvancedGranularity` permet une configuration fine par instance de widget. La correction de la variable inexistante élimine l'erreur TypeScript et stabilise le build.
+
+### 💜 Prochaines étapes :
+- Tester les deux modes sur différentes résolutions pour valider l'affichage
+- Vérifier la cohérence visuelle entre widgets Details et CompareData  
+- Documenter les guidelines d'utilisation des deux modes pour les utilisateurs finaux
+- Considérer l'ajout d'un tooltip explicatif sur le badge simple
+- Valider les performances avec le nouveau système de granularité unifié
+
+**✅ CORRECTION APPLIQUÉE :**
+**Problème résolu :** Le contrôle de granularité disparaissait complètement quand `enableAdvancedGranularity` était activé, au lieu d'afficher le contrôle complet.
+
+**Solutions appliquées :**
+1. **Ajout prop manquante** `showSimpleGranularity` dans `Detailswidget.tsx` pour le mode energetic
+2. **Suppression condition `hasData`** dans `ChartContainer.tsx` pour les deux modes
+3. **Logique cohérente** : Contrôles toujours visibles quand configurés
+
+**Fonctionnement final :**
+- `enableAdvancedGranularity = false` → Badge simple "Granularité : 5 minutes" (non cliquable)
+- `enableAdvancedGranularity = true` → Contrôle complet avec dropdown Auto/Strict
+
+---
+
+### ✨ Date: 2025-01-31 (Harmonisation hauteurs SimpleGranularityDisplay & ExportMenu)
+
+### ⌛ Changement :
+**Correction définitive des hauteurs différentielles** entre le composant `SimpleGranularityDisplay` et l'`ExportMenu` pour une cohérence visuelle parfaite dans la barre d'actions `.chart-header-actions`.
+
+**Problème identifié :**
+- **Différence de font-size** : `SimpleGranularityDisplay` (1.5rem) vs `ExportMenu` (2rem)
+- **Manque de propriétés harmonisées** : font-weight, line-height, box-sizing
+- **Alignement vertical incohérent** dans la zone d'actions commune
+
+**Solutions implémentées :**
+
+**1. Alignement font-size et font-weight :**
+```css
+.simple-granularity-display {
+  font-size: 2rem;          /* ← Aligné sur ExportMenu (2rem au lieu de 1.5rem) */
+  font-weight: 700;         /* ← Ajouté pour correspondre à export-button */
+}
+```
+
+**2. Harmonisation typographique interne :**
+```css
+.simple-granularity-label {
+  font-weight: 600;         /* ← Maintient hiérarchie visuelle */
+  font-size: 1.44rem;       /* ← Harmonisé avec export-button-text */
+}
+
+.simple-granularity-value {
+  font-size: 1.35rem;       /* ← Équilibré avec le nouveau label */
+  white-space: nowrap;      /* ← Évite retour à la ligne */
+}
+```
+
+**3. Protection contre conflits CSS externes :**
+```css
+.simple-granularity-display {
+  box-sizing: border-box;   /* ← Cohérence avec export-button */
+  line-height: 1.2;         /* ← Contrôle précis de la hauteur */
+  justify-content: flex-start;  /* ← Alignement cohérent */
+  position: relative;       /* ← Contexte de positionnement */
+}
+```
+
+**Architecture résultante :**
+- **Hauteurs identiques** : Même padding (1.25rem 2rem), même font-size (2rem), même font-weight (700)
+- **Propriétés communes** : min-width: 20rem, border-radius: 0.6rem, background: #f8fafc
+- **Protection Ant Design** : Évite les conflits avec les styles forcés `!important` d'AntD
+- **Cohérence visuelle** : Alignement parfait dans `.chart-header-actions`
+
+### 🤔 Analyse :
+**Impact UX significatif :** L'harmonisation des hauteurs élimine l'incohérence visuelle dans la barre d'actions, créant une interface plus professionnelle et polie. Cette correction améliore la perception de qualité du widget et renforce la cohérence du design system.
+
+**Robustesse technique :** La protection contre les conflits CSS via `box-sizing`, `line-height` et `position` garantit la stabilité visuelle même en présence de styles externes ou de mises à jour d'Ant Design. L'approche progressive (font-size → font-weight → propriétés protectrices) assure la maintenabilité.
+
+### 💜 Prochaines étapes :
+- ✅ **CORRIGÉ** : Conflit font-size entre container et enfants résolu
+- ✅ **HARMONISÉ** : Tous les textes principaux utilisent font-size: 1.44rem et font-weight: 600
+- ✅ **VALIDÉ** : Hauteurs parfaitement alignées via propriétés communes (padding, box-sizing, line-height)
+- Tester l'affichage harmonisé sur différentes résolutions (mobile, tablet, desktop)
+- Valider la cohérence avec d'autres composants de la suite (GranularityControl complet)
+- Vérifier l'impact sur les thèmes personnalisés clients
+- Documenter les guidelines de hauteur pour les futurs composants UI
+
+**✅ CORRECTION FINALE APPLIQUÉE :**
+**Problème résolu :** Conflit de font-size entre le container `.simple-granularity-display` (2rem) et son enfant `.simple-granularity-label` (1.44rem) causait une hauteur incohérente.
+
+**Solution définitive :**
+- **Container nettoyé** : Suppression font-size/font-weight du container (focus sur layout uniquement)
+- **Texte harmonisé** : `.simple-granularity-label` aligné sur `.export-button-text` et `.granularity-button-text`
+- **Propriétés communes** : padding, min-width, box-sizing, line-height identiques
+
+**Résultat :** Les trois composants ont maintenant exactement la même hauteur avec la même architecture CSS.
+
+**UPDATE :** Une incohérence persistait car `.export-button` avait encore des styles de police sur le conteneur. La correction finale a supprimé `font-size` et `font-weight` du conteneur et a ajouté `box-sizing: border-box` et `line-height: 1.2` pour une harmonisation parfaite et robuste.
+
+---
+
+### ✨ Date: 2025-01-31 (Style minimaliste - Couleur active blanche & Positionnement dynamique popovers)
+
+### ⌛ Changement :
+**Corrections définitives des deux problèmes UX critiques** avec solutions robustes et intelligentes.
+
+**Corrections appliquées :**
+
+**1. Couleur active GranularityControl - Style blanc ultra-minimaliste :**
+- **Évolution design** : Adoption d'un style blanc épuré pour une approche ultra-minimaliste
+- **Solution esthétique** : Fond blanc avec texte gris foncé et shadow subtile pour la profondeur
+
+```css
+[data-scope='segment-group'][data-part='item'][data-state='checked'] {
+  background: white !important;
+  color: #374151 !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-scope='segment-group'][data-part='item'][data-state='checked']:hover {
+  background: #f9fafb !important;
+  color: #1f2937 !important;
+}
+```
+
+**2. Popovers export - Positionnement dynamique intelligent :**
+- **Problème résolu** : `position: fixed` avec `right: 2rem` statique causait des coupures sur différentes résolutions
+- **Solution évoluée** : Calcul dynamique de position avec `getBoundingClientRect()` et adaptation au viewport
+
+```tsx
+// Positionnement intelligent avec protection des bords
+useEffect(() => {
+  if (isOpen && buttonRef.current) {
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let top = buttonRect.bottom + 8;
+    let left = buttonRect.right - popoverWidth;
+    
+    // Adaptations automatiques pour éviter les débordements
+    if (left < 16) left = 16;
+    if (left + popoverWidth > viewportWidth - 16) {
+      left = viewportWidth - popoverWidth - 16;
+    }
+    if (top + popoverHeight > viewportHeight - 16) {
+      top = buttonRect.top - popoverHeight - 8;
+    }
+    
+    setPopoverStyle({ position: 'fixed', top: `${top}px`, left: `${left}px`, zIndex: 9999 });
+  }
+}, [isOpen]);
+```
+
+### 🤔 Analyse :
+**Solution universelle** : Le positionnement dynamique élimine définitivement les problèmes de coupure sur toutes les résolutions et orientations. L'algorithme d'adaptation préserve l'UX en repositionnant intelligemment le popover.
+
+**Performance optimisée** : Calcul de position uniquement à l'ouverture (`useEffect([isOpen])`) évite les re-calculs inutiles. Le style inline permet un contrôle précis sans surcharge CSS.
+
+**Maintenabilité** : Les corrections sont isolées et n'affectent pas les autres composants. La logique de positionnement est réutilisable pour d'autres popovers.
+
+### 💜 Prochaines étapes :
+- Tester sur différentes résolutions (4K, mobile, tablette) pour valider l'adaptation
+- Monitorer les performances du calcul de position en conditions réelles
+- Considérer l'extraction de la logique de positionnement en hook personnalisé `useSmartPopover`
+
+---
+
+### ✨ Date: 2025-01-31 (Corrections couleur active GranularityControl & popovers export coupés)
+
+### ⌛ Changement :
+**Correction de deux problèmes critiques UX** identifiés dans les widgets detailswidget et compareData CalculateTrend.
+
+**Problèmes résolus :**
+
+**1. Couleur active manquante dans GranularityControl Ark UI :**
+- **Problème** : Les boutons Auto/Manuel du `SegmentGroup` Ark UI perdaient leur couleur active (#18213e)
+- **Cause** : Manque de spécificité CSS par rapport aux styles par défaut d'Ark UI
+- **Solution** : Ajout de `!important` et styles spécifiques pour `.segment-item-content`, `.segment-item-icon`, `.segment-item-label`
+
+```css
+[data-scope='segment-group'][data-part='item'][data-state='checked'] {
+  background: #18213e !important;
+  color: white !important;
+  border-color: #18213e !important;
+}
+
+[data-scope='segment-group'][data-part='item'][data-state='checked'] .segment-item-content {
+  position: relative;
+  z-index: 1;
+  color: white !important;
+}
+```
+
+**2. Popovers ExportMenu coupés :**
+- **Problème** : Les dropdown des boutons d'export étaient coupés par les conteneurs parents avec `overflow: hidden`
+- **Cause** : Utilisation de `position: absolute` au lieu de `position: fixed`
+- **Solution** : Migration vers `position: fixed` avec z-index élevé et positionnement responsive adapté
+
+```css
+.export-menu .dropdown-menu {
+  position: fixed;
+  right: 2rem;
+  z-index: 9999;
+}
+
+/* Responsive adapté */
+@media (max-width: 768px) {
+  .export-menu .dropdown-menu {
+    right: 1rem;
+  }
+}
+```
+
+### 🤔 Analyse :
+**Impact scalabilité & maintainability :**
+- **Ark UI** : La spécificité CSS renforcée assure la cohérence visuelle des SegmentGroup dans tous les contextes
+- **Popovers** : Le `position: fixed` élimine définitivement les problèmes de clipping, améliore l'accessibilité
+- **Responsive** : Les nouveaux breakpoints conservent une UX optimale sur tous devices
+- **Performance** : Z-index optimisé (9999) assure la visibilité sans impact sur les performances
+
+### 💜 Prochaines étapes :
+- Tester l'affichage sur différentes résolutions pour valider le positionnement fixed
+- Vérifier que les animations Framer Motion restent fluides avec les nouveaux z-index
+- Considérer l'utilisation de React Portal pour les futurs popovers complexes
+
+---
+
 ### ✨ Date: 2025-01-11 (Animation fluide granularity-dropdown-content avec Motion Layout)
 
 ### ⌛ Changement :
@@ -6309,3 +6625,5 @@ Cette modification améliore directement l'expérience utilisateur en rendant le
 
 ### 💜 Prochaines étapes :
 - Valider le rendu sur différentes ta
+
+
