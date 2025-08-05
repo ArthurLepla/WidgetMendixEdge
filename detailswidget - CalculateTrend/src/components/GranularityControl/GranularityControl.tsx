@@ -12,13 +12,15 @@ import {
 import { SegmentGroup } from '@ark-ui/react';
 import "./GranularityControl.css";
 
+export type GranularityUnit = "minute" | "hour" | "day" | "week" | "month" | "year";
+
 export interface GranularityControlProps {
   mode: "auto" | "strict";
   value: number;
-  unit: "minute" | "hour" | "day" | "week" | "month" | "year";
+  unit: GranularityUnit;
   onModeChange: (mode: "Auto" | "Strict") => void;
   onValueChange: (value: number) => void;
-  onUnitChange: (unit: string) => void;
+  onUnitChange: (unit: GranularityUnit) => void;
   autoGranularity: { value: number; unit: string };
   isDisabled?: boolean;
   analysisDurationMs?: number;
@@ -46,11 +48,11 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [pendingTime, setPendingTime] = useState<number>(value);
-  const [pendingUnit, setPendingUnit] = useState(unit);
+  const [pendingUnit, setPendingUnit] = useState<GranularityUnit>(unit);
   const [pendingMode, setPendingMode] = useState<"auto" | "strict">(mode);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const unitLabels: Record<string, string> = {
+  const unitLabels: Record<GranularityUnit, string> = {
     minute: "minutes",
     hour: "heures", 
     day: "jours",
@@ -59,7 +61,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     year: "années"
   };
 
-  const unitLabelsSingular: Record<string, string> = {
+  const unitLabelsSingular: Record<GranularityUnit, string> = {
     minute: "minute",
     hour: "heure",
     day: "jour", 
@@ -68,7 +70,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     year: "année"
   };
 
-  const unitMsMap: Record<string, number> = {
+  const unitMsMap: Record<GranularityUnit, number> = {
     minute: 60 * 1000,
     hour: 60 * 60 * 1000,
     day: 24 * 60 * 60 * 1000,
@@ -112,8 +114,8 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     setPendingMode(mode);
   }, [mode]);
 
-  const generateOptions = React.useCallback((unitType: string): number[] => {
-    const baseOptions: Record<string, number[]> = {
+  const generateOptions = React.useCallback((unitType: GranularityUnit): number[] => {
+    const baseOptions: Record<GranularityUnit, number[]> = {
       minute: [5, 10, 15, 20, 30, 45, 60],
       hour: [1, 2, 3, 4, 6, 8, 12, 24],
       day: [1, 2, 3, 5, 7, 10, 14, 21, 30],
@@ -127,11 +129,11 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
       const bucketMs = opt * unitMsMap[unitType];
       if (bucketMs > analysisDurationMs) return false;
       const points = Math.ceil(analysisDurationMs / bucketMs);
-      return points <= 2000; // Augmentation de la limite de 100 à 2000
+      return points <= 100;
     }) || [];
   }, [analysisDurationMs, unitMsMap]);
 
-  const isUnitValid = React.useCallback((unitType: string): boolean => {
+  const isUnitValid = React.useCallback((unitType: GranularityUnit): boolean => {
     if (!analysisDurationMs) return true;
     return generateOptions(unitType).length > 0;
   }, [analysisDurationMs, generateOptions]);
@@ -139,9 +141,9 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
   const generateSuggestions = () => {
     if (!analysisDurationMs) return [];
 
-    const allOptions: Array<{unit: string; value: number; points: number}> = [];
+    const allOptions: Array<{unit: GranularityUnit; value: number; points: number}> = [];
     
-    Object.entries(unitMsMap).forEach(([u, ms]) => {
+    (Object.keys(unitMsMap) as GranularityUnit[]).forEach((u) => {
       const baseOptions: Record<string, number[]> = {
         minute: [5, 10, 15, 30],
         hour: [1, 2, 3, 4, 6, 8, 12],
@@ -152,7 +154,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
       };
       
       baseOptions[u]?.forEach(v => {
-        const pts = Math.ceil(analysisDurationMs / (v * ms));
+        const pts = Math.ceil(analysisDurationMs / (v * unitMsMap[u]));
         if (pts >= 20 && pts <= 80) {
           allOptions.push({ unit: u, value: v, points: pts });
         }
@@ -165,6 +167,22 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
   };
 
   const handleModeToggle = (newMode: "auto" | "strict") => {
+    if (pendingMode === "auto" && newMode === "strict") {
+        const { value: autoValue, unit: autoUnitLabel } = autoGranularity;
+        
+        const unitKeyByLabel = new Map<string, GranularityUnit>();
+        (Object.keys(unitLabels) as GranularityUnit[]).forEach(key => unitKeyByLabel.set(unitLabels[key], key));
+        (Object.keys(unitLabelsSingular) as GranularityUnit[]).forEach(key => unitKeyByLabel.set(unitLabelsSingular[key], key));
+        
+        const unitKey = unitKeyByLabel.get(autoUnitLabel);
+
+        if (unitKey) {
+            setPendingTime(autoValue);
+            setPendingUnit(unitKey);
+            onValueChange(autoValue);
+            onUnitChange(unitKey);
+        }
+    }
     setPendingMode(newMode);
     onModeChange(newMode === "auto" ? "Auto" : "Strict");
   };
@@ -174,7 +192,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
     onValueChange(newValue);
   };
 
-  const handleUnitChange = (newUnit: string) => {
+  const handleUnitChange = (newUnit: GranularityUnit) => {
     if (!isUnitValid(newUnit)) return;
     
     const newOptions = generateOptions(newUnit);
@@ -183,13 +201,13 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
       selectedValue = newOptions.length > 0 ? newOptions[0] : pendingTime;
     }
 
-    setPendingUnit(newUnit as any);
+    setPendingUnit(newUnit);
     setPendingTime(selectedValue);
     onUnitChange(newUnit);
     onValueChange(selectedValue);
   };
 
-  const handleSuggestionClick = (suggestion: {unit: string; value: number}) => {
+  const handleSuggestionClick = (suggestion: {unit: GranularityUnit; value: number}) => {
     handleUnitChange(suggestion.unit);
     handleValueChange(suggestion.value);
     setShowSuggestions(false);
@@ -206,7 +224,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
 
   const suggestions = generateSuggestions();
   const availableValues = generateOptions(pendingUnit);
-  const availableUnits = Object.keys(unitLabels).filter(isUnitValid);
+  const availableUnits = (Object.keys(unitLabels) as GranularityUnit[]).filter(isUnitValid);
 
   // Auto-protection : Force mode Auto lors des changements de plage temporelle
   const prevAnalysisDurationMs = React.useRef(analysisDurationMs);
@@ -391,7 +409,7 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
                         <div className="granularity-select-wrapper">
                           <select 
                             value={pendingUnit}
-                            onChange={(e) => handleUnitChange(e.target.value)}
+                            onChange={(e) => handleUnitChange(e.target.value as GranularityUnit)}
                             className="granularity-select"
                           >
                             {availableUnits.map(unitKey => (

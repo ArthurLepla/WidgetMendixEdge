@@ -1,3 +1,52 @@
+### ✨ Date: 2025-01-31 (Correction affichage granularité en mode IPE - Widget Details)
+
+### ⌛ Changement :
+**Correction de l'affichage des contrôles de granularité en mode IPE** pour assurer une cohérence parfaite avec les autres modes (énergétique et vue générale).
+
+**Problème résolu :**
+- **Mode énergétique** : Manquait la propriété `showSimpleGranularity` quand `enableAdvancedGranularity` était désactivé
+- **Incohérence entre modes** : Le mode IPE avait les contrôles simple/avancé, mais pas le mode énergétique
+- **UX fragmentée** : Expérience différente selon le mode d'affichage
+
+**Solution implémentée :**
+```tsx
+// Mode énergétique - AVANT (manquait showSimpleGranularity)
+<ChartContainer
+    showGranularityControl={hasGranularityConfig && enableAdvancedGranularity}
+    // manquait la ligne suivante
+/>
+
+// Mode énergétique - APRÈS (cohérent avec IPE et vue générale)
+<ChartContainer
+    showGranularityControl={hasGranularityConfig && enableAdvancedGranularity}
+    showSimpleGranularity={hasGranularityConfig && !enableAdvancedGranularity}
+/>
+```
+
+**Comportement unifié obtenu :**
+- **Quand `enableAdvancedGranularity = true`** : 
+  - Mode énergétique ✅ Contrôle avancé affiché
+  - Mode IPE ✅ Contrôle avancé affiché
+  - Vue générale ✅ Contrôle avancé affiché
+
+- **Quand `enableAdvancedGranularity = false`** :
+  - Mode énergétique ✅ Badge simple affiché (maintenant)
+  - Mode IPE ✅ Badge simple affiché (déjà correct)
+  - Vue générale ✅ Badge simple affiché (déjà correct)
+
+### 🤔 Analyse :
+**Impact UX significatif :** Cette correction élimine l'incohérence entre les modes d'affichage qui créait une confusion pour l'utilisateur. Maintenant, quel que soit le mode sélectionné (énergétique, IPE, ou vue générale), l'utilisateur retrouve toujours le même type de contrôle de granularité selon la configuration `enableAdvancedGranularity`. Cette uniformité améliore la prévisibilité de l'interface et réduit la courbe d'apprentissage.
+
+**Architecture consolidée :** La correction d'une ligne de code résout un problème architectural plus large de cohérence entre composants. Tous les modes utilisent maintenant exactement la même logique conditionnelle, ce qui simplifie la maintenance et garantit qu'aucun autre mode ne peut avoir ce type d'oubli à l'avenir.
+
+### 💜 Prochaines étapes :
+- Tester l'affichage en mode énergétique avec `enableAdvancedGranularity = false`
+- Valider la cohérence visuelle entre tous les modes d'affichage
+- Vérifier que les transitions entre modes préservent la logique de granularité
+- Documenter les règles de cohérence pour les futurs développements
+
+---
+
 ### ✨ Date: 2025-01-31 (Implémentation Mode Granularité Simple/Avancé - Widget Details)
 
 ### ⌛ Changement :

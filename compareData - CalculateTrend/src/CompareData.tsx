@@ -767,21 +767,28 @@ export function CompareData({
         return createElement("div", { className: "widget-loading" }, "Chargement des données Mendix...");
     }
     
-    if (error && !enableTestMode) { 
+    // En mode IPE (sans dates), on affiche le widget avec les contrôles désactivés
+    if (error && !enableTestMode && dateDebut && dateDebut.value) {
         if (error === "NO_MACHINE_SELECTED") {
             return createElement(NoSelection);
         }
-        if (error === "DATE_NOT_SELECTED"){
-            return createElement(ErrorCard, { title: "Dates non sélectionnées", message: "Veuillez sélectionner une date de début et de fin pour afficher les données." });
+        if (error === "DATE_NOT_SELECTED") {
+            return createElement(ErrorCard, {
+                title: "Dates non sélectionnées",
+                message: "Veuillez sélectionner une date de début et de fin pour afficher les données."
+            });
         }
         if (error === "CONFIG_ERROR_IPE_ATTRIBUTES") {
-            return createElement(ErrorCard, { 
-                title: "Configuration IPE manquante", 
-                message: "Pour utiliser le mode IPE, veuillez configurer dsProduction_Consommation avec tous les attributs requis." 
+            return createElement(ErrorCard, {
+                title: "Configuration IPE manquante",
+                message: "Pour utiliser le mode IPE, veuillez configurer dsProduction_Consommation avec tous les attributs requis."
             });
         }
         if (error === "DATA_SOURCE_NOT_READY") {
-            return createElement(ErrorCard, { title: "Données non disponibles", message: "Les sources de données ne sont pas prêtes. Veuillez vérifier la configuration des attributs et des dates."});
+            return createElement(ErrorCard, {
+                title: "Données non disponibles",
+                message: "Les sources de données ne sont pas prêtes. Veuillez vérifier la configuration des attributs et des dates."
+            });
         }
         return createElement(ErrorCard, { message: error });
     }
@@ -800,22 +807,33 @@ export function CompareData({
     // Déterminer le suffixe du titre selon le mode
     let titleSuffix = "";
     if (ipeMode === "double") {
-        const ipeName = activeIPE === 1 ? (ipe1Name || "IPE 1") : (ipe2Name || "IPE 2");
+        const ipeName = activeIPE === 1 ? ipe1Name || "IPE 1" : ipe2Name || "IPE 2";
         titleSuffix = ` - ${ipeName}`;
     }
 
-    const chartTitle = `${enableTestMode ? "[MODE TEST] " : ""}Analyse Comparative: ${currentEnergyConfig.label} (${viewMode === "ipe" ? "IPE" : "Consommation"})${titleSuffix}`;
-    const exportFilename = `export_${enableTestMode ? "test_mode_" : ""}comparaison_${(energyType as EnergyType).toLowerCase()}_${viewMode}${ipeMode === "double" ? `_ipe${activeIPE}` : ""}`;
-    
+    const chartTitle = `${enableTestMode ? "[MODE TEST] " : ""}Analyse Comparative: ${
+        currentEnergyConfig.label
+    } (${viewMode === "ipe" ? "IPE" : "Consommation"})${titleSuffix}`;
+    const exportFilename = `export_${
+        enableTestMode ? "test_mode_" : ""
+    }comparaison_${(energyType as EnergyType).toLowerCase()}_${viewMode}${
+        ipeMode === "double" ? `_ipe${activeIPE}` : ""
+    }`;
+
     // Vérifier si nous avons des données à afficher
     const hasData = currentMachinesStats.length > 0 && currentMachinesData.length > 0;
-    
-    if (!isLoading && !hasData) {
+
+    if (!isLoading && !hasData && dateDebut && dateDebut.value) {
         if (enableTestMode) {
-            return createElement(ErrorCard, { title: "Erreur Mode Test", message: "La génération des données de test a échoué ou n'a produit aucune donnée." })
+            return createElement(ErrorCard, {
+                title: "Erreur Mode Test",
+                message: "La génération des données de test a échoué ou n'a produit aucune donnée."
+            });
         } else if (error && error !== "NO_MACHINE_SELECTED" && error !== "DATE_NOT_SELECTED") {
-            return createElement(ErrorCard, { message: "Aucune donnée à afficher pour la sélection actuelle après traitement."});
-        } 
+            return createElement(ErrorCard, {
+                message: "Aucune donnée à afficher pour la sélection actuelle après traitement."
+            });
+        }
     }
 
     // Déterminer les dates à afficher selon l'IPE actif
@@ -845,37 +863,42 @@ export function CompareData({
     */
 
     // Déterminer si le toggle doit être affiché
-    const shouldShowToggle: boolean = ipeMode === "double" && viewMode === "ipe" && 
-                            !!(ipe1Name && ipe1Name.trim() !== "") && 
-                            !!(ipe2Name && ipe2Name.trim() !== "") && 
-                            machinesStats1.length > 0 && machinesStats2.length > 0;
+    const shouldShowToggle: boolean =
+        ipeMode === "double" &&
+        viewMode === "ipe" &&
+        !!(ipe1Name && ipe1Name.trim() !== "") &&
+        !!(ipe2Name && ipe2Name.trim() !== "") &&
+        machinesStats1.length > 0 &&
+        machinesStats2.length > 0;
 
-    return createElement(ChartContainer, {
-        title: chartTitle,
-        energyConfig: currentEnergyConfig,
-        data: currentChartExportData,
-        filename: exportFilename,
-        showLineChart: false,
-        showHeatMap: false,
-        extraHeaderContent: headerInfo,
-        showIPEToggle: shouldShowToggle,
-        ipe1Name: ipe1Name || undefined,
-        ipe2Name: ipe2Name || undefined,
-        activeIPE: activeIPE,
-        onIPEToggle: setActiveIPE,
-        // Props pour la granularité
-        showGranularityControl: enableAdvancedGranularity,
-        showSimpleGranularity: !enableAdvancedGranularity,
-        granularityMode: granularityMode,
-        granularityValue: granularityValue,
-        granularityUnit: granularityUnit,
-        onGranularityModeChange: handleGranularityModeChange,
-        onGranularityValueChange: handleGranularityValueChange,
-        onGranularityUnitChange: handleGranularityUnitChange,
-        startDate: effectiveDateDebut?.value || undefined,
-        endDate: effectiveDateFin?.value || undefined,
-        isGranularityDisabled: false
-    }, 
+    return createElement(
+        ChartContainer,
+        {
+            title: chartTitle,
+            energyConfig: currentEnergyConfig,
+            data: currentChartExportData,
+            filename: exportFilename,
+            showLineChart: false,
+            showHeatMap: false,
+            extraHeaderContent: headerInfo,
+            showIPEToggle: shouldShowToggle,
+            ipe1Name: ipe1Name || undefined,
+            ipe2Name: ipe2Name || undefined,
+            activeIPE: activeIPE,
+            onIPEToggle: setActiveIPE,
+            // Props pour la granularité
+            showGranularityControl: enableAdvancedGranularity,
+            showSimpleGranularity: !enableAdvancedGranularity,
+            granularityMode: granularityMode,
+            granularityValue: granularityValue,
+            granularityUnit: granularityUnit,
+            onGranularityModeChange: handleGranularityModeChange,
+            onGranularityValueChange: handleGranularityValueChange,
+            onGranularityUnitChange: handleGranularityUnitChange,
+            startDate: effectiveDateDebut?.value || undefined,
+            endDate: effectiveDateFin?.value || undefined,
+            isGranularityDisabled: !hasData
+        }, 
         createElement("div", { className: "widget-layout-container" },
             createElement("div", { className: "widget-cards-grid" },
                 currentMachinesStats.map((machine) => 
