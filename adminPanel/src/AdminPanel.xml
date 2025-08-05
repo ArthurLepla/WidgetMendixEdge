@@ -1,16 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget id="dvgroup.adminpanel.AdminPanel" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+<widget id="dvgroup.adminpanel.AdminPanel" pluginWidget="true" needsEntityContext="false" offlineCapable="true"
         supportedPlatform="Web"
         xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>Admin Panel</name>
-    <description>My widget description</description>
+    <description>Modern admin panel for managing assets and features</description>
     <icon/>
     <properties>
-        <propertyGroup caption="General">
-            <property key="sampleText" type="string" required="false">
-                <caption>Default value</caption>
-                <description>Sample text input</description>
+        <propertyGroup caption="Assets Configuration">
+            <property key="assetsDatasource" type="datasource" isList="true" required="true">
+                <caption>Assets Data Source</caption>
+                <description>Data source for assets</description>
+            </property>
+            <property key="variablesDatasource" type="datasource" isList="true" required="false">
+                <caption>Variables Data Source</caption>
+                <description>Data source for variables</description>
+            </property>
+            <property key="levelsDatasource" type="datasource" isList="true" required="false">
+                <caption>Levels Data Source</caption>
+                <description>Data source for levels</description>
+            </property>
+            <property key="syncAction" type="action" required="false">
+                <caption>Sync Action</caption>
+                <description>Action to sync assets</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Features Configuration">
+            <property key="featuresDatasource" type="datasource" isList="true" required="true">
+                <caption>Features Data Source</caption>
+                <description>Data source for feature toggles</description>
+            </property>
+            <property key="onFeatureToggle" type="action" required="false">
+                <caption>On Feature Toggle</caption>
+                <description>Action when feature is toggled</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Asset Attributes">
+            <property key="assetName" type="attribute" required="true">
+                <caption>Asset Name</caption>
+                <description>Name attribute of asset</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsElec" type="attribute" required="false">
+                <caption>Is Electric</caption>
+                <description>Electric flag</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsGaz" type="attribute" required="false">
+                <caption>Is Gas</caption>
+                <description>Gas flag</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsEau" type="attribute" required="false">
+                <caption>Is Water</caption>
+                <description>Water flag</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsAir" type="attribute" required="false">
+                <caption>Is Air</caption>
+                <description>Air flag</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Feature Attributes">
+            <property key="featureName" type="attribute" required="true">
+                <caption>Feature Name</caption>
+                <description>Name of the feature</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="featureIsEnabled" type="attribute" required="true">
+                <caption>Is Enabled</caption>
+                <description>Feature enabled state</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="featureConfigValue" type="attribute" required="false">
+                <caption>Configuration Value</caption>
+                <description>Configuration value of feature</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Variable Attributes">
+            <property key="variableName" type="attribute" required="false">
+                <caption>Variable Name</caption>
+                <description>Name of the variable</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="variableUnit" type="attribute" required="false">
+                <caption>Variable Unit</caption>
+                <description>Unit of the variable</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="variableType" type="attribute" required="false">
+                <caption>Variable Type</caption>
+                <description>Type of the variable</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
             </property>
         </propertyGroup>
     </properties>

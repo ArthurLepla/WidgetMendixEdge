@@ -2,7 +2,7 @@
   "name": "adminpanel",
   "widgetName": "AdminPanel",
   "version": "1.0.0",
-  "description": "My widget description",
+  "description": "Modern admin panel for managing assets and features",
   "copyright": "© Mendix Technology BV 2022. All rights reserved.",
   "author": "Arthur",
   "engines": {
@@ -26,10 +26,15 @@
   },
   "devDependencies": {
     "@mendix/pluggable-widgets-tools": "^10.15.0",
-    "@types/big.js": "^6.0.2"
+    "@types/big.js": "^6.0.2",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0"
   },
   "dependencies": {
-    "classnames": "^2.2.6"
+    "antd": "^5.12.0",
+    "classnames": "^2.2.6",
+    "framer-motion": "^10.16.0",
+    "lucide-react": "^0.300.0"
   },
   "resolutions": {
     "react": "^18.2.0",

@@ -1,6 +1,144 @@
-/*
-Place your custom CSS here
-*/
-.widget-hello-world {
+.admin-panel-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+}
 
+.admin-panel-content {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-panel-tabs .ant-tabs-nav {
+    margin-bottom: 24px;
+}
+
+.admin-panel-tabs .ant-tabs-tab {
+    font-size: 16px;
+    padding: 12px 20px;
+}
+
+/* Assets Tree Styles */
+.assets-tree-card {
+    height: calc(100vh - 350px);
+    overflow: hidden;
+}
+
+.assets-tree-card .ant-card-body {
+    overflow-y: auto;
+    height: calc(100% - 57px);
+}
+
+.assets-tree .ant-tree-node-content-wrapper {
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.assets-tree .ant-tree-node-content-wrapper:hover {
+    background: rgba(24, 144, 255, 0.08);
+}
+
+.assets-tree .ant-tree-node-selected .ant-tree-node-content-wrapper {
+    background: rgba(24, 144, 255, 0.15);
+}
+
+/* Asset Details Card */
+.asset-details-card {
+    height: calc(100vh - 350px);
+    overflow: hidden;
+}
+
+.asset-details-card .ant-card-body {
+    overflow-y: auto;
+    height: calc(100% - 57px);
+}
+
+.variables-table .ant-table {
+    font-size: 13px;
+}
+
+/* Features Card Styles */
+.features-card {
+    min-height: calc(100vh - 350px);
+}
+
+.feature-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.feature-card.enabled {
+    border-color: #52c41a;
+    background: linear-gradient(135deg, #f6ffed 0%, #ffffff 100%);
+}
+
+.feature-card.disabled {
+    opacity: 0.85;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Loading Animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Statistic Cards */
+.ant-statistic-title {
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.ant-statistic-content {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .admin-panel-content {
+        padding: 16px;
+    }
+    
+    .assets-tree-card,
+    .asset-details-card {
+        height: auto;
+        min-height: 400px;
+    }
+}
+
+/* Ant Design Theme Overrides */
+.ant-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ant-card-hoverable:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.ant-btn-primary {
+    height: 40px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.ant-tag {
+    border-radius: 4px;
+    padding: 2px 8px;
 }
