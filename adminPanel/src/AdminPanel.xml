@@ -25,55 +25,81 @@
                 <description>Action to sync assets</description>
             </property>
         </propertyGroup>
+        
         <propertyGroup caption="Features Configuration">
             <property key="featuresDatasource" type="datasource" isList="true" required="true">
                 <caption>Features Data Source</caption>
                 <description>Data source for feature toggles</description>
             </property>
-            <property key="onFeatureToggle" type="action" required="false">
+            <property key="onFeatureToggle" type="action" required="false" dataSource="featuresDatasource">
                 <caption>On Feature Toggle</caption>
                 <description>Action when feature is toggled</description>
             </property>
         </propertyGroup>
+        
         <propertyGroup caption="Asset Attributes">
-            <property key="assetName" type="attribute" required="true">
+            <property key="assetName" type="attribute" required="true" dataSource="assetsDatasource">
                 <caption>Asset Name</caption>
                 <description>Name attribute of asset</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
-            <property key="assetIsElec" type="attribute" required="false">
+            <property key="assetIsElec" type="attribute" required="false" dataSource="assetsDatasource">
                 <caption>Is Electric</caption>
                 <description>Electric flag</description>
                 <attributeTypes>
                     <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
-            <property key="assetIsGaz" type="attribute" required="false">
+            <property key="assetIsGaz" type="attribute" required="false" dataSource="assetsDatasource">
                 <caption>Is Gas</caption>
                 <description>Gas flag</description>
                 <attributeTypes>
                     <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
-            <property key="assetIsEau" type="attribute" required="false">
+            <property key="assetIsEau" type="attribute" required="false" dataSource="assetsDatasource">
                 <caption>Is Water</caption>
                 <description>Water flag</description>
                 <attributeTypes>
                     <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
-            <property key="assetIsAir" type="attribute" required="false">
+            <property key="assetIsAir" type="attribute" required="false" dataSource="assetsDatasource">
                 <caption>Is Air</caption>
                 <description>Air flag</description>
                 <attributeTypes>
                     <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
+            <property key="assetParent" type="association" dataSource="assetsDatasource" required="false"
+                      selectableObjects="assetsDatasource">
+                <caption>Asset Parent</caption>
+                <description>Parent asset for hierarchy</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
+            </property>
+            <property key="assetHasChildren" type="attribute" required="false" dataSource="assetsDatasource">
+                <caption>Has Children</caption>
+                <description>Whether asset has child assets</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetLevel" type="association" dataSource="assetsDatasource" required="false"
+                      selectableObjects="levelsDatasource">
+                <caption>Asset Level</caption>
+                <description>Level of the asset in hierarchy</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
+            </property>
         </propertyGroup>
+        
         <propertyGroup caption="Feature Attributes">
-            <property key="featureName" type="attribute" required="true">
+            <property key="featureName" type="attribute" required="true" dataSource="featuresDatasource">
                 <caption>Feature Name</caption>
                 <description>Name of the feature</description>
                 <attributeTypes>
@@ -81,14 +107,14 @@
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
-            <property key="featureIsEnabled" type="attribute" required="true">
+            <property key="featureIsEnabled" type="attribute" required="true" dataSource="featuresDatasource">
                 <caption>Is Enabled</caption>
                 <description>Feature enabled state</description>
                 <attributeTypes>
                     <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
-            <property key="featureConfigValue" type="attribute" required="false">
+            <property key="featureConfigValue" type="attribute" required="false" dataSource="featuresDatasource">
                 <caption>Configuration Value</caption>
                 <description>Configuration value of feature</description>
                 <attributeTypes>
@@ -96,28 +122,37 @@
                 </attributeTypes>
             </property>
         </propertyGroup>
+        
         <propertyGroup caption="Variable Attributes">
-            <property key="variableName" type="attribute" required="false">
+            <property key="variableName" type="attribute" required="false" dataSource="variablesDatasource">
                 <caption>Variable Name</caption>
                 <description>Name of the variable</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
-            <property key="variableUnit" type="attribute" required="false">
+            <property key="variableUnit" type="attribute" required="false" dataSource="variablesDatasource">
                 <caption>Variable Unit</caption>
                 <description>Unit of the variable</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
-            <property key="variableType" type="attribute" required="false">
+            <property key="variableType" type="attribute" required="false" dataSource="variablesDatasource">
                 <caption>Variable Type</caption>
                 <description>Type of the variable</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                     <attributeType name="Enum"/>
                 </attributeTypes>
+            </property>
+            <property key="variableAsset" type="association" dataSource="variablesDatasource" required="false"
+                      selectableObjects="assetsDatasource">
+                <caption>Variable Asset</caption>
+                <description>Asset associated with this variable</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
             </property>
         </propertyGroup>
     </properties>

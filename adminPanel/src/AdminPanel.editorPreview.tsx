@@ -1,7 +1,7 @@
 import { ReactElement, createElement } from "react";
 import { AdminPanelPreviewProps } from "../typings/AdminPanelProps";
 import { Layout, Tabs, Card, Row, Col, Statistic } from "antd";
-import { Database, ToggleLeft, Zap, Activity, Droplet, Wind } from "lucide-react";
+import { Database, ToggleLeft, Zap, Flame, Droplet } from "lucide-react";
 
 const { Content } = Layout;
 
@@ -45,7 +45,7 @@ export function preview(_props: AdminPanelPreviewProps): ReactElement {
                                             <Statistic
                                                 title="Gas"
                                                 value={12}
-                                                prefix={<Activity size={20} />}
+                                                prefix={<Flame size={20} />}
                                             />
                                         </Card>
                                     </Col>

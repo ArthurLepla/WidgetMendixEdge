@@ -1,23 +1,20 @@
-import { ReactElement, createElement, useState, useEffect, useMemo } from "react";
+import { ReactElement, createElement, useState, useMemo } from "react";
 import { AdminPanelContainerProps } from "../typings/AdminPanelProps";
 import { ValueStatus } from "mendix";
-import { Tabs, Layout, Card, Row, Col, Statistic, Button, Space, message, ConfigProvider, theme } from "antd";
+import { Tabs, Layout, Card, Row, Col, Statistic, Button, Space, message, ConfigProvider, theme, App } from "antd";
 import { 
     Database, 
     ToggleLeft, 
     RefreshCw, 
-    Activity,
+    Flame,
     Zap,
     Droplet,
-    Wind,
-    Gauge,
-    CheckCircle2,
-    XCircle,
-    Settings
+    Settings,
+    Wind
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { AssetsTab } from "./components/AssetsTab";
-import { FeaturesTab } from "./components/FeaturesTab";
+import { motion } from "framer-motion";
+import { AssetsTab } from "./components/AssetsTabs";
+import { FeaturesTab } from "./components/FeaturesTabs";
 import "./ui/AdminPanel.css";
 
 const { Content } = Layout;
@@ -27,46 +24,48 @@ export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
     const [loading, setLoading] = useState(false);
     const [selectedAsset, setSelectedAsset] = useState<any>(null);
 
-    // Calculate KPIs for assets
+    // KPIs pour les assets
     const assetsKPIs = useMemo(() => {
         if (!props.assetsDatasource || props.assetsDatasource.status !== ValueStatus.Available) {
             return { total: 0, electric: 0, gas: 0, water: 0, air: 0 };
         }
 
         const items = props.assetsDatasource.items || [];
-        return {
-            total: items.length,
-            electric: items.filter(item => 
-                props.assetIsElec && item.get(props.assetIsElec)?.value === true
-            ).length,
-            gas: items.filter(item => 
-                props.assetIsGaz && item.get(props.assetIsGaz)?.value === true
-            ).length,
-            water: items.filter(item => 
-                props.assetIsEau && item.get(props.assetIsEau)?.value === true
-            ).length,
-            air: items.filter(item => 
-                props.assetIsAir && item.get(props.assetIsAir)?.value === true
-            ).length
-        };
+        
+        let electric = 0;
+        let gas = 0;
+        let water = 0;
+        let air = 0;
+        
+        items.forEach(item => {
+            if (props.assetIsElec?.get(item)?.value === true) electric++;
+            if (props.assetIsGaz?.get(item)?.value === true) gas++;
+            if (props.assetIsEau?.get(item)?.value === true) water++;
+            if (props.assetIsAir?.get(item)?.value === true) air++;
+        });
+        
+        return { total: items.length, electric, gas, water, air };
     }, [props.assetsDatasource, props.assetIsElec, props.assetIsGaz, props.assetIsEau, props.assetIsAir]);
 
-    // Calculate KPIs for features
+    // KPIs pour les features
     const featuresKPIs = useMemo(() => {
         if (!props.featuresDatasource || props.featuresDatasource.status !== ValueStatus.Available) {
             return { total: 0, active: 0, inactive: 0 };
         }
 
         const items = props.featuresDatasource.items || [];
-        return {
-            total: items.length,
-            active: items.filter(item => 
-                props.featureIsEnabled && item.get(props.featureIsEnabled)?.value === true
-            ).length,
-            inactive: items.filter(item => 
-                props.featureIsEnabled && item.get(props.featureIsEnabled)?.value === false
-            ).length
-        };
+        let active = 0;
+        let inactive = 0;
+        
+        items.forEach(item => {
+            if (props.featureIsEnabled?.get(item)?.value === true) {
+                active++;
+            } else {
+                inactive++;
+            }
+        });
+        
+        return { total: items.length, active, inactive };
     }, [props.featuresDatasource, props.featureIsEnabled]);
 
     const handleSync = async () => {
@@ -74,9 +73,9 @@ export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
             setLoading(true);
             try {
                 await props.syncAction.execute();
-                message.success("Synchronization completed successfully");
+                message.success("Synchronisation réussie");
             } catch (error) {
-                message.error("Synchronization failed");
+                message.error("Échec de la synchronisation");
             } finally {
                 setLoading(false);
             }
@@ -87,78 +86,85 @@ export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
         {
             key: "assets",
             label: (
-                <Space>
+                <Space size={4}>
                     <Database size={16} />
                     <span>Assets</span>
                 </Space>
             ),
             children: (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
                 >
-                    <Space direction="vertical" size="large" style={{ width: "100%" }}>
-                        {/* KPIs Row */}
+                    <Space direction="vertical" size={24} style={{ width: "100%" }}>
+                        {/* KPIs simplifiés */}
                         <Row gutter={[16, 16]}>
                             <Col xs={24} sm={12} md={6}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Total Assets"
+                                        title="Total"
                                         value={assetsKPIs.total}
-                                        prefix={<Database size={20} />}
-                                        valueStyle={{ color: "#1890ff" }}
+                                        prefix={<Database size={18} />}
+                                        className="statistic-primary"
                                     />
                                 </Card>
                             </Col>
                             <Col xs={24} sm={12} md={6}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Electric"
+                                        title="Électrique"
                                         value={assetsKPIs.electric}
-                                        prefix={<Zap size={20} />}
-                                        valueStyle={{ color: "#faad14" }}
+                                        prefix={<Zap size={18} />}
+                                        className="statistic-electric"
                                     />
                                 </Card>
                             </Col>
                             <Col xs={24} sm={12} md={6}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Gas"
+                                        title="Gaz"
                                         value={assetsKPIs.gas}
-                                        prefix={<Activity size={20} />}
-                                        valueStyle={{ color: "#ff7875" }}
+                                        prefix={<Flame size={18} />}
+                                        className="statistic-gas"
                                     />
                                 </Card>
                             </Col>
                             <Col xs={24} sm={12} md={6}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Water"
+                                        title="Eau"
                                         value={assetsKPIs.water}
-                                        prefix={<Droplet size={20} />}
-                                        valueStyle={{ color: "#5cdbd3" }}
+                                        prefix={<Droplet size={18} />}
+                                        className="statistic-water"
+                                    />
+                                </Card>
+                            </Col>
+                            <Col xs={24} sm={12} md={6}>
+                                <Card>
+                                    <Statistic
+                                        title="Air"
+                                        value={assetsKPIs.air}
+                                        prefix={<Wind size={18} />}
+                                        className="statistic-air"
                                     />
                                 </Card>
                             </Col>
                         </Row>
 
-                        {/* Sync Button */}
-                        <Row>
-                            <Col span={24}>
-                                <Button
-                                    type="primary"
-                                    icon={<RefreshCw size={16} className={loading ? "spin" : ""} />}
-                                    onClick={handleSync}
-                                    loading={loading}
-                                    size="large"
-                                >
-                                    Synchronize Assets
-                                </Button>
-                            </Col>
-                        </Row>
+                        {/* Bouton de synchronisation simplifié */}
+                        <div>
+                            <Button
+                                type="primary"
+                                icon={<RefreshCw size={16} className={loading ? "spin" : ""} />}
+                                onClick={handleSync}
+                                loading={loading}
+                            >
+                                Synchroniser
+                            </Button>
+                        </div>
 
-                        {/* Assets Main Content */}
+                        {/* Contenu principal */}
                         <AssetsTab
                             {...props}
                             selectedAsset={selectedAsset}
@@ -171,53 +177,51 @@ export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
         {
             key: "features",
             label: (
-                <Space>
+                <Space size={4}>
                     <ToggleLeft size={16} />
                     <span>Features</span>
                 </Space>
             ),
             children: (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
                 >
-                    <Space direction="vertical" size="large" style={{ width: "100%" }}>
-                        {/* KPIs Row */}
+                    <Space direction="vertical" size={24} style={{ width: "100%" }}>
+                        {/* KPIs simplifiés */}
                         <Row gutter={[16, 16]}>
                             <Col xs={24} sm={8}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Total Features"
+                                        title="Total"
                                         value={featuresKPIs.total}
-                                        prefix={<Settings size={20} />}
-                                        valueStyle={{ color: "#1890ff" }}
+                                        prefix={<Settings size={18} />}
+                                        className="statistic-primary"
                                     />
                                 </Card>
                             </Col>
                             <Col xs={24} sm={8}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Active"
+                                        title="Actives"
                                         value={featuresKPIs.active}
-                                        prefix={<CheckCircle2 size={20} />}
                                         valueStyle={{ color: "#52c41a" }}
                                     />
                                 </Card>
                             </Col>
                             <Col xs={24} sm={8}>
-                                <Card hoverable>
+                                <Card>
                                     <Statistic
-                                        title="Inactive"
+                                        title="Inactives"
                                         value={featuresKPIs.inactive}
-                                        prefix={<XCircle size={20} />}
-                                        valueStyle={{ color: "#ff4d4f" }}
+                                        valueStyle={{ color: "#8c8c8c" }}
                                     />
                                 </Card>
                             </Col>
                         </Row>
 
-                        {/* Features Content */}
+                        {/* Contenu des features */}
                         <FeaturesTab {...props} />
                     </Space>
                 </motion.div>
@@ -230,28 +234,59 @@ export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
             theme={{
                 algorithm: theme.defaultAlgorithm,
                 token: {
-                    colorPrimary: "#1890ff",
+                    colorPrimary: "#18213e",
                     borderRadius: 8,
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                 },
+                components: {
+                    Card: {
+                        paddingLG: 20,
+                        paddingContentHorizontal: 20,
+                    },
+                    Button: {
+                        controlHeight: 36,
+                        paddingContentHorizontal: 16,
+                    },
+                    Tabs: {
+                        inkBarColor: "#18213e",
+                        itemSelectedColor: "#18213e",
+                        itemHoverColor: "#18213e",
+                    },
+                    Switch: {
+                        colorPrimary: "#18213e",
+                        colorPrimaryHover: "#2a3a5a",
+                    },
+                    Table: {
+                        headerBg: "#fafafa",
+                        headerColor: "#18213e",
+                        rowHoverBg: "rgba(24, 33, 62, 0.04)",
+                    },
+                    Statistic: {
+                        contentFontSize: 28,
+                        titleFontSize: 13,
+                    }
+                }
             }}
         >
-            <Layout className="admin-panel-container">
-                <Content className="admin-panel-content">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        <Tabs
-                            activeKey={activeTab}
-                            onChange={setActiveTab}
-                            items={tabItems}
-                            size="large"
-                            className="admin-panel-tabs"
-                        />
-                    </motion.div>
-                </Content>
-            </Layout>
+            <App>
+                <Layout className="admin-panel-container">
+                    <Content className="admin-panel-content">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Tabs
+                                activeKey={activeTab}
+                                onChange={setActiveTab}
+                                items={tabItems}
+                                size="large"
+                                className="admin-panel-tabs"
+                            />
+                        </motion.div>
+                    </Content>
+                </Layout>
+            </App>
         </ConfigProvider>
     );
 }

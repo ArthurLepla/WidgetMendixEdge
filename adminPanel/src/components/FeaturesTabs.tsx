@@ -1,33 +1,39 @@
 import { ReactElement, createElement, useState } from "react";
-import { Card, List, Switch, Tag, Input, Space, Typography, Badge, message, Empty, Spin } from "antd";
-import { Search, CheckCircle2, XCircle } from "lucide-react";
+import { Card, List, Switch, Input, Space, Typography, Badge, Empty, Spin, App } from "antd";
+import { Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { ValueStatus } from "mendix";
 import type { AdminPanelContainerProps } from "../../typings/AdminPanelProps";
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
+    const { message } = App.useApp();
     const [searchText, setSearchText] = useState("");
 
     const handleToggle = async (item: any, checked: boolean) => {
-        if (props.featureIsEnabled) {
-            item.set(props.featureIsEnabled, checked);
+        if (props.onFeatureToggle && props.onFeatureToggle.get(item)) {
+            const action = props.onFeatureToggle.get(item);
             
-            if (props.onFeatureToggle && props.onFeatureToggle.canExecute) {
+            if (action.canExecute) {
                 try {
-                    await props.onFeatureToggle.execute();
-                    message.success(`Feature ${checked ? 'enabled' : 'disabled'} successfully`);
+                    await action.execute();
+                    message.success(`Feature ${checked ? "activée" : "désactivée"}`);
                 } catch (error) {
-                    message.error('Failed to update feature');
+                    message.error("Échec de la modification");
+                    console.error(error);
                 }
+            } else {
+                message.warning("Action non disponible");
             }
+        } else {
+            message.warning("Configuration manquante");
         }
     };
 
     const filteredFeatures = props.featuresDatasource?.items?.filter(item => {
         if (!searchText) return true;
-        const name = props.featureName ? item.get(props.featureName)?.displayValue || "" : "";
+        const name = props.featureName?.get(item)?.displayValue || "";
         return name.toLowerCase().includes(searchText.toLowerCase());
     }) || [];
 
@@ -37,7 +43,7 @@ export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
             className="features-card"
             extra={
                 <Input
-                    placeholder="Search features..."
+                    placeholder="Rechercher..."
                     prefix={<Search size={16} />}
                     value={searchText}
                     onChange={e => setSearchText(e.target.value)}
@@ -47,58 +53,52 @@ export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
             }
         >
             {props.featuresDatasource?.status === ValueStatus.Loading ? (
-                <Spin size="large" />
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <Spin size="large" />
+                </div>
             ) : filteredFeatures.length > 0 ? (
                 <List
                     grid={{ gutter: 16, xs: 1, sm: 2, md: 2, lg: 3, xl: 3, xxl: 4 }}
                     dataSource={filteredFeatures}
                     renderItem={(item, index) => {
-                        const name = props.featureName ? item.get(props.featureName)?.displayValue || "" : "";
-                        const isEnabled = props.featureIsEnabled ? item.get(props.featureIsEnabled)?.value === true : false;
-                        const configValue = props.featureConfigValue ? item.get(props.featureConfigValue)?.displayValue || "" : "";
+                        const name = props.featureName?.get(item)?.displayValue || "";
+                        const isEnabled = props.featureIsEnabled?.get(item)?.value === true;
+                        const configValue = props.featureConfigValue?.get(item)?.displayValue || "";
 
                         return (
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                transition={{ duration: 0.2, delay: index * 0.03 }}
                             >
                                 <List.Item>
                                     <Card
-                                        hoverable
-                                        className={`feature-card ${isEnabled ? 'enabled' : 'disabled'}`}
+                                        className={`feature-card ${isEnabled ? 'enabled' : ''}`}
                                     >
                                         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                                            <Space align="center" style={{ justifyContent: "space-between", width: "100%" }}>
-                                                <Badge 
-                                                    status={isEnabled ? "success" : "default"} 
-                                                    text={
-                                                        <Text strong style={{ fontSize: 16 }}>
-                                                            {name}
-                                                        </Text>
-                                                    }
-                                                />
+                                            <div className="feature-header">
+                                                <Text strong className="feature-title">
+                                                    {name}
+                                                </Text>
                                                 <Switch
                                                     checked={isEnabled}
                                                     onChange={(checked) => handleToggle(item, checked)}
-                                                    checkedChildren={<CheckCircle2 size={14} />}
-                                                    unCheckedChildren={<XCircle size={14} />}
+                                                    size="small"
                                                 />
-                                            </Space>
+                                            </div>
                                             
                                             {configValue && (
-                                                <Paragraph 
-                                                    ellipsis={{ rows: 2 }} 
-                                                    type="secondary"
-                                                    style={{ marginBottom: 0 }}
-                                                >
-                                                    Config: {configValue}
-                                                </Paragraph>
+                                                <Text type="secondary" className="feature-config">
+                                                    {configValue}
+                                                </Text>
                                             )}
                                             
-                                            <Tag color={isEnabled ? "success" : "default"}>
-                                                {isEnabled ? "Active" : "Inactive"}
-                                            </Tag>
+                                            <div className="feature-status">
+                                                <Badge 
+                                                    status={isEnabled ? "success" : "default"} 
+                                                    text={isEnabled ? "Active" : "Inactive"}
+                                                />
+                                            </div>
                                         </Space>
                                     </Card>
                                 </List.Item>
@@ -107,7 +107,10 @@ export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
                     }}
                 />
             ) : (
-                <Empty description="No features found" />
+                <Empty 
+                    description="Aucune feature trouvée" 
+                    style={{ padding: '40px' }}
+                />
             )}
         </Card>
     );

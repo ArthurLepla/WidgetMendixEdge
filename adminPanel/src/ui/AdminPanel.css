@@ -1,94 +1,307 @@
+/* ===== Variables CSS ===== */
+:root {
+    --primary-color: #18213e;
+    --primary-hover: #2a3a5a;
+    --primary-light: rgba(24, 33, 62, 0.08);
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --error-color: #ff4d4f;
+    --text-primary: #262626;
+    --text-secondary: #8c8c8c;
+    --border-color: #e8e8e8;
+    --background: #fafafa;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Layout Principal ===== */
 .admin-panel-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    width: 100%;
 }
 
 .admin-panel-content {
     padding: 24px;
-    max-width: 1400px;
+    width: 100%;
+    max-width: 1440px;
     margin: 0 auto;
 }
 
+/* ===== Tabs ===== */
 .admin-panel-tabs .ant-tabs-nav {
     margin-bottom: 24px;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .admin-panel-tabs .ant-tabs-tab {
+    font-size: 15px;
+    padding: 12px 16px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.admin-panel-tabs .ant-tabs-tab-active {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.admin-panel-tabs .ant-tabs-ink-bar {
+    background: var(--primary-color);
+    height: 3px;
+}
+
+/* ===== Cards ===== */
+.ant-card {
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ant-card-hoverable:hover {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-2px);
+}
+
+.ant-card-head {
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 20px;
+}
+
+.ant-card-head-title {
     font-size: 16px;
-    padding: 12px 20px;
+    font-weight: 600;
+    color: var(--primary-color);
 }
 
-/* Assets Tree Styles */
-.assets-tree-card {
-    height: calc(100vh - 350px);
-    overflow: hidden;
+/* ===== Statistiques avec cohérence couleur ===== */
+.ant-statistic-title {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.assets-tree-card .ant-card-body {
-    overflow-y: auto;
-    height: calc(100% - 57px);
+.ant-statistic-content {
+    color: var(--primary-color);
+    font-size: 28px;
+    font-weight: 600;
 }
 
-.assets-tree .ant-tree-node-content-wrapper {
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.3s;
+.statistic-primary .ant-statistic-content {
+    color: var(--primary-color) !important;
 }
 
-.assets-tree .ant-tree-node-content-wrapper:hover {
-    background: rgba(24, 144, 255, 0.08);
+.statistic-electric .ant-statistic-content {
+    color: #10b981 !important;
 }
 
-.assets-tree .ant-tree-node-selected .ant-tree-node-content-wrapper {
-    background: rgba(24, 144, 255, 0.15);
+.statistic-gas .ant-statistic-content {
+    color: #f59e0b !important;
 }
 
-/* Asset Details Card */
+.statistic-water .ant-statistic-content {
+    color: #3b82f6 !important;
+}
+
+.statistic-air .ant-statistic-content {
+    color: #06b6d4 !important;
+}
+
+/* ===== Energy Tags Modernisés ===== */
+.tag-electric {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white !important;
+    border: none !important;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.tag-gas {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white !important;
+    border: none !important;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.tag-water {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white !important;
+    border: none !important;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.tag-air {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: white !important;
+    border: none !important;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* ===== Boutons ===== */
+.ant-btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.ant-btn-primary {
+    background: var(--primary-color);
+    height: 40px;
+    font-size: 14px;
+}
+
+.ant-btn-primary:hover {
+    background: var(--primary-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(24, 33, 62, 0.2);
+}
+
+/* ===== Assets Tree ===== */
+.assets-tree-card,
 .asset-details-card {
     height: calc(100vh - 350px);
-    overflow: hidden;
+    min-height: 400px;
 }
 
+.assets-tree-card .ant-card-body,
 .asset-details-card .ant-card-body {
     overflow-y: auto;
     height: calc(100% - 57px);
+    padding: 16px;
 }
 
-.variables-table .ant-table {
-    font-size: 13px;
-}
-
-/* Features Card Styles */
+/* ===== Features Cards Minimalistes ===== */
 .features-card {
     min-height: calc(100vh - 350px);
 }
 
 .feature-card {
-    transition: all 0.3s ease;
     border: 2px solid transparent;
+    transition: all 0.2s ease;
+    background: white;
+    cursor: default;
 }
 
 .feature-card.enabled {
-    border-color: #52c41a;
-    background: linear-gradient(135deg, #f6ffed 0%, #ffffff 100%);
-}
-
-.feature-card.disabled {
-    opacity: 0.85;
+    border-color: var(--success-color);
+    background: linear-gradient(135deg, rgba(82, 196, 26, 0.05) 0%, white 100%);
 }
 
 .feature-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    /* Pas d'effet hover comme demandé */
+    transform: none;
+    box-shadow: var(--card-shadow);
 }
 
-/* Loading Animation */
-@keyframes spin {
+.feature-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.feature-title {
+    font-size: 15px;
+    color: var(--primary-color);
+}
+
+.feature-config {
+    font-size: 13px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.feature-status {
+    font-size: 12px;
+}
+
+/* ===== Switch personnalisé ===== */
+.ant-switch {
+    background: var(--text-secondary);
+    min-width: 40px;
+}
+
+.ant-switch-checked {
+    background: var(--primary-color);
+}
+
+/* ===== Tables ===== */
+.variables-table .ant-table {
+    font-size: 13px;
+}
+
+.ant-table-thead > tr > th {
+    background: var(--background);
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.ant-table-tbody > tr:hover > td {
+    background: var(--primary-light);
+}
+
+/* ===== Input Search ===== */
+.ant-input-affix-wrapper {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(24, 33, 62, 0.1);
+}
+
+/* ===== Scrollbar personnalisée ===== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-secondary);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
     from {
-        transform: rotate(0deg);
+        opacity: 0;
+        transform: translateY(10px);
     }
     to {
-        transform: rotate(360deg);
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -96,19 +309,18 @@
     animation: spin 1s linear infinite;
 }
 
-/* Statistic Cards */
-.ant-statistic-title {
-    color: rgba(0, 0, 0, 0.65);
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ===== Empty State ===== */
+.ant-empty-description {
+    color: var(--text-secondary);
     font-size: 14px;
-    margin-bottom: 8px;
 }
 
-.ant-statistic-content {
-    font-size: 24px;
-    font-weight: 600;
-}
-
-/* Responsive Adjustments */
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
     .admin-panel-content {
         padding: 16px;
@@ -117,28 +329,39 @@
     .assets-tree-card,
     .asset-details-card {
         height: auto;
-        min-height: 400px;
+        min-height: 300px;
+        margin-bottom: 16px;
+    }
+    
+    .ant-statistic-content {
+        font-size: 24px;
+    }
+    
+    .feature-card {
+        margin-bottom: 8px;
     }
 }
 
-/* Ant Design Theme Overrides */
-.ant-card {
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* ===== Badge personnalisé ===== */
+.ant-badge-status-dot {
+    width: 8px;
+    height: 8px;
 }
 
-.ant-card-hoverable:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+.ant-badge-status-success .ant-badge-status-dot {
+    background: var(--success-color);
 }
 
-.ant-btn-primary {
-    height: 40px;
-    font-size: 15px;
-    font-weight: 500;
-    border-radius: 6px;
+.ant-badge-status-default .ant-badge-status-dot {
+    background: var(--text-secondary);
 }
 
-.ant-tag {
-    border-radius: 4px;
-    padding: 2px 8px;
+/* ===== Focus Visibility ===== */
+*:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+button:focus-visible {
+    outline-offset: 0;
 }
