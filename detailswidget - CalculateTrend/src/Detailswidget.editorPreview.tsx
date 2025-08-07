@@ -15,21 +15,18 @@ export function preview(props: DetailswidgetPreviewProps): JSX.Element {
                         <IPECard
                             title={props.card1Title}
                             value={new Big(0)}
-                            unit={props.card1Unit}
                             color="#000000"
                             type="consumption"
                         />
                         <IPECard
                             title={props.card2Title}
                             value={new Big(0)}
-                            unit={props.card2Unit}
                             color="#000000"
                             type="production"
                         />
                         <IPECard
                             title={props.card3Title}
                             value={new Big(0)}
-                            unit={props.card3Unit}
                             color="#000000"
                             type="ipe"
                         />
@@ -46,9 +43,9 @@ export function preview(props: DetailswidgetPreviewProps): JSX.Element {
 
     const energyConfig = energyConfigs[props.energyType];
     const previewCards = [
-        { title: props.card1Title || "Card 1", unit: props.card1Unit, type: "consumption" },
-        { title: props.card2Title || "Card 2", unit: props.card2Unit, type: "production" },
-        { title: props.card3Title || "Card 3", unit: props.card3Unit, type: "ipe" }
+        { title: props.card1Title || "Card 1", type: "consumption" },
+        { title: props.card2Title || "Card 2", type: "production" },
+        { title: props.card3Title || "Card 3", type: "ipe" }
     ];
 
     return (
@@ -72,7 +69,7 @@ export function preview(props: DetailswidgetPreviewProps): JSX.Element {
                                     <div className="ipe-card-value" style={{ color: energyConfig.color }}>
                                         {(123.45 * (index + 1)).toFixed(2)}
                                         <span className="ipe-card-unit">
-                                            {card.unit || energyConfig.unit}
+                                            {energyConfig.unit}
                                         </span>
                                     </div>
                                 </div>

@@ -18,6 +18,10 @@ const PRODUCTION_COLOR = "#FF9800"; // Couleur orange pour la production
 const PRODUCTION_BACKGROUND = "rgba(255, 152, 0, 0.1)"; // Background orange avec opacité
 
 export function IPECard({title, value, unit, type, color }: IPECardProps): JSX.Element {
+    // Log de debug pour IPECard
+    if (process.env.NODE_ENV !== "production") {
+        console.debug("IPECard render", { title, value: value?.toString() });
+    }
     const getIcon = () => {
         switch (type) {
             case "elec":

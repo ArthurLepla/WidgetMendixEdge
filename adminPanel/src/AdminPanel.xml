@@ -35,6 +35,10 @@
                 <caption>On Feature Toggle</caption>
                 <description>Action when feature is toggled</description>
             </property>
+            <property key="syncFeaturesAction" type="action" required="false">
+                <caption>Sync Features Action</caption>
+                <description>Action to sync features</description>
+            </property>
         </propertyGroup>
         
         <propertyGroup caption="Asset Attributes">

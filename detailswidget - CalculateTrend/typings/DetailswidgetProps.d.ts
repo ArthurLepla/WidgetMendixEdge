@@ -9,8 +9,6 @@ import { Big } from "big.js";
 
 export type ViewModeEnum = "energetic" | "ipe";
 
-export type IpeModeEnum = "single" | "double";
-
 export type EnergyTypeEnum = "electricity" | "gas" | "water" | "air" | "IPE";
 
 export interface DetailswidgetContainerProps {
@@ -20,13 +18,13 @@ export interface DetailswidgetContainerProps {
     tabIndex?: number;
     devMode: boolean;
     viewMode: ViewModeEnum;
-    ipeMode: IpeModeEnum;
     energyType: EnergyTypeEnum;
-    enableAdvancedGranularity: boolean;
     consumptionDataSource?: ListValue;
     timestampAttr?: ListAttributeValue<Date>;
     consumptionAttr?: ListAttributeValue<Big>;
     NameAttr?: ListAttributeValue<string>;
+    metricTypeAttr?: ListAttributeValue<string>;
+    energyTypeAttr?: ListAttributeValue<string>;
     startDate?: EditableValue<Date>;
     endDate?: EditableValue<Date>;
     card1Title: string;
@@ -48,6 +46,8 @@ export interface DetailswidgetContainerProps {
     timestampAttr2?: ListAttributeValue<Date>;
     consumptionAttr2?: ListAttributeValue<Big>;
     NameAttr2?: ListAttributeValue<string>;
+    metricTypeAttr2?: ListAttributeValue<string>;
+    energyTypeAttr2?: ListAttributeValue<string>;
     startDate2?: EditableValue<Date>;
     endDate2?: EditableValue<Date>;
     card1Title2: string;
@@ -76,6 +76,13 @@ export interface DetailswidgetContainerProps {
     bufferUnitAttr?: EditableValue<string>;
     onModeChange?: ActionValue;
     onTimeChange?: ActionValue;
+    featureList?: ListValue;
+    featureNameAttr?: ListAttributeValue<string>;
+    assetVariablesDataSource?: ListValue;
+    variableNameAttr?: ListAttributeValue<string>;
+    variableUnitAttr?: ListAttributeValue<string>;
+    variableMetricTypeAttr?: ListAttributeValue<string>;
+    variableEnergyTypeAttr?: ListAttributeValue<string>;
 }
 
 export interface DetailswidgetPreviewProps {
@@ -91,13 +98,13 @@ export interface DetailswidgetPreviewProps {
     translate: (text: string) => string;
     devMode: boolean;
     viewMode: ViewModeEnum;
-    ipeMode: IpeModeEnum;
     energyType: EnergyTypeEnum;
-    enableAdvancedGranularity: boolean;
     consumptionDataSource: {} | { caption: string } | { type: string } | null;
     timestampAttr: string;
     consumptionAttr: string;
     NameAttr: string;
+    metricTypeAttr: string;
+    energyTypeAttr: string;
     startDate: string;
     endDate: string;
     card1Title: string;
@@ -119,6 +126,8 @@ export interface DetailswidgetPreviewProps {
     timestampAttr2: string;
     consumptionAttr2: string;
     NameAttr2: string;
+    metricTypeAttr2: string;
+    energyTypeAttr2: string;
     startDate2: string;
     endDate2: string;
     card1Title2: string;
@@ -147,4 +156,11 @@ export interface DetailswidgetPreviewProps {
     bufferUnitAttr: string;
     onModeChange: {} | null;
     onTimeChange: {} | null;
+    featureList: {} | { caption: string } | { type: string } | null;
+    featureNameAttr: string;
+    assetVariablesDataSource: {} | { caption: string } | { type: string } | null;
+    variableNameAttr: string;
+    variableUnitAttr: string;
+    variableMetricTypeAttr: string;
+    variableEnergyTypeAttr: string;
 }

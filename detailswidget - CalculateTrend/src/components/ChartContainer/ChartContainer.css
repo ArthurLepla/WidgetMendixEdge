@@ -172,6 +172,23 @@
   outline-offset: -1px;
 }
 
+/* État désactivé pour le toggle IPE */
+.ipe-toggle-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ipe-toggle-disabled .ipe-toggle-item {
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.ipe-toggle-disabled .ipe-toggle-item[data-state="on"] {
+  background-color: #d1d5db;
+  color: #6b7280;
+  box-shadow: none;
+}
+
 /* Responsive design avec espacements cohérents */
 @media (max-width: 768px) {
   .chart-header-actions {

@@ -17,6 +17,7 @@ export interface AdminPanelContainerProps {
     syncAction?: ActionValue;
     featuresDatasource: ListValue;
     onFeatureToggle?: ListActionValue;
+    syncFeaturesAction?: ActionValue;
     assetName: ListAttributeValue<string>;
     assetIsElec?: ListAttributeValue<boolean>;
     assetIsGaz?: ListAttributeValue<boolean>;
@@ -51,6 +52,7 @@ export interface AdminPanelPreviewProps {
     syncAction: {} | null;
     featuresDatasource: {} | { caption: string } | { type: string } | null;
     onFeatureToggle: {} | null;
+    syncFeaturesAction: {} | null;
     assetName: string;
     assetIsElec: string;
     assetIsGaz: string;

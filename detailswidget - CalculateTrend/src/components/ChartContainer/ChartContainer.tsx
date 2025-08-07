@@ -12,6 +12,7 @@ import { BarChart3, Zap, Flame, Droplets, Wind } from "lucide-react"
 import "./ChartContainer.css"
 import { GranularityControl } from "../GranularityControl/GranularityControl"
 import { GranularityPopover } from "../GranularityControl/GranularityPopover"
+import { debug } from "../../utils/debugLogger"
 
 interface ChartContainerProps {
   data: Row[]
@@ -31,6 +32,7 @@ interface ChartContainerProps {
   ipe2Name?: string
   activeIPE?: 1 | 2
   onIPEToggle?: (ipe: 1 | 2) => void
+  ipeToggleDisabled?: boolean
   showGranularityControl?: boolean
   showSimpleGranularity?: boolean
   granularityMode?: "auto" | "strict"
@@ -47,27 +49,31 @@ const IPEToggle = ({
   ipe1Name, 
   ipe2Name, 
   activeIPE, 
-  onToggle 
+  onToggle,
+  disabled = false
 }: { 
   ipe1Name: string; 
   ipe2Name: string; 
   activeIPE: 1 | 2; 
   onToggle: (ipe: 1 | 2) => void; 
+  disabled?: boolean;
 }) => (
   <ToggleGroup.Root
-    className="ipe-toggle-group"
+    className={`ipe-toggle-group ${disabled ? 'ipe-toggle-disabled' : ''}`}
     type="single"
     value={activeIPE.toString()}
     onValueChange={(value) => {
-      if (value) {
+      if (value && !disabled) {
         onToggle(parseInt(value) as 1 | 2)
       }
     }}
+    disabled={disabled}
   >
     <ToggleGroup.Item 
       className="ipe-toggle-item" 
       value="1"
       aria-label={ipe1Name || "IPE 1"}
+      disabled={disabled}
     >
       {ipe1Name || "IPE 1"}
     </ToggleGroup.Item>
@@ -75,6 +81,7 @@ const IPEToggle = ({
       className="ipe-toggle-item" 
       value="2"
       aria-label={ipe2Name || "IPE 2"}
+      disabled={disabled}
     >
       {ipe2Name || "IPE 2"}
     </ToggleGroup.Item>
@@ -126,6 +133,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   ipe2Name,
   activeIPE = 1,
   onIPEToggle,
+  ipeToggleDisabled = false,
   showGranularityControl = false,
   showSimpleGranularity = false,
   granularityMode = "auto",
@@ -172,6 +180,15 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   const icon = getEnergyIcon(energyConfig.label, energyConfig.color)
   const containerTitle = title || `Visualisation des données ${energyConfig.label?.toLowerCase?.() || ""}`
 
+  // Log des props du ChartContainer
+  debug("ChartContainer props", {
+    title,
+    hasData,
+    showIPEToggle,
+    ipeToggleDisabled,
+    analysisDurationMs
+  });
+
   return (
     <div className={`chart-container ${isVisible ? 'visible' : 'hidden'}`}>
       {/* Header with title, toggle and export button */}
@@ -186,8 +203,19 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
             </div>
           </div>
 
-          {/* Actions wrapper pour granularité, toggle et export */}
+          {/* Actions wrapper pour toggle IPE, granularité et export */}
           <div className="chart-header-actions">
+            {/* Toggle IPE - À gauche */}
+            {showIPEToggle && onIPEToggle && (
+              <IPEToggle
+                ipe1Name={ipe1Name || "IPE 1"}
+                ipe2Name={ipe2Name || "IPE 2"}
+                activeIPE={activeIPE}
+                onToggle={onIPEToggle}
+                disabled={ipeToggleDisabled}
+              />
+            )}
+
             {/* Granularity Control - Mode Avancé */}
             {showGranularityControl && onGranularityModeChange && (
               isCompact ? (
@@ -220,16 +248,6 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
             {/* Simple Granularity Display - Mode Standard */}
             {showSimpleGranularity && (
               <SimpleGranularityDisplay autoGranularity={autoGranularity} />
-            )}
-
-            {/* Toggle IPE */}
-            {showIPEToggle && onIPEToggle && (
-              <IPEToggle
-                ipe1Name={ipe1Name || "IPE 1"}
-                ipe2Name={ipe2Name || "IPE 2"}
-                activeIPE={activeIPE}
-                onToggle={onIPEToggle}
-              />
             )}
 
             {/* Export button */}

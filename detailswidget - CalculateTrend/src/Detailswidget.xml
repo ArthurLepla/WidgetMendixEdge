@@ -21,14 +21,7 @@
                         <enumerationValue key="ipe">IPE</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="ipeMode" type="enumeration" defaultValue="single">
-                    <caption>Mode IPE</caption>
-                    <description>Choisir entre un IPE simple ou double</description>
-                    <enumerationValues>
-                        <enumerationValue key="single">Simple IPE</enumerationValue>
-                        <enumerationValue key="double">Double IPE</enumerationValue>
-                    </enumerationValues>
-                </property>
+
                 <property key="energyType" type="enumeration" defaultValue="electricity">
                     <caption>Type d'énergie</caption>
                     <description>Sélectionner le type d'énergie à afficher</description>
@@ -40,10 +33,7 @@
                         <enumerationValue key="IPE">IPE</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="enableAdvancedGranularity" type="boolean" defaultValue="false">
-                    <caption>Autoriser réglage manuel de la granularité</caption>
-                    <description>Lorsque cette option est désactivée, l'utilisateur voit la granularité actuelle mais ne peut pas l'ajuster.</description>
-                </property>
+
             </propertyGroup>
 
             <!-- IPE Principal (toujours visible) -->
@@ -71,6 +61,20 @@
                     <description>Nom de l'objet (non requis si le mode dev est activé)</description>
                     <attributeTypes>
                         <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="metricTypeAttr" type="attribute" dataSource="consumptionDataSource" required="false">
+                    <caption>Type de métrique</caption>
+                    <description>Attribut MetricType pour identifier le type de variable (Conso, IPE, IPE_kg, Prod, etc.)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+                <property key="energyTypeAttr" type="attribute" dataSource="consumptionDataSource" required="false">
+                    <caption>Type d'énergie</caption>
+                    <description>Attribut EnergyType pour identifier le type d'énergie (Elec, Gaz, Eau, Air, None)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
                     </attributeTypes>
                 </property>
             </propertyGroup>
@@ -103,7 +107,7 @@
                 </property>
                 <property key="card1Unit" type="string" required="false">
                     <caption>Unité Card 1</caption>
-                    <description>Unité de mesure pour la première card</description>
+                    <description>Unité pour la première card (ex: kWh, m³, %)</description>
                 </property>
                 <property key="card1DataSource" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 1</caption>
@@ -129,7 +133,7 @@
                 </property>
                 <property key="card2Unit" type="string" required="false">
                     <caption>Unité Card 2</caption>
-                    <description>Unité de mesure pour la deuxième card</description>
+                    <description>Unité pour la deuxième card (ex: kWh, m³, %)</description>
                 </property>
                 <property key="card2DataSource" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 2</caption>
@@ -155,7 +159,7 @@
                 </property>
                 <property key="card3Unit" type="string" required="false">
                     <caption>Unité Card 3</caption>
-                    <description>Unité de mesure pour la troisième card</description>
+                    <description>Unité pour la troisième card (ex: kWh, m³, %)</description>
                 </property>
                 <property key="card3DataSource" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 3</caption>
@@ -197,6 +201,20 @@
                         <attributeType name="String"/>
                     </attributeTypes>
                 </property>
+                <property key="metricTypeAttr2" type="attribute" dataSource="consumptionDataSource2" required="false">
+                    <caption>Type de métrique 2</caption>
+                    <description>Attribut MetricType pour le deuxième IPE (Conso, IPE, IPE_kg, Prod, etc.)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+                <property key="energyTypeAttr2" type="attribute" dataSource="consumptionDataSource2" required="false">
+                    <caption>Type d'énergie 2</caption>
+                    <description>Attribut EnergyType pour le deuxième IPE (Elec, Gaz, Eau, Air, None)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
             </propertyGroup>
 
             <propertyGroup caption="Période d'analyse 2">
@@ -227,7 +245,7 @@
                 </property>
                 <property key="card1Unit2" type="string" required="false">
                     <caption>Unité Card 1 (IPE 2)</caption>
-                    <description>Unité de mesure pour la première card du deuxième IPE</description>
+                    <description>Unité pour la première card du deuxième IPE (ex: kWh, m³, %)</description>
                 </property>
                 <property key="card1DataSource2" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 1 (IPE 2)</caption>
@@ -253,7 +271,7 @@
                 </property>
                 <property key="card2Unit2" type="string" required="false">
                     <caption>Unité Card 2 (IPE 2)</caption>
-                    <description>Unité de mesure pour la deuxième card du deuxième IPE</description>
+                    <description>Unité pour la deuxième card du deuxième IPE (ex: kWh, m³, %)</description>
                 </property>
                 <property key="card2DataSource2" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 2 (IPE 2)</caption>
@@ -279,7 +297,7 @@
                 </property>
                 <property key="card3Unit2" type="string" required="false">
                     <caption>Unité Card 3 (IPE 2)</caption>
-                    <description>Unité de mesure pour la troisième card du deuxième IPE</description>
+                    <description>Unité pour la troisième card du deuxième IPE (ex: kWh, m³, %)</description>
                 </property>
                 <property key="card3DataSource2" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 3 (IPE 2)</caption>
@@ -294,17 +312,18 @@
                 </property>
             </propertyGroup>
 
-            <!-- Noms des IPE pour le toggle (visible seulement en mode double) -->
-            <propertyGroup caption="Configuration Double IPE">
+            <!-- Noms des IPE -->
+            <propertyGroup caption="Noms des IPE">
                 <property key="ipe1Name" type="string" required="false">
                     <caption>Nom IPE 1</caption>
-                    <description>Nom affiché pour le premier IPE dans le toggle</description>
+                    <description>Nom personnalisé pour le premier IPE</description>
                 </property>
                 <property key="ipe2Name" type="string" required="false">
                     <caption>Nom IPE 2</caption>
-                    <description>Nom affiché pour le deuxième IPE dans le toggle</description>
+                    <description>Nom personnalisé pour le deuxième IPE</description>
                 </property>
             </propertyGroup>
+
 
             <!-- ==================== Granularité ==================== -->
             <propertyGroup caption="Affichage Granularité (Lecture)">
@@ -367,6 +386,57 @@
                 <property key="onTimeChange" type="action" required="false">
                     <caption>On Time/Unit Change</caption>
                     <description>Microflow à exécuter quand la valeur ou l'unité change.</description>
+                </property>
+            </propertyGroup>
+
+            <!-- ==================== Feature Toggles ==================== -->
+            <propertyGroup caption="Feature Toggles">
+                <property key="featureList" type="datasource" isList="true" required="false">
+                    <caption>FeatureToggle – liste activée</caption>
+                    <description>Liste des features activées pour ce widget</description>
+                </property>
+                <property key="featureNameAttr" type="attribute" dataSource="featureList" required="false">
+                    <caption>Attribut FeatureName</caption>
+                    <description>Attribut contenant le nom de la feature</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+
+            <!-- ==================== Variables de l'Asset ==================== -->
+            <propertyGroup caption="Variables de l'Asset">
+                <property key="assetVariablesDataSource" type="datasource" isList="true" required="false">
+                    <caption>Variables de l'asset</caption>
+                    <description>Liste des variables de l'asset sélectionné pour récupérer les unités automatiquement</description>
+                </property>
+                <property key="variableNameAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                    <caption>Attribut Nom Variable</caption>
+                    <description>Attribut contenant le nom de la variable</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="variableUnitAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                    <caption>Attribut Unité Variable</caption>
+                    <description>Attribut contenant l'unité de la variable</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="variableMetricTypeAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                    <caption>Attribut Type Métrique Variable</caption>
+                    <description>Attribut contenant le type de métrique de la variable</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+                <property key="variableEnergyTypeAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                    <caption>Attribut Type Énergie Variable</caption>
+                    <description>Attribut contenant le type d'énergie de la variable</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
                 </property>
             </propertyGroup>
         </propertyGroup>

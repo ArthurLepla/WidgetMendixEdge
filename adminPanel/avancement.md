@@ -1,5 +1,35 @@
 # Avancement du Projet - AdminPanel Widget
 
+## 2025-01-27 - Ajout du bouton de synchronisation des features
+
+### ⌛ Changement :
+Ajout d'un bouton de synchronisation des features dans l'onglet Features :
+
+1. **Nouvelle propriété `syncFeaturesAction`** : Ajout dans AdminPanel.xml pour permettre l'exécution d'un microflow de synchronisation
+2. **Bouton de synchronisation** : Ajout dans FeaturesTabs.tsx avec icône RefreshCw et état de chargement
+3. **Gestion des erreurs** : Messages de succès/erreur appropriés avec gestion des cas d'échec
+4. **Interface cohérente** : Bouton placé à côté de la barre de recherche dans l'en-tête de la carte
+
+### 🤔 Analyse :
+**Fonctionnalité ajoutée :**
+- **Synchronisation des features** : Possibilité de synchroniser les features existantes via un microflow Mendix
+- **Feedback utilisateur** : Messages de succès/erreur pour informer l'utilisateur du statut de l'opération
+- **État de chargement** : Bouton affiche un spinner pendant l'exécution du microflow
+- **Gestion d'erreurs robuste** : Vérification de la disponibilité de l'action avant exécution
+
+**Impact sur l'architecture :**
+- **Cohérence avec les assets** : Même pattern que `syncAction` pour les assets
+- **Respect de l'architecture Mendix** : Utilisation de microflows pour les opérations de synchronisation
+- **Interface utilisateur améliorée** : Accès facile à la synchronisation depuis l'interface
+
+### 💜 Prochaines étapes :
+- Créer le microflow de synchronisation des features dans Mendix Studio Pro
+- Tester la fonctionnalité avec des données réelles
+- Considérer l'ajout d'une confirmation avant synchronisation si nécessaire
+- Optimiser les performances du microflow de synchronisation
+
+---
+
 ## 2025-01-27 - Mise à jour de l'icône pour le gaz (Activity → Flame)
 
 ### ⌛ Changement :

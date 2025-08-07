@@ -1,10 +1,9 @@
 import { ReactElement, createElement, useState } from "react";
-import { Card, List, Switch, Input, Space, Typography, Badge, Empty, Spin, App } from "antd";
-import { Search } from "lucide-react";
+import { Card, List, Switch, Input, Space, Typography, Badge, Empty, Spin, App, Button } from "antd";
+import { Search, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { ValueStatus } from "mendix";
 import type { AdminPanelContainerProps } from "../../typings/AdminPanelProps";
-
 const { Text } = Typography;
 
 export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
@@ -31,6 +30,20 @@ export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
         }
     };
 
+    const handleSyncFeatures = async () => {
+        if (props.syncFeaturesAction && props.syncFeaturesAction.canExecute) {
+            try {
+                await props.syncFeaturesAction.execute();
+                message.success("Synchronisation des features terminée");
+            } catch (error) {
+                message.error("Échec de la synchronisation");
+                console.error(error);
+            }
+        } else {
+            message.warning("Action de synchronisation non disponible");
+        }
+    };
+
     const filteredFeatures = props.featuresDatasource?.items?.filter(item => {
         if (!searchText) return true;
         const name = props.featureName?.get(item)?.displayValue || "";
@@ -42,14 +55,24 @@ export function FeaturesTab(props: AdminPanelContainerProps): ReactElement {
             title="Feature Toggles"
             className="features-card"
             extra={
-                <Input
-                    placeholder="Rechercher..."
-                    prefix={<Search size={16} />}
-                    value={searchText}
-                    onChange={e => setSearchText(e.target.value)}
-                    allowClear
-                    style={{ width: 250 }}
-                />
+                <Space>
+                    <Input
+                        placeholder="Rechercher..."
+                        prefix={<Search size={16} />}
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                        allowClear
+                        style={{ width: 250 }}
+                    />
+                    <Button
+                        type="primary"
+                        icon={<RefreshCw size={16} />}
+                        onClick={handleSyncFeatures}
+                        loading={props.syncFeaturesAction?.isExecuting}
+                    >
+                        Synchroniser
+                    </Button>
+                </Space>
             }
         >
             {props.featuresDatasource?.status === ValueStatus.Loading ? (
