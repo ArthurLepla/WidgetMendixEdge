@@ -9,7 +9,7 @@ import { IPECard } from "./components/IPECard";
 import { ChartContainer } from "./components/ChartContainer";
 import { getAutoGranularity } from "./lib/utils";
 import { useFeatures } from "./hooks/use-features";
-import { debug } from "./utils/debugLogger";
+import { debug, verbose, diag } from "./utils/debugLogger";
 import { 
   extractSmartVariablesData, 
   getSmartIPEUnits,
@@ -163,6 +163,14 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
       ipe1Name: '',
       ipe2Name: ''
     });
+
+    // Helper: map unit to desired IPE metric type
+    const unitToIpeMetricType = (unit?: string): string | undefined => {
+      if (!unit) return undefined;
+      const u = unit.toLowerCase();
+      if (u.includes('/kg')) return 'IPE_kg';
+      return 'IPE';
+    };
 
 
             // -------- Feature Toggle Logic --------
@@ -428,6 +436,32 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
     // 🔄 Fonctions pour obtenir les propriétés de l'IPE actuel avec gestion des fallbacks
     const getCurrentIPEProps = () => {
+        // Mode énergétique: utiliser directement la série consommation (pas de fallback IPE)
+        if (viewMode === "energetic") {
+            return {
+                consumptionDataSource,
+                timestampAttr,
+                consumptionAttr,
+                NameAttr,
+                metricTypeAttr,
+                startDate,
+                endDate,
+                card1Title,
+                card1DataSource,
+                card1ValueAttr,
+                card2Title,
+                card2DataSource,
+                card2ValueAttr,
+                card3Title,
+                card3DataSource,
+                card3ValueAttr,
+                data: data1,
+                card1Data: card1Data1,
+                card2Data: card2Data1,
+                card3Data: card3Data1
+            };
+        }
+
         // Cas 1 : Mode double IPE actif et IPE 2 sélectionné
         if (isDoubleIPEActive && activeIPE === 2 && hasIPE2Data) {
             debug("🔄 Utilisation IPE 2", { activeIPE, hasIPE2Data });
@@ -543,7 +577,9 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         }
         
         // Cas 5 : Aucune donnée disponible (ne devrait jamais arriver ici)
-        debug("❌ Aucune donnée IPE disponible", { fallbackMode, fallbackReason });
+        if (viewMode === "ipe") {
+            debug("❌ Aucune donnée IPE disponible", { fallbackMode, fallbackReason });
+        }
         return {
             consumptionDataSource,
             timestampAttr,
@@ -576,27 +612,34 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
     // Logs des datasources
     useEffect(() => {
         if (isConsumptionDataReady1) {
-            const fi = consumptionDataSource?.items && consumptionDataSource.items.length > 0
-                ? consumptionDataSource.items[0]
-                : undefined;
-            debug("DS-IPE1 Available", { 
-                items: consumptionDataSource?.items?.length,
-                hasTimestampAttr: !!timestampAttr,
-                hasConsumptionAttr: !!consumptionAttr,
-                hasNameAttr: !!NameAttr,
-                firstItem: fi ? {
-                    id: (fi as any)?.id,
-                    hasTimestamp: timestampAttr ? !!timestampAttr.get(fi)?.value : false,
-                    hasConsumption: consumptionAttr ? !!consumptionAttr.get(fi)?.value : false,
-                    hasName: NameAttr ? !!NameAttr.get(fi)?.value : false
-                } : null
+            const itemCount = consumptionDataSource?.items?.length ?? 0;
+            const first = itemCount > 0 ? consumptionDataSource!.items![0] : undefined;
+            const firstPreview = first ? {
+                id: (first as any)?.id,
+                ts: timestampAttr ? timestampAttr.get(first)?.value : undefined,
+                val: consumptionAttr ? consumptionAttr.get(first)?.value : undefined,
+                name: NameAttr ? NameAttr.get(first)?.value : undefined,
+                metricType: metricTypeAttr ? metricTypeAttr.get(first)?.value : undefined
+            } : null;
+
+            diag("Dataset summary (DS1)", {
+                mode: viewMode,
+                energyType,
+                itemCount,
+                attrs: {
+                    hasTimestampAttr: !!timestampAttr,
+                    hasConsumptionAttr: !!consumptionAttr,
+                    hasNameAttr: !!NameAttr,
+                    hasMetricTypeAttr: !!metricTypeAttr
+                },
+                firstPreview
             });
         }
     }, [isConsumptionDataReady1, consumptionDataSource?.items?.length, devMode, timestampAttr, consumptionAttr, NameAttr]);
 
     useEffect(() => {
         if (isConsumptionDataReady2)
-            debug("DS-IPE2 Available", { 
+            debug("DS-2 summary", { 
                 items: consumptionDataSource2?.items?.length
             });
     }, [isConsumptionDataReady2, consumptionDataSource2?.items?.length, devMode]);
@@ -618,7 +661,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
     // Chargement des données principales IPE 1
     useEffect(() => {
-        debug("Conditions parsing IPE 1", {
+        debug("Parse conditions - DS1", {
             devMode: devMode,
             isConsumptionDataReady1: isConsumptionDataReady1,
             hasTimestampAttr: !!timestampAttr,
@@ -632,9 +675,12 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             (devMode || (timestampAttr && consumptionAttr))
         ) {
             const itemsRaw = consumptionDataSource?.items ?? [];
+            const expectedIpeMetric = viewMode === 'ipe' 
+              ? unitToIpeMetricType(activeIPE === 2 ? smartAutoUnits.card3_2 : smartAutoUnits.card3)
+              : undefined;
             
             // 🔍 DEBUG DÉTAILLÉ des 5 premiers items
-            debug("🔍 Analyse détaillée des premiers items", {
+            verbose("🔍 Analyse détaillée des premiers items", {
                 totalItems: itemsRaw.length,
                 first5Items: itemsRaw.slice(0, 5).map((item, index) => {
                     const timestamp = timestampAttr ? timestampAttr.get(item).value : null;
@@ -650,7 +696,8 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                         metricType,
                         metricTypeType: typeof metricType,
                         metricTypeIsNull: metricType === null,
-                        metricTypeIsUndefined: metricType === undefined
+                        metricTypeIsUndefined: metricType === undefined,
+                        expectedIpeMetric
                     };
                 })
             });
@@ -666,13 +713,14 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
                     // 🔍 DEBUG : Log pour les 5 premiers items
                     if (originalIndex < 5) {
-                        debug(`🔍 Item ${originalIndex} détails`, {
+                        verbose(`🔍 Item ${originalIndex} détails`, {
                             timestamp,
                             value,
                             nameValue,
                             metricTypeValue,
                             metricTypeFromAttr: metricTypeValue,
-                            metricTypeFromName: getMetricTypeFromName(nameValue)
+                            metricTypeFromName: getMetricTypeFromName(nameValue),
+                            expectedIpeMetric
                         });
                     }
 
@@ -682,25 +730,33 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                         
                         // 🔍 DEBUG : Test de filtrage
                         if (originalIndex < 5) {
-                            debug(`🔍 Test filtrage item ${originalIndex}`, {
+                            verbose(`🔍 Test filtrage item ${originalIndex}`, {
                                 finalMetricType,
                                 viewMode,
+                                expectedIpeMetric,
                                 beforeFilter: { nameValue, metricTypeValue, finalMetricType }
                             });
                         }
                         
                         // Vérifier si cette variable doit être affichée dans le mode actuel
                         const shouldDisplay = shouldDisplayVariable(finalMetricType, viewMode);
-                        
+                        // En mode IPE, ne garder que la variante attendue (IPE ou IPE_kg)
+                        const matchesExpectedIpe = viewMode !== 'ipe' || !expectedIpeMetric || finalMetricType === expectedIpeMetric;
                         if (!shouldDisplay) {
                             if (originalIndex < 5) {
-                                debug(`❌ Item ${originalIndex} rejeté par filtrage`);
+                                verbose(`❌ Item ${originalIndex} rejeté par filtrage (rule)`);
+                            }
+                            return null;
+                        }
+                        if (!matchesExpectedIpe) {
+                            if (originalIndex < 5) {
+                                verbose(`❌ Item ${originalIndex} rejeté (IPE variant mismatch)`, { finalMetricType, expectedIpeMetric });
                             }
                             return null;
                         }
 
                         if (originalIndex < 5) {
-                            debug(`✅ Item ${originalIndex} accepté`);
+                            verbose(`✅ Item ${originalIndex} accepté`);
                         }
 
                         return {
@@ -717,23 +773,30 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             const sortedItems = items.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
             setData1(sortedItems);
             
-            debug("Data1 parsed - DÉTAILLÉ", {
+            const byType: Record<string, number> = items.reduce((acc, it) => {
+                const k = (it.metricType || '(undefined)') as string;
+                acc[k] = (acc[k] || 0) + 1;
+                return acc;
+            }, {} as Record<string, number>);
+
+            const seriesSignature = {
+                mode: viewMode,
+                energyType,
+                metricTypes: Array.from(new Set(sortedItems.map(i => i.metricType || "(undefined)"))),
                 count: sortedItems.length,
-                itemsRawCount: itemsRaw.length,
-                itemsFilteredCount: items.length,
-                first: sortedItems[0],
-                last: sortedItems[sortedItems.length - 1],
-                itemsRejetés: itemsRaw.length - items.length,
-                viewMode: viewMode,
-                metricTypes: sortedItems.map(item => item.metricType),
-                // 🔍 ANALYSE des rejets
-                analysisRejects: {
-                    totalRaw: itemsRaw.length,
-                    afterValidation: items.length,
-                    afterFilter: sortedItems.length,
-                    rejectedByValidation: itemsRaw.length - items.length,
-                    rejectedByFilter: items.length - sortedItems.length
-                }
+                expectedIpeMetric,
+                tsRange: sortedItems.length > 0 ? {
+                    first: sortedItems[0].timestamp,
+                    last: sortedItems[sortedItems.length - 1].timestamp
+                } : null
+            };
+
+            diag("Series signature (DS1)", {
+                signature: seriesSignature,
+                rawCount: itemsRaw.length,
+                filteredCount: items.length,
+                rejectedByValidation: itemsRaw.length - items.length,
+                byType
             });
         }
     }, [devMode, isConsumptionDataReady1, timestampAttr, consumptionAttr, NameAttr, consumptionDataSource, metricTypeAttr, viewMode]);
@@ -741,7 +804,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
     // Chargement des données principales IPE 2
     useEffect(() => {
         // Debug log pour voir pourquoi le parsing ne se déclenche pas
-        debug("Conditions parsing IPE 2", {
+        debug("Parse conditions - DS2", {
             devMode: devMode,
             isDoubleIPEActive: isDoubleIPEActive,
             isConsumptionDataReady2: isConsumptionDataReady2,
@@ -758,6 +821,9 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             consumptionAttr2
         ) {
             const itemsRaw = consumptionDataSource2?.items ?? [];
+            const expectedIpeMetric2 = viewMode === 'ipe' 
+              ? unitToIpeMetricType(smartAutoUnits.card3_2)
+              : undefined;
             const items = itemsRaw
                 .map(item => {
                     const timestamp = timestampAttr2.get(item).value;
@@ -770,7 +836,9 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                         const finalMetricType = metricTypeValue || getMetricTypeFromName(nameValue);
                         
                         // Vérifier si cette variable doit être affichée dans le mode actuel
-                        if (!shouldDisplayVariable(finalMetricType, viewMode)) {
+                        const shouldDisp = shouldDisplayVariable(finalMetricType, viewMode);
+                        const matchesExpected = viewMode !== 'ipe' || !expectedIpeMetric2 || finalMetricType === expectedIpeMetric2;
+                        if (!shouldDisp || !matchesExpected) {
                             return null;
                         }
 
@@ -787,7 +855,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
             const sortedItems = items.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
             setData2(sortedItems);
-            debug("Data2 parsed", {
+            debug("DS2 parsed", {
                 count: sortedItems.length,
                 first: sortedItems[0],
                 last: sortedItems[sortedItems.length - 1],
@@ -902,10 +970,10 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         }
     }, [devMode, isDoubleIPEActive, viewMode, isCard3DataReady2, card3ValueAttr2, card3DataSource2]);
 
-    // État global prêt - renforcé avec vérification des données non vides
+    // État global prêt – basé sur la disponibilité des datasources (sans exiger des données)
     useEffect(() => {
-        const mainReady1 = devMode || (isConsumptionDataReady1 && data1.length > 0);
-        const mainReady2 = !isDoubleIPEActive || devMode || (isConsumptionDataReady2 && data2.length > 0);
+        const mainReady1 = devMode || isConsumptionDataReady1;
+        const mainReady2 = !isDoubleIPEActive || devMode || isConsumptionDataReady2;
         
         const cardsReady1 =
             viewMode !== "ipe" ||

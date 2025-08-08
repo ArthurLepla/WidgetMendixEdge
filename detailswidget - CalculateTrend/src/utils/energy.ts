@@ -29,45 +29,25 @@ export type EnergyType = typeof ENERGY_TYPES[keyof typeof ENERGY_TYPES];
 
 // Fonction pour déterminer si une variable doit être affichée selon le mode
 export function shouldDisplayVariable(
-    metricType: string | undefined, 
+    metricType: string | undefined,
     viewMode: "energetic" | "ipe"
 ): boolean {
+    // Règles strictes pour éviter les mélanges et les sommes inattendues
     if (viewMode === "ipe") {
-        // 🎯 En mode IPE : Accepter les variables IPE ET les variables de consommation
-        // Car la JavaAction peut retourner des données de consommation même en mode IPE
-        if (!metricType) {
-            return false; // ❌ Rejeter si pas de type
-        }
-
-        const normalizedMetricType = metricType.trim();
-        
-        // ✅ Accepter les variables IPE
-        const isIPE = normalizedMetricType === METRIC_TYPES.IPE || 
-                      normalizedMetricType === METRIC_TYPES.IPE_KG;
-        
-        // ✅ Accepter aussi les variables de consommation (car la JavaAction les retourne)
-        const isConsumption = normalizedMetricType === METRIC_TYPES.CONSO || 
-                             normalizedMetricType.toLowerCase().includes("conso");
-        
-        const shouldAccept = isIPE || isConsumption;
-        
-        return shouldAccept;
-    } 
-    
-    if (viewMode === "energetic") {
-        // En mode énergétique : TOUT sauf IPE
-        if (!metricType) {
-            return true; // ✅ Accepter si pas de type spécifié
-        }
-
-        const normalizedMetricType = metricType.trim();
-        const isNotIPE = normalizedMetricType !== METRIC_TYPES.IPE && 
-                        normalizedMetricType !== METRIC_TYPES.IPE_KG;
-        
-        return isNotIPE;
+        if (!metricType) return false;
+        const normalized = metricType.trim();
+        return normalized === METRIC_TYPES.IPE || normalized === METRIC_TYPES.IPE_KG;
     }
 
-    return true;
+    if (viewMode === "energetic") {
+        // Par défaut, la datasource principale correspond à la consommation.
+        // Si `MetricType` est absent, on considère que c'est de la Conso pour ne pas masquer les séries.
+        if (!metricType) return true;
+        const normalized = metricType.trim();
+        return normalized === METRIC_TYPES.CONSO || normalized.toLowerCase().includes("conso");
+    }
+
+    return false;
 }
 
 // Fonction pour obtenir le type de métrique à partir d'un nom (fallback)

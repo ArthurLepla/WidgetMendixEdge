@@ -49,3 +49,25 @@ Des règles globales surchargeaient ponctuellement le groupe Radix, créant un d
 ### 💜 Prochaines étapes :
 - Surveiller le rendu sur 3 breakpoints (≥1024, 768–1023, ≤480).
 - Si d’autres collisions apparaissent, encapsuler via un wrapper plus spécifique (`.chart-header-actions .ipe-toggle-group`).
+
+---
+
+### ⌛ Changement (2025‑08‑08, soir) :
+Durcissement du filtrage des séries et refonte des logs.
+
+Fichiers modifiés:
+- `src/utils/energy.ts` : règles strictes `shouldDisplayVariable` —
+  - mode `energetic` → n’accepte que `Conso`;
+  - mode `ipe` → n’accepte que `IPE`/`IPE_kg`.
+- `src/Detailswidget.tsx` :
+  - chemin `energetic` court-circuité pour utiliser uniquement la série conso (plus de fallback IPE);
+  - renommage/simplification des logs (« DS‑1/DS‑2 summary », « Parse conditions – DS1/DS2 », « DS1/DS2 parsed ») ;
+  - logs verbeux (par item) déplacés vers `verbose()`.
+- `src/utils/debugLogger.ts` : ajout d’un niveau `verbose()` et du paramètre `?debugIPE=2` pour activer les logs lourds; `?debugIPE=1` conserve les logs standards.
+
+### 🤔 Analyse :
+Les valeurs cumulées observées provenaient du mélange implicite de métriques (Conso + IPE) lors du parsing en mode `energetic`. Le filtrage strict empêche désormais ces mélanges et l’UI énergétiques s’appuie toujours sur la série consommation. Les nouveaux logs réduisent le bruit et rendent l’investigation ciblée via `?debugIPE=2`.
+
+### 💜 Prochaines étapes :
+- Vérifier sur l’asset « USINE » que le dataset énergétique contient bien uniquement `MetricType=Conso`.
+- Si nécessaire, ajouter un résumé serveur (JavaAction) par MetricType pour cross‑check.
