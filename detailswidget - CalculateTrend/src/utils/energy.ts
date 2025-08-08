@@ -32,18 +32,10 @@ export function shouldDisplayVariable(
     metricType: string | undefined, 
     viewMode: "energetic" | "ipe"
 ): boolean {
-    // Debug logs
-    console.debug("🔍 shouldDisplayVariable", { 
-        metricType, 
-        viewMode,
-        metricTypeType: typeof metricType 
-    });
-
     if (viewMode === "ipe") {
         // 🎯 En mode IPE : Accepter les variables IPE ET les variables de consommation
         // Car la JavaAction peut retourner des données de consommation même en mode IPE
         if (!metricType) {
-            console.warn("❌ Mode IPE : metricType undefined - rejeté");
             return false; // ❌ Rejeter si pas de type
         }
 
@@ -59,23 +51,12 @@ export function shouldDisplayVariable(
         
         const shouldAccept = isIPE || isConsumption;
         
-        console.debug(shouldAccept ? "✅ Mode IPE : Variable acceptée" : 
-                             "❌ Mode IPE : Variable rejetée", {
-            normalizedMetricType,
-            expectedIPE: METRIC_TYPES.IPE,
-            expectedIPE_KG: METRIC_TYPES.IPE_KG,
-            isIPE,
-            isConsumption,
-            shouldAccept
-        });
-        
         return shouldAccept;
     } 
     
     if (viewMode === "energetic") {
         // En mode énergétique : TOUT sauf IPE
         if (!metricType) {
-            console.debug("✅ Mode énergétique : metricType undefined - accepté");
             return true; // ✅ Accepter si pas de type spécifié
         }
 
@@ -83,16 +64,9 @@ export function shouldDisplayVariable(
         const isNotIPE = normalizedMetricType !== METRIC_TYPES.IPE && 
                         normalizedMetricType !== METRIC_TYPES.IPE_KG;
         
-        console.debug(isNotIPE ? "✅ Mode énergétique : Variable non-IPE acceptée" : 
-                                "❌ Mode énergétique : Variable IPE rejetée", {
-            normalizedMetricType,
-            isNotIPE
-        });
-        
         return isNotIPE;
     }
 
-    console.debug("✅ Default : accepté");
     return true;
 }
 

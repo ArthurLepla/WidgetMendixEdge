@@ -207,13 +207,15 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
           <div className="chart-header-actions">
             {/* Toggle IPE - À gauche */}
             {showIPEToggle && onIPEToggle && (
-              <IPEToggle
-                ipe1Name={ipe1Name || "IPE 1"}
-                ipe2Name={ipe2Name || "IPE 2"}
-                activeIPE={activeIPE}
-                onToggle={onIPEToggle}
-                disabled={ipeToggleDisabled}
-              />
+              <div className="ipe-toggle-control">
+                <IPEToggle
+                  ipe1Name={ipe1Name || "IPE 1"}
+                  ipe2Name={ipe2Name || "IPE 2"}
+                  activeIPE={activeIPE}
+                  onToggle={onIPEToggle}
+                  disabled={ipeToggleDisabled}
+                />
+              </div>
             )}
 
             {/* Granularity Control - Mode Avancé */}

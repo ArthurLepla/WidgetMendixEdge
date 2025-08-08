@@ -43,8 +43,6 @@
     flex-shrink: 0;
     padding: 0.75rem;
     border-radius: 0.5rem;
-    width: var(--triple-cards-icon-size);
-    height: var(--triple-cards-icon-size);
 }
 
 .ipe-card-title {

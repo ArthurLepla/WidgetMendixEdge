@@ -34,6 +34,22 @@
                     </enumerationValues>
                 </property>
 
+                <!-- Paramètre spécifique au mode IPE : énergie de référence pour résoudre les unités
+                     à partir des variables de l'asset (sans hardcode). -->
+                <property key="ipeEnergyType" type="enumeration" defaultValue="Elec">
+                    <caption>IPE – Énergie ciblée</caption>
+                    <description>
+                        Énergie de référence utilisée en mode IPE pour détecter les variantes (IPE / IPE_kg)
+                        et résoudre les unités à partir des variables de l'asset sélectionné. Ignoré en mode énergétique.
+                    </description>
+                    <enumerationValues>
+                        <enumerationValue key="Elec">Électricité</enumerationValue>
+                        <enumerationValue key="Gaz">Gaz</enumerationValue>
+                        <enumerationValue key="Eau">Eau</enumerationValue>
+                        <enumerationValue key="Air">Air</enumerationValue>
+                    </enumerationValues>
+                </property>
+
             </propertyGroup>
 
             <!-- IPE Principal (toujours visible) -->
@@ -101,14 +117,8 @@
                     <caption>Titre Card 1</caption>
                     <description>Titre pour la première card</description>
                 </property>
-                <property key="card1Icon" type="icon" required="false">
-                    <caption>Icône Card 1</caption>
-                    <description>Sélectionner l'icône pour la première card</description>
-                </property>
-                <property key="card1Unit" type="string" required="false">
-                    <caption>Unité Card 1</caption>
-                    <description>Unité pour la première card (ex: kWh, m³, %)</description>
-                </property>
+                
+                
                 <property key="card1DataSource" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 1</caption>
                     <description>Sélectionner la source de données pour la première card</description>
@@ -120,6 +130,10 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <property key="card1AssetAttrKey" type="string" required="false">
+                    <caption>Attribut d'asset (Card 1)</caption>
+                    <description>Nom d'attribut de Smart.Asset (ex: ConsoTotalElec, ProdTotal, ProdTotalKg)</description>
+                </property>
             </propertyGroup>
 
             <propertyGroup caption="Configuration IPE - Card 2">
@@ -127,14 +141,8 @@
                     <caption>Titre Card 2</caption>
                     <description>Titre pour la deuxième card</description>
                 </property>
-                <property key="card2Icon" type="icon" required="false">
-                    <caption>Icône Card 2</caption>
-                    <description>Sélectionner l'icône pour la deuxième card</description>
-                </property>
-                <property key="card2Unit" type="string" required="false">
-                    <caption>Unité Card 2</caption>
-                    <description>Unité pour la deuxième card (ex: kWh, m³, %)</description>
-                </property>
+                
+                
                 <property key="card2DataSource" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 2</caption>
                     <description>Sélectionner la source de données pour la deuxième card</description>
@@ -146,6 +154,10 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <property key="card2AssetAttrKey" type="string" required="false">
+                    <caption>Attribut d'asset (Card 2)</caption>
+                    <description>Nom d'attribut de Smart.Asset (ex: ProdTotal, ProdTotalKg)</description>
+                </property>
             </propertyGroup>
 
             <propertyGroup caption="Configuration IPE - Card 3">
@@ -153,14 +165,8 @@
                     <caption>Titre Card 3</caption>
                     <description>Titre pour la troisième card</description>
                 </property>
-                <property key="card3Icon" type="icon" required="false">
-                    <caption>Icône Card 3</caption>
-                    <description>Sélectionner l'icône pour la troisième card</description>
-                </property>
-                <property key="card3Unit" type="string" required="false">
-                    <caption>Unité Card 3</caption>
-                    <description>Unité pour la troisième card (ex: kWh, m³, %)</description>
-                </property>
+                
+                
                 <property key="card3DataSource" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 3</caption>
                     <description>Sélectionner la source de données pour la troisième card</description>
@@ -171,6 +177,10 @@
                     <attributeTypes>
                         <attributeType name="Decimal"/>
                     </attributeTypes>
+                </property>
+                <property key="card3AssetAttrKey" type="string" required="false">
+                    <caption>Attribut d'asset (Card 3)</caption>
+                    <description>Nom d'attribut de Smart.Asset (ex: IPEElecKg, IPEElec)</description>
                 </property>
             </propertyGroup>
 
@@ -239,14 +249,8 @@
                     <caption>Titre Card 1 (IPE 2)</caption>
                     <description>Titre pour la première card du deuxième IPE</description>
                 </property>
-                <property key="card1Icon2" type="icon" required="false">
-                    <caption>Icône Card 1 (IPE 2)</caption>
-                    <description>Sélectionner l'icône pour la première card du deuxième IPE</description>
-                </property>
-                <property key="card1Unit2" type="string" required="false">
-                    <caption>Unité Card 1 (IPE 2)</caption>
-                    <description>Unité pour la première card du deuxième IPE (ex: kWh, m³, %)</description>
-                </property>
+                
+                
                 <property key="card1DataSource2" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 1 (IPE 2)</caption>
                     <description>Sélectionner la source de données pour la première card du deuxième IPE</description>
@@ -258,6 +262,10 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <property key="card1AssetAttrKey2" type="string" required="false">
+                    <caption>Attribut d'asset (Card 1 - IPE 2)</caption>
+                    <description>Nom d'attribut de Smart.Asset pour la card 1 du deuxième IPE</description>
+                </property>
             </propertyGroup>
 
             <propertyGroup caption="Configuration IPE 2 - Card 2">
@@ -265,14 +273,8 @@
                     <caption>Titre Card 2 (IPE 2)</caption>
                     <description>Titre pour la deuxième card du deuxième IPE</description>
                 </property>
-                <property key="card2Icon2" type="icon" required="false">
-                    <caption>Icône Card 2 (IPE 2)</caption>
-                    <description>Sélectionner l'icône pour la deuxième card du deuxième IPE</description>
-                </property>
-                <property key="card2Unit2" type="string" required="false">
-                    <caption>Unité Card 2 (IPE 2)</caption>
-                    <description>Unité pour la deuxième card du deuxième IPE (ex: kWh, m³, %)</description>
-                </property>
+                
+                
                 <property key="card2DataSource2" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 2 (IPE 2)</caption>
                     <description>Sélectionner la source de données pour la deuxième card du deuxième IPE</description>
@@ -284,6 +286,10 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <property key="card2AssetAttrKey2" type="string" required="false">
+                    <caption>Attribut d'asset (Card 2 - IPE 2)</caption>
+                    <description>Nom d'attribut de Smart.Asset pour la card 2 du deuxième IPE</description>
+                </property>
             </propertyGroup>
 
             <propertyGroup caption="Configuration IPE 2 - Card 3">
@@ -291,14 +297,8 @@
                     <caption>Titre Card 3 (IPE 2)</caption>
                     <description>Titre pour la troisième card du deuxième IPE</description>
                 </property>
-                <property key="card3Icon2" type="icon" required="false">
-                    <caption>Icône Card 3 (IPE 2)</caption>
-                    <description>Sélectionner l'icône pour la troisième card du deuxième IPE</description>
-                </property>
-                <property key="card3Unit2" type="string" required="false">
-                    <caption>Unité Card 3 (IPE 2)</caption>
-                    <description>Unité pour la troisième card du deuxième IPE (ex: kWh, m³, %)</description>
-                </property>
+                
+                
                 <property key="card3DataSource2" type="datasource" isList="true" required="false">
                     <caption>Source de données Card 3 (IPE 2)</caption>
                     <description>Sélectionner la source de données pour la troisième card du deuxième IPE</description>
@@ -310,19 +310,13 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <property key="card3AssetAttrKey2" type="string" required="false">
+                    <caption>Attribut d'asset (Card 3 - IPE 2)</caption>
+                    <description>Nom d'attribut de Smart.Asset pour la card 3 du deuxième IPE</description>
+                </property>
             </propertyGroup>
 
-            <!-- Noms des IPE -->
-            <propertyGroup caption="Noms des IPE">
-                <property key="ipe1Name" type="string" required="false">
-                    <caption>Nom IPE 1</caption>
-                    <description>Nom personnalisé pour le premier IPE</description>
-                </property>
-                <property key="ipe2Name" type="string" required="false">
-                    <caption>Nom IPE 2</caption>
-                    <description>Nom personnalisé pour le deuxième IPE</description>
-                </property>
-            </propertyGroup>
+            <!-- Noms des IPE retirés: les labels affichent désormais strictement les unités détectées -->
 
 
             <!-- ==================== Granularité ==================== -->

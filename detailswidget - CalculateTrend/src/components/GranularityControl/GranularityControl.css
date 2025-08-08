@@ -7,12 +7,12 @@
 
 /* Bouton principal */
 .granularity-button {
-  min-width: 20rem;
-  font-size: 2rem;
+  min-width: var(--control-min-width, 20rem);
+  font-size: var(--control-font-size, 2rem);
   font-weight: 700;
   background-color: #f8fafc;
   color: #4b5563;
-  padding: 1.25rem 2rem;
+  padding: var(--control-py, 1.25rem) var(--control-px, 2rem);
   border-radius: 0.6rem;
   display: flex;
   align-items: center;
@@ -23,6 +23,8 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .granularity-button::before {
@@ -65,6 +67,7 @@
   flex: 1;
   z-index: 1;
   position: relative;
+  min-width: 0; /* permet l'ellipsis */
 }
 
 .granularity-button-icon {
@@ -81,6 +84,9 @@
   font-weight: 600;
   font-size: 1.44rem;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Chevron Wrapper - Zone cliquable plus évidente */

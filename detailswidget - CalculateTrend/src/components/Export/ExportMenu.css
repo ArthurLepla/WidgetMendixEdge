@@ -5,6 +5,7 @@
   z-index: 100;
   /* Isolation du contexte de positionnement */
   transform: translateZ(0);
+  max-width: 100%;
 }
 
 /* Styles pour le dropdown Ant Design - Plus agressifs */
@@ -104,12 +105,12 @@
 
 /* Bouton principal - Styles harmonisés */
 .export-button {
-  min-width: 20rem;
+  min-width: var(--control-min-width, 20rem);
   /* SUPPRIMÉ font-size: 2rem; - Le container ne contient pas de texte direct */
   /* SUPPRIMÉ font-weight: 700; - Le container ne contient pas de texte direct */
   background-color: #f8fafc;
   color: #4b5563;
-  padding: 1.25rem 2rem;
+  padding: var(--control-py, 1.25rem) var(--control-px, 2rem);
   border-radius: 0.6rem;
   display: flex;
   align-items: center;
@@ -123,6 +124,8 @@
   /* Protection contre les conflits CSS externe */
   box-sizing: border-box;   /* ← Cohérence avec simple-granularity-display */
   line-height: 1.2;         /* ← Contrôle précis de la hauteur */
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 /* Chevron harmonisé */
@@ -220,6 +223,7 @@
   flex: 1;
   z-index: 1;
   position: relative;
+  min-width: 0; /* permet au texte de se réduire et évite le débordement */
 }
 
 .export-button-icon {
@@ -253,8 +257,11 @@
 
 .export-button-text {
   font-weight: 600;
-  font-size: 1.44rem;
+  font-size: var(--control-font-size, 1.44rem);
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Indicateur d'état optionnel (pour une cohérence visuelle) */

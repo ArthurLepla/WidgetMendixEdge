@@ -4,12 +4,14 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, WebIcon } from "mendix";
+import { ActionValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
 import { Big } from "big.js";
 
 export type ViewModeEnum = "energetic" | "ipe";
 
 export type EnergyTypeEnum = "electricity" | "gas" | "water" | "air" | "IPE";
+
+export type IpeEnergyTypeEnum = "Elec" | "Gaz" | "Eau" | "Air";
 
 export interface DetailswidgetContainerProps {
     name: string;
@@ -19,6 +21,7 @@ export interface DetailswidgetContainerProps {
     devMode: boolean;
     viewMode: ViewModeEnum;
     energyType: EnergyTypeEnum;
+    ipeEnergyType: IpeEnergyTypeEnum;
     consumptionDataSource?: ListValue;
     timestampAttr?: ListAttributeValue<Date>;
     consumptionAttr?: ListAttributeValue<Big>;
@@ -28,20 +31,17 @@ export interface DetailswidgetContainerProps {
     startDate?: EditableValue<Date>;
     endDate?: EditableValue<Date>;
     card1Title: string;
-    card1Icon?: DynamicValue<WebIcon>;
-    card1Unit: string;
     card1DataSource?: ListValue;
     card1ValueAttr?: ListAttributeValue<Big>;
+    card1AssetAttrKey: string;
     card2Title: string;
-    card2Icon?: DynamicValue<WebIcon>;
-    card2Unit: string;
     card2DataSource?: ListValue;
     card2ValueAttr?: ListAttributeValue<Big>;
+    card2AssetAttrKey: string;
     card3Title: string;
-    card3Icon?: DynamicValue<WebIcon>;
-    card3Unit: string;
     card3DataSource?: ListValue;
     card3ValueAttr?: ListAttributeValue<Big>;
+    card3AssetAttrKey: string;
     consumptionDataSource2?: ListValue;
     timestampAttr2?: ListAttributeValue<Date>;
     consumptionAttr2?: ListAttributeValue<Big>;
@@ -51,22 +51,17 @@ export interface DetailswidgetContainerProps {
     startDate2?: EditableValue<Date>;
     endDate2?: EditableValue<Date>;
     card1Title2: string;
-    card1Icon2?: DynamicValue<WebIcon>;
-    card1Unit2: string;
     card1DataSource2?: ListValue;
     card1ValueAttr2?: ListAttributeValue<Big>;
+    card1AssetAttrKey2: string;
     card2Title2: string;
-    card2Icon2?: DynamicValue<WebIcon>;
-    card2Unit2: string;
     card2DataSource2?: ListValue;
     card2ValueAttr2?: ListAttributeValue<Big>;
+    card2AssetAttrKey2: string;
     card3Title2: string;
-    card3Icon2?: DynamicValue<WebIcon>;
-    card3Unit2: string;
     card3DataSource2?: ListValue;
     card3ValueAttr2?: ListAttributeValue<Big>;
-    ipe1Name: string;
-    ipe2Name: string;
+    card3AssetAttrKey2: string;
     displayModeAttr?: EditableValue<string>;
     displayTimeAttr?: EditableValue<Big>;
     displayUnitAttr?: EditableValue<string>;
@@ -99,6 +94,7 @@ export interface DetailswidgetPreviewProps {
     devMode: boolean;
     viewMode: ViewModeEnum;
     energyType: EnergyTypeEnum;
+    ipeEnergyType: IpeEnergyTypeEnum;
     consumptionDataSource: {} | { caption: string } | { type: string } | null;
     timestampAttr: string;
     consumptionAttr: string;
@@ -108,20 +104,17 @@ export interface DetailswidgetPreviewProps {
     startDate: string;
     endDate: string;
     card1Title: string;
-    card1Icon: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
-    card1Unit: string;
     card1DataSource: {} | { caption: string } | { type: string } | null;
     card1ValueAttr: string;
+    card1AssetAttrKey: string;
     card2Title: string;
-    card2Icon: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
-    card2Unit: string;
     card2DataSource: {} | { caption: string } | { type: string } | null;
     card2ValueAttr: string;
+    card2AssetAttrKey: string;
     card3Title: string;
-    card3Icon: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
-    card3Unit: string;
     card3DataSource: {} | { caption: string } | { type: string } | null;
     card3ValueAttr: string;
+    card3AssetAttrKey: string;
     consumptionDataSource2: {} | { caption: string } | { type: string } | null;
     timestampAttr2: string;
     consumptionAttr2: string;
@@ -131,22 +124,17 @@ export interface DetailswidgetPreviewProps {
     startDate2: string;
     endDate2: string;
     card1Title2: string;
-    card1Icon2: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
-    card1Unit2: string;
     card1DataSource2: {} | { caption: string } | { type: string } | null;
     card1ValueAttr2: string;
+    card1AssetAttrKey2: string;
     card2Title2: string;
-    card2Icon2: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
-    card2Unit2: string;
     card2DataSource2: {} | { caption: string } | { type: string } | null;
     card2ValueAttr2: string;
+    card2AssetAttrKey2: string;
     card3Title2: string;
-    card3Icon2: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
-    card3Unit2: string;
     card3DataSource2: {} | { caption: string } | { type: string } | null;
     card3ValueAttr2: string;
-    ipe1Name: string;
-    ipe2Name: string;
+    card3AssetAttrKey2: string;
     displayModeAttr: string;
     displayTimeAttr: string;
     displayUnitAttr: string;

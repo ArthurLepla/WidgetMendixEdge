@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ValueStatus, ListValue, ListAttributeValue } from "mendix";
 import { useGranulariteManuelleToggle, useDoubleIPEToggle } from "./use-feature-toggle";
 import { debug } from "../utils/debugLogger";
+import { METRIC_TYPES, getMetricTypeFromName } from "../utils/energy";
 
 interface UseFeaturesProps {
     featureList: ListValue | undefined;
@@ -12,6 +13,11 @@ interface UseFeaturesProps {
     timestampAttr2: ListAttributeValue<Date> | undefined;
     consumptionAttr: ListAttributeValue<Big> | undefined;
     consumptionAttr2: ListAttributeValue<Big> | undefined;
+    // Nouveaux attributs pour une détection IPE fiable
+    NameAttr?: ListAttributeValue<string>;
+    NameAttr2?: ListAttributeValue<string>;
+    metricTypeAttr?: ListAttributeValue<string>;
+    metricTypeAttr2?: ListAttributeValue<string>;
 }
 
 interface UseFeaturesReturn {
@@ -245,27 +251,101 @@ export function useFeatures({
     timestampAttr,
     timestampAttr2,
     consumptionAttr,
-    consumptionAttr2
+    consumptionAttr2,
+    NameAttr,
+    NameAttr2,
+    metricTypeAttr,
+    metricTypeAttr2
 }: UseFeaturesProps): UseFeaturesReturn {
     
     // Feature toggles
     const isGranulariteManuelleEnabled = useGranulariteManuelleToggle(featureList, featureNameAttr);
     const isDoubleIPEEnabled = useDoubleIPEToggle(featureList, featureNameAttr);
     
-    // Vérification des données IPE avec validation de non-vidité
-    const hasIPE1Data = useMemo(() => !!(
-        consumptionDataSource?.status === ValueStatus.Available &&
-        (consumptionDataSource.items?.length ?? 0) > 0 &&
-        timestampAttr &&
-        consumptionAttr
-    ), [consumptionDataSource, timestampAttr, consumptionAttr]);
-    
-    const hasIPE2Data = useMemo(() => !!(
-        consumptionDataSource2?.status === ValueStatus.Available &&
-        (consumptionDataSource2.items?.length ?? 0) > 0 &&
-        timestampAttr2 &&
-        consumptionAttr2
-    ), [consumptionDataSource2, timestampAttr2, consumptionAttr2]);
+    // Vérification stricte: considérer IPE présent uniquement si au moins 1 item a MetricType IPE/IPE_kg
+    const hasIPE1Data = useMemo(() => {
+        if (
+            consumptionDataSource?.status !== ValueStatus.Available ||
+            !timestampAttr || !consumptionAttr ||
+            !(consumptionDataSource.items?.length && consumptionDataSource.items.length > 0)
+        ) {
+            return false;
+        }
+        const items = consumptionDataSource.items;
+        const maxScan = Math.min(items.length, 100);
+        let ipeCount = 0;
+        let firstMatchIndex: number | null = null;
+        let firstMatchName: string | undefined;
+        let firstMatchMetricType: string | undefined;
+        for (let i = 0; i < maxScan; i++) {
+            const it = items[i];
+            const mt = metricTypeAttr?.get(it)?.value?.trim();
+            const nameVal = NameAttr?.get(it)?.value;
+            const mtFallback = getMetricTypeFromName(nameVal);
+            const finalMt = (mt || mtFallback)?.toString();
+            if (finalMt === METRIC_TYPES.IPE || finalMt === METRIC_TYPES.IPE_KG) {
+                ipeCount++;
+                if (firstMatchIndex === null) {
+                    firstMatchIndex = i;
+                    firstMatchName = nameVal || undefined;
+                    firstMatchMetricType = finalMt;
+                }
+            }
+        }
+        debug("🔎 IPE scan DS1", {
+            scanned: maxScan,
+            total: items.length,
+            ipeCount,
+            firstMatch: firstMatchIndex !== null ? {
+                index: firstMatchIndex,
+                name: firstMatchName,
+                metricType: firstMatchMetricType
+            } : null
+        });
+        return ipeCount > 0;
+    }, [consumptionDataSource, timestampAttr, consumptionAttr, metricTypeAttr, NameAttr]);
+
+    const hasIPE2Data = useMemo(() => {
+        if (
+            consumptionDataSource2?.status !== ValueStatus.Available ||
+            !timestampAttr2 || !consumptionAttr2 ||
+            !(consumptionDataSource2.items?.length && consumptionDataSource2.items.length > 0)
+        ) {
+            return false;
+        }
+        const items = consumptionDataSource2.items;
+        const maxScan = Math.min(items.length, 100);
+        let ipeCount = 0;
+        let firstMatchIndex: number | null = null;
+        let firstMatchName: string | undefined;
+        let firstMatchMetricType: string | undefined;
+        for (let i = 0; i < maxScan; i++) {
+            const it = items[i];
+            const mt = metricTypeAttr2?.get(it)?.value?.trim();
+            const nameVal = NameAttr2?.get(it)?.value;
+            const mtFallback = getMetricTypeFromName(nameVal);
+            const finalMt = (mt || mtFallback)?.toString();
+            if (finalMt === METRIC_TYPES.IPE || finalMt === METRIC_TYPES.IPE_KG) {
+                ipeCount++;
+                if (firstMatchIndex === null) {
+                    firstMatchIndex = i;
+                    firstMatchName = nameVal || undefined;
+                    firstMatchMetricType = finalMt;
+                }
+            }
+        }
+        debug("🔎 IPE scan DS2", {
+            scanned: maxScan,
+            total: items.length,
+            ipeCount,
+            firstMatch: firstMatchIndex !== null ? {
+                index: firstMatchIndex,
+                name: firstMatchName,
+                metricType: firstMatchMetricType
+            } : null
+        });
+        return ipeCount > 0;
+    }, [consumptionDataSource2, timestampAttr2, consumptionAttr2, metricTypeAttr2, NameAttr2]);
     
     // 🎯 Détection du nombre d'IPE disponibles
     const ipeCount = useMemo(() => {

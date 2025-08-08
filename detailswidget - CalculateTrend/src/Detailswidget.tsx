@@ -2,13 +2,26 @@ import { createElement, useEffect, useState, useMemo, Fragment } from "react";
 import Big from "big.js";
 import { ValueStatus } from "mendix";
 import { Inbox } from "lucide-react";
+import { IPEUnavailable } from "./components/IPEUnavailable";
 import { DetailswidgetContainerProps } from "../typings/DetailswidgetProps";
 import { energyConfigs, shouldDisplayVariable, getMetricTypeFromName } from "./utils/energy";
 import { IPECard } from "./components/IPECard";
 import { ChartContainer } from "./components/ChartContainer";
 import { getAutoGranularity } from "./lib/utils";
-import { useFeatures, useAutoDetectedIPENames, useAutoDetectedCardUnits } from "./hooks/use-features";
+import { useFeatures } from "./hooks/use-features";
 import { debug } from "./utils/debugLogger";
+import { 
+  extractSmartVariablesData, 
+  getSmartIPEUnits,
+  getSmartCardUnit,
+  getSmartIPEUnitForSeries,
+  getIPEVariantsFromVariables,
+  findProductionUnitForIPE,
+  debugSmartVariables,
+  WIDGET_TO_SMART_ENERGY_MAPPING,
+  type SmartVariableData,
+  type SmartEnergyType
+ } from "./utils/smartUnitUtils";
 
 
 
@@ -25,40 +38,7 @@ const NoDataMessage = () => (
     </div>
 );
 
-// 🎯 Composant de fallback intelligent pour les cas sans IPE
-const IPEFallbackMessage = ({ 
-    fallbackReason, 
-    ipeCount, 
-    recommendedMode 
-}: { 
-    fallbackReason: string; 
-    ipeCount: number; 
-    recommendedMode: string; 
-}) => (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-8 tw-text-center tw-min-h-[200px]">
-        <div className="tw-bg-amber-50 tw-border tw-border-amber-200 tw-rounded-lg tw-p-6 tw-max-w-md">
-            <div className="tw-text-amber-800 tw-text-lg tw-font-semibold tw-mb-2">
-                Mode IPE non disponible
-            </div>
-            <div className="tw-text-amber-600 tw-text-sm tw-mb-4">
-                Cet asset ne possède pas de données IPE ({ipeCount} IPE disponible{ipeCount > 1 ? 's' : ''}).
-            </div>
-            <div className="tw-text-amber-500 tw-text-xs tw-mb-4">
-                {fallbackReason}
-            </div>
-                    <div className="tw-bg-amber-100 tw-border tw-border-amber-300 tw-rounded tw-p-3">
-            <div className="tw-text-amber-700 tw-text-xs tw-font-medium">
-                💡 Recommandation : {recommendedMode === "fallback" 
-                    ? "Utilisez le mode \"Énergétique\" pour afficher les données de consommation."
-                    : recommendedMode === "single" 
-                    ? "Utilisez le mode IPE simple pour afficher les données disponibles."
-                    : "Mode double IPE recommandé pour une vue complète."
-                }
-            </div>
-        </div>
-        </div>
-    </div>
-);
+// Composant séparé pour un design moderne (cf. src/components/IPEUnavailable.tsx)
 
 export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element | null {
     // Log de montage du composant
@@ -95,27 +75,23 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         devMode,
         viewMode,
         energyType,
+        ipeEnergyType,
         // IPE 1 (principal)
         consumptionDataSource,
         timestampAttr,
         consumptionAttr,
         NameAttr,
         metricTypeAttr,
+        energyTypeAttr,
         startDate,
         endDate,
         card1Title,
-        card1Icon,
-        card1Unit,
         card1DataSource,
         card1ValueAttr,
         card2Title,
-        card2Icon,
-        card2Unit,
         card2DataSource,
         card2ValueAttr,
         card3Title,
-        card3Icon,
-        card3Unit,
         card3DataSource,
         card3ValueAttr,
         // IPE 2 (secondaire)
@@ -124,21 +100,16 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         consumptionAttr2,
         NameAttr2,
         metricTypeAttr2,
+        energyTypeAttr2,
         startDate2,
         endDate2,
         card1Title2,
-        card1Icon2,
-        card1Unit2,
         card1DataSource2,
         card1ValueAttr2,
         card2Title2,
-        card2Icon2,
-        card2Unit2,
         card2DataSource2,
         card2ValueAttr2,
         card3Title2,
-        card3Icon2,
-        card3Unit2,
         card3DataSource2,
         card3ValueAttr2,
         // Variables de l'asset
@@ -180,6 +151,20 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
     
     const [isDataReady, setIsDataReady] = useState(false);
 
+    // État pour les variables Smart et unités automatiques
+    const [smartVariables, setSmartVariables] = useState<SmartVariableData[]>([]);
+    const [smartAutoUnits, setSmartAutoUnits] = useState({
+      card1: '',
+      card2: '',
+      card3: '',
+      card1_2: '',
+      card2_2: '',
+      card3_2: '',
+      ipe1Name: '',
+      ipe2Name: ''
+    });
+
+
             // -------- Feature Toggle Logic --------
         const {
             hasIPE1Data,
@@ -202,46 +187,171 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             timestampAttr,
             timestampAttr2,
             consumptionAttr,
-            consumptionAttr2
-        });
-
-        // 🎯 Auto-détection des noms d'IPE
-        const { ipe1Name: autoDetectedIPE1Name, ipe2Name: autoDetectedIPE2Name } = useAutoDetectedIPENames(
-            consumptionDataSource,
-            consumptionDataSource2,
+            consumptionAttr2,
             NameAttr,
             NameAttr2,
-            hasIPE1Data,
-            hasIPE2Data
-        );
+            metricTypeAttr,
+            metricTypeAttr2
+        });
 
-        // 🎯 Auto-détection des unités des cartes
-        const {
-            card1Unit: autoDetectedCard1Unit,
-            card2Unit: autoDetectedCard2Unit,
-            card3Unit: autoDetectedCard3Unit
-        } = useAutoDetectedCardUnits(
-            energyType,
-            viewMode,
-            // Variables de l'asset pour détecter les unités automatiquement
-            assetVariablesDataSource,
-            variableNameAttr,
-            variableUnitAttr,
-            variableMetricTypeAttr,
-            variableEnergyTypeAttr,
-            // Unités manuelles (priorité si définies)
-            card1Unit,
-            card2Unit,
-            card3Unit,
-            card1Unit2,
-            card2Unit2,
-            card3Unit2
-        );
+        // Plus de nommage IPE basé sur NameAttr: on affichera strictement les unités résolues
+
+    // Plus d'auto-détection des unités de cards via hook distinct: les unités viennent désormais du système Smart uniquement
 
     // Logs des features et toggle
     useEffect(() => {
         debug("Features / Toggle", { isDoubleIPEActive, activeIPE });
     }, [isDoubleIPEActive, activeIPE]);
+
+
+
+    // Chargement et extraction des variables Smart de l'asset
+    useEffect(() => {
+        const variables = extractSmartVariablesData(
+            assetVariablesDataSource,
+            variableNameAttr,
+            variableUnitAttr,
+            variableMetricTypeAttr,
+            variableEnergyTypeAttr
+        );
+        
+        setSmartVariables(variables);
+        
+        // Debug complet des variables Smart
+        const debugInfo = debugSmartVariables(variables);
+        debug("Smart Variables loaded", debugInfo);
+        
+    }, [
+        assetVariablesDataSource,
+        variableNameAttr,
+        variableUnitAttr,
+        variableMetricTypeAttr,
+        variableEnergyTypeAttr
+    ]);
+
+    // Calcul intelligent des unités automatiques basé sur le système Smart
+    useEffect(() => {
+        if (smartVariables.length === 0) {
+            return;
+        }
+        
+        // Conversion du type d'énergie widget vers enum Smart pour conso
+        const smartEnergyType = WIDGET_TO_SMART_ENERGY_MAPPING[energyType] || 'Elec';
+        // Énergie cible pour IPE (contrôlée par le XML, sans hardcode)
+        const targetIPEEnergy = (ipeEnergyType as unknown as SmartEnergyType) || 'Elec';
+        
+        // Récupération des unités IPE intelligentes
+        // Si possible, résout à partir des métadonnées de série (metricTypeAttr/energyTypeAttr)
+        // ⚠️ Ne jamais appeler .get() avec un item undefined
+        const firstItem1 = consumptionDataSource?.items && consumptionDataSource.items.length > 0
+            ? consumptionDataSource.items[0]
+            : undefined;
+        const firstItem2 = consumptionDataSource2?.items && consumptionDataSource2.items.length > 0
+            ? consumptionDataSource2.items[0]
+            : undefined;
+
+        const seriesMetricType1 = firstItem1 && metricTypeAttr ? metricTypeAttr.get(firstItem1)?.value : null;
+        const seriesEnergyType1 = firstItem1 && energyTypeAttr ? energyTypeAttr.get(firstItem1)?.value : null;
+        const seriesMetricType2 = firstItem2 && metricTypeAttr2 ? metricTypeAttr2.get(firstItem2)?.value : null;
+        const seriesEnergyType2 = firstItem2 && energyTypeAttr2 ? energyTypeAttr2.get(firstItem2)?.value : null;
+
+        const seriesIPE1Unit = getSmartIPEUnitForSeries(
+            smartVariables,
+            seriesMetricType1,
+            seriesEnergyType1,
+            energyType
+        );
+        const seriesIPE2Unit = getSmartIPEUnitForSeries(
+            smartVariables,
+            seriesMetricType2,
+            seriesEnergyType2,
+            energyType
+        );
+
+        // Variantes disponibles depuis les variables de l'asset pour l'énergie IPE cible
+        const variants = getIPEVariantsFromVariables(smartVariables, targetIPEEnergy);
+        const baseIpeKgUnit = variants.find(v => v.metricType === 'IPE_kg')?.unit;
+        const baseIpeUnit = variants.find(v => v.metricType === 'IPE')?.unit;
+
+        const fallbackIPE = getSmartIPEUnits(smartVariables, energyType);
+
+        // Lorsque les séries ne portent pas explicitement le MetricType,
+        // l'ancien code privilégiait IPE_kg par défaut pour les deux, d'où deux labels identiques.
+        // On force ici: IPE1 ⇢ IPE_kg (si dispo), IPE2 ⇢ IPE (si dispo). Sinon on retombe sur la logique série/fallback.
+        const hasSeries1Explicit = (seriesMetricType1 || '').trim() === 'IPE' || (seriesMetricType1 || '').trim() === 'IPE_kg';
+        const hasSeries2Explicit = (seriesMetricType2 || '').trim() === 'IPE' || (seriesMetricType2 || '').trim() === 'IPE_kg';
+
+        let ipe1Unit = '';
+        let ipe2Unit = '';
+
+        if (!hasSeries1Explicit && !hasSeries2Explicit) {
+          // Cas le plus fréquent: la série ne précise pas le MetricType → priorité aux variantes détectées
+          ipe1Unit = baseIpeKgUnit || seriesIPE1Unit || fallbackIPE.ipe1Unit;
+          ipe2Unit = baseIpeUnit || seriesIPE2Unit || fallbackIPE.ipe2Unit;
+        } else {
+          // Respecter les indications explicites de série quand présentes
+          ipe1Unit =
+            ((seriesMetricType1?.trim() === 'IPE_kg') ? (baseIpeKgUnit || seriesIPE1Unit)
+              : (seriesMetricType1?.trim() === 'IPE') ? (baseIpeUnit || seriesIPE1Unit)
+              : '') || seriesIPE1Unit || baseIpeKgUnit || baseIpeUnit || fallbackIPE.ipe1Unit;
+
+          ipe2Unit =
+            ((seriesMetricType2?.trim() === 'IPE_kg') ? (baseIpeKgUnit || seriesIPE2Unit)
+              : (seriesMetricType2?.trim() === 'IPE') ? (baseIpeUnit || seriesIPE2Unit)
+              : '') || seriesIPE2Unit || baseIpeUnit || baseIpeKgUnit || fallbackIPE.ipe2Unit;
+        }
+
+        // Déterminer les unités de production les plus cohérentes (sans hardcode)
+        const prodForIpe1 = findProductionUnitForIPE(smartVariables, ipe1Unit);
+        const prodForIpe2 = findProductionUnitForIPE(smartVariables, ipe2Unit);
+        
+        const newSmartAutoUnits = {
+            // 100% auto: unités déduites du système Smart exclusivement
+            card1: getSmartCardUnit(smartVariables, energyType, 'card1', viewMode),
+            card2: prodForIpe1 || getSmartCardUnit(smartVariables, energyType, 'card2', viewMode),
+            // IPE (card3) doit suivre STRICTEMENT l'IPE actif
+            card3: ipe1Unit,
+
+            // IPE 2
+            card1_2: getSmartCardUnit(smartVariables, energyType, 'card1', viewMode),
+            card2_2: prodForIpe2 || getSmartCardUnit(smartVariables, energyType, 'card2', viewMode),
+            card3_2: ipe2Unit,
+
+            // IPE Names = affichage strict de l'unité (pas de hardcode)
+            ipe1Name: ipe1Unit,
+            ipe2Name: ipe2Unit
+        };
+        
+        setSmartAutoUnits(newSmartAutoUnits);
+
+        debug("Smart Auto Units calculated", {
+            widgetEnergyType: energyType,
+            smartEnergyType,
+            targetIPEEnergy,
+            seriesMetricType1,
+            seriesEnergyType1,
+            seriesMetricType2,
+            seriesEnergyType2,
+            resolvedIPE1Unit: ipe1Unit,
+            resolvedIPE2Unit: ipe2Unit,
+            ipeVariants: variants,
+            reasoning: {
+              hasSeries1Explicit,
+              hasSeries2Explicit,
+              baseIpeKgUnit,
+              baseIpeUnit,
+              seriesIPE1Unit,
+              seriesIPE2Unit,
+              fallbackIPE
+            },
+            smartAutoUnits: newSmartAutoUnits
+        });
+    }, [
+        smartVariables,
+        energyType,
+        viewMode,
+        ipeEnergyType
+    ]);
 
     const energyConfig = viewMode === "ipe" ? energyConfigs.IPE : energyConfigs[energyType];
     const baseEnergyConfig = energyConfigs[energyType];
@@ -330,15 +440,12 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 startDate: startDate2,
                 endDate: endDate2,
                 card1Title: card1Title2,
-                card1Icon: card1Icon2,
                 card1DataSource: card1DataSource2,
                 card1ValueAttr: card1ValueAttr2,
                 card2Title: card2Title2,
-                card2Icon: card2Icon2,
                 card2DataSource: card2DataSource2,
                 card2ValueAttr: card2ValueAttr2,
                 card3Title: card3Title2,
-                card3Icon: card3Icon2,
                 card3DataSource: card3DataSource2,
                 card3ValueAttr: card3ValueAttr2,
                 data: data2,
@@ -360,18 +467,15 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 startDate,
                 endDate,
                 card1Title,
-                card1Icon,
-                card1Unit: autoDetectedCard1Unit,
+                card1Unit: undefined,
                 card1DataSource,
                 card1ValueAttr,
                 card2Title,
-                card2Icon,
-                card2Unit: autoDetectedCard2Unit,
+                card2Unit: undefined,
                 card2DataSource,
                 card2ValueAttr,
                 card3Title,
-                card3Icon,
-                card3Unit: autoDetectedCard3Unit,
+                card3Unit: undefined,
                 card3DataSource,
                 card3ValueAttr,
                 data: data1,
@@ -393,18 +497,15 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 startDate,
                 endDate,
                 card1Title,
-                card1Icon,
-                card1Unit: autoDetectedCard1Unit,
+                card1Unit: undefined,
                 card1DataSource,
                 card1ValueAttr,
                 card2Title,
-                card2Icon,
-                card2Unit: autoDetectedCard2Unit,
+                card2Unit: undefined,
                 card2DataSource,
                 card2ValueAttr,
                 card3Title,
-                card3Icon,
-                card3Unit: autoDetectedCard3Unit,
+                card3Unit: undefined,
                 card3DataSource,
                 card3ValueAttr,
                 data: data1,
@@ -426,15 +527,12 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                 startDate: startDate2,
                 endDate: endDate2,
                 card1Title: card1Title2,
-                card1Icon: card1Icon2,
                 card1DataSource: card1DataSource2,
                 card1ValueAttr: card1ValueAttr2,
                 card2Title: card2Title2,
-                card2Icon: card2Icon2,
                 card2DataSource: card2DataSource2,
                 card2ValueAttr: card2ValueAttr2,
                 card3Title: card3Title2,
-                card3Icon: card3Icon2,
                 card3DataSource: card3DataSource2,
                 card3ValueAttr: card3ValueAttr2,
                 data: data2,
@@ -455,15 +553,12 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             startDate,
             endDate,
             card1Title,
-            card1Icon,
             card1DataSource,
             card1ValueAttr,
             card2Title,
-            card2Icon,
             card2DataSource,
             card2ValueAttr,
             card3Title,
-            card3Icon,
             card3DataSource,
             card3ValueAttr,
             data: [],
@@ -480,19 +575,23 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
     // Logs des datasources
     useEffect(() => {
-        if (isConsumptionDataReady1)
+        if (isConsumptionDataReady1) {
+            const fi = consumptionDataSource?.items && consumptionDataSource.items.length > 0
+                ? consumptionDataSource.items[0]
+                : undefined;
             debug("DS-IPE1 Available", { 
                 items: consumptionDataSource?.items?.length,
                 hasTimestampAttr: !!timestampAttr,
                 hasConsumptionAttr: !!consumptionAttr,
                 hasNameAttr: !!NameAttr,
-                firstItem: consumptionDataSource?.items?.[0] ? {
-                    id: consumptionDataSource.items[0].id,
-                    hasTimestamp: timestampAttr ? !!timestampAttr.get(consumptionDataSource.items[0]).value : false,
-                    hasConsumption: consumptionAttr ? !!consumptionAttr.get(consumptionDataSource.items[0]).value : false,
-                    hasName: NameAttr ? !!NameAttr.get(consumptionDataSource.items[0]).value : false
+                firstItem: fi ? {
+                    id: (fi as any)?.id,
+                    hasTimestamp: timestampAttr ? !!timestampAttr.get(fi)?.value : false,
+                    hasConsumption: consumptionAttr ? !!consumptionAttr.get(fi)?.value : false,
+                    hasName: NameAttr ? !!NameAttr.get(fi)?.value : false
                 } : null
             });
+        }
     }, [isConsumptionDataReady1, consumptionDataSource?.items?.length, devMode, timestampAttr, consumptionAttr, NameAttr]);
 
     useEffect(() => {
@@ -931,10 +1030,9 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         <div className="tw-flex tw-flex-row tw-gap-6 tw-h-full">
             {(currentProps.card1DataSource || devMode || currentProps.card1Title) && (
                 <IPECard
-                    icon={currentProps.card1Icon}
                     title={currentProps.card1Title || "Consommation"}
                     value={currentProps.card1Data}
-                    unit={currentProps.card1Unit || "kWh"}
+                    unit={(activeIPE === 2 ? smartAutoUnits.card1_2 : smartAutoUnits.card1) || "kWh"}
                     color={energyConfig.color}
                     type={
                         energyType === "gas"
@@ -949,20 +1047,18 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             )}
             {(currentProps.card2DataSource || devMode || currentProps.card2Title) && (
                 <IPECard
-                    icon={currentProps.card2Icon}
                     title={currentProps.card2Title || "Production"}
                     value={currentProps.card2Data}
-                    unit={currentProps.card2Unit || "kWh"}
+                    unit={(activeIPE === 2 ? smartAutoUnits.card2_2 : smartAutoUnits.card2) || "kWh"}
                     color={energyConfig.color}
                     type="production"
                 />
             )}
             {(currentProps.card3DataSource || devMode || currentProps.card3Title) && (
                 <IPECard
-                    icon={currentProps.card3Icon}
                     title={currentProps.card3Title || "IPE"}
                     value={currentProps.card3Data}
-                    unit={currentProps.card3Unit || "%"}
+                    unit={(activeIPE === 2 ? smartAutoUnits.card3_2 : smartAutoUnits.card3) || baseEnergyConfig.ipeUnit}
                     color={energyConfig.color}
                     type="ipe"
                 />
@@ -977,9 +1073,20 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         </div>
     ) : null;
 
+    // Warning si aucune variable Smart n'est trouvée
+    const smartValidationWarning = smartVariables.length === 0 && assetVariablesDataSource?.items?.length === 0 && (
+        <div className="tw-mb-4 tw-p-3 tw-bg-blue-50 tw-border tw-border-blue-200 tw-rounded-lg">
+            <div className="tw-text-blue-800 tw-font-medium">ℹ️ Aucune variable Smart détectée</div>
+            <div className="tw-text-blue-700 tw-text-sm tw-mt-1">
+                Les unités des cards utiliseront les valeurs configurées manuellement.
+            </div>
+        </div>
+    );
+
     if (viewMode === "energetic") {
         return (
             <Fragment>
+                {smartValidationWarning}
                 {toastOverlay}
                 <ChartContainer
                     data={hasData ? exportData : []}
@@ -1019,10 +1126,10 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
             
             // Afficher un message informatif avec recommandation
             return (
-                <IPEFallbackMessage 
+                <IPEUnavailable
                     fallbackReason={fallbackReason}
                     ipeCount={ipeCount}
-                    recommendedMode={recommendedMode}
+                    recommendedMode={recommendedMode as any}
                 />
             );
         }
@@ -1061,14 +1168,17 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
         
         const ipeConfig = {
             ...energyConfigs.IPE,
-            unit: currentProps.card3Unit || baseEnergyConfig.ipeUnit,
+            unit: (activeIPE === 2 ? smartAutoUnits.card3_2 : smartAutoUnits.card3) || baseEnergyConfig.ipeUnit,
             label: energyConfigs.IPE.label || "IPE"
         };
         
-        const titleSuffix = isDoubleIPEActive ? ` - ${activeIPE === 1 ? autoDetectedIPE1Name : autoDetectedIPE2Name}` : "";
+        const resolvedIPE1Name = smartAutoUnits.ipe1Name;
+        const resolvedIPE2Name = smartAutoUnits.ipe2Name;
+        const titleSuffix = isDoubleIPEActive ? ` - ${activeIPE === 1 ? resolvedIPE1Name : resolvedIPE2Name}` : "";
         
         return (
             <Fragment>
+                {smartValidationWarning}
                 {toastOverlay}
                 <ChartContainer
                     data={hasData ? exportData : []}
@@ -1087,8 +1197,8 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
                     }
                     noDataContent={!hasData ? <NoDataMessage /> : undefined}
                     showIPEToggle={isDoubleIPEActive && hasIPE1Data && hasIPE2Data}
-                    ipe1Name={autoDetectedIPE1Name}
-                    ipe2Name={autoDetectedIPE2Name}
+                    ipe1Name={smartAutoUnits.ipe1Name}
+                    ipe2Name={smartAutoUnits.ipe2Name}
                     activeIPE={activeIPE}
                     onIPEToggle={setActiveIPE}
                     ipeToggleDisabled={!hasIPE2Data || !hasIPE1Data}
@@ -1109,6 +1219,7 @@ export function Detailswidget(props: DetailswidgetContainerProps): JSX.Element |
 
     return (
         <Fragment>
+            {smartValidationWarning}
             {toastOverlay}
             <ChartContainer
                 data={hasData ? exportData : []}

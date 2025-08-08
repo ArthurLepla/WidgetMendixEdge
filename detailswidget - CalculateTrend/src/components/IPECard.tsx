@@ -25,19 +25,19 @@ export function IPECard({title, value, unit, type, color }: IPECardProps): JSX.E
     const getIcon = () => {
         switch (type) {
             case "elec":
-                return <Zap size={56} color={energyConfigs.electricity.color} />;
+                return <Zap size={30} color={energyConfigs.electricity.color} />;
             case "gaz":
-                return <Flame size={56} color={energyConfigs.gas.color} />;
+                return <Flame size={30} color={energyConfigs.gas.color} />;
             case "eau":
-                return <Droplets size={56} color={energyConfigs.water.color} />;
+                return <Droplets size={30} color={energyConfigs.water.color} />;
             case "air":
-                return <Wind size={56} color={energyConfigs.air.color} />;
+                return <Wind size={30} color={energyConfigs.air.color} />;
             case "ipe":
-                return <Gauge size={56} color={energyConfigs.IPE.color} />;
+                return <Gauge size={30} color={energyConfigs.IPE.color} />;
             case "consumption":
-                return <Zap size={56} color={color || energyConfigs.electricity.color} />;
+                return <Zap size={30} color={color || energyConfigs.electricity.color} />;
             case "production":
-                return <Factory size={56} color={PRODUCTION_COLOR} />;
+                return <Factory size={30} color={PRODUCTION_COLOR} />;
         }
     };
 
