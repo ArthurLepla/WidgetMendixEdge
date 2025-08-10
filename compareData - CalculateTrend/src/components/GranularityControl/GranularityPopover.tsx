@@ -2,26 +2,23 @@ import { createElement, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Settings, X } from "lucide-react";
 import { GranularityControl, GranularityControlProps } from "./GranularityControl";
-import { SegmentGroup } from '@ark-ui/react';
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import "./GranularityPopover.css";
 
 export interface GranularityPopoverProps extends GranularityControlProps {}
 
 // Exemple minimal SegmentGroup Ark UI (doc officielle)
-const FrameworkSegmentGroup = () => {
+const FrameworkToggleGroup = () => {
   const frameworks = ['React', 'Solid', 'Svelte', 'Vue'];
-  const [value, setValue] = useState<string | null>('React');
+  const [value, setValue] = useState<string>('React');
   return (
-    <SegmentGroup.Root value={value} onValueChange={e => setValue(e.value)}>
-      <SegmentGroup.Indicator />
+    <ToggleGroup.Root type="single" value={value} onValueChange={(val) => val && setValue(val)}>
       {frameworks.map(framework => (
-        <SegmentGroup.Item key={framework} value={framework}>
-          <SegmentGroup.ItemText>{framework}</SegmentGroup.ItemText>
-          <SegmentGroup.ItemControl />
-          <SegmentGroup.ItemHiddenInput />
-        </SegmentGroup.Item>
+        <ToggleGroup.Item key={framework} value={framework} className="toggle-group-item">
+          {framework}
+        </ToggleGroup.Item>
       ))}
-    </SegmentGroup.Root>
+    </ToggleGroup.Root>
   );
 };
 
@@ -51,8 +48,8 @@ export const GranularityPopover: React.FC<GranularityPopoverProps> = props => {
             </Dialog.Close>
           </div>
           <div className="granularity-popover-content">
-            {/* SegmentGroup Ark UI minimal (démo) */}
-            <FrameworkSegmentGroup />
+            {/* ToggleGroup Radix UI minimal (démo) */}
+            <FrameworkToggleGroup />
             {/* Contrôle métier */}
             <GranularityControl {...props} />
           </div>

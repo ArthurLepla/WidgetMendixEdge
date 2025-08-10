@@ -10,8 +10,8 @@ import "./TreeSelect.css";
 const { Title } = Typography;
 
 interface AssetsTabProps extends AdminPanelContainerProps {
-    selectedAsset: any;
-    onSelectAsset: (asset: any) => void;
+    selectedAsset: ObjectItem | null;
+    onSelectAsset: (asset: ObjectItem) => void;
 }
 
 // Types pour les nœuds de l'arbre
@@ -220,6 +220,18 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
     const [searchTerm, setSearchTerm] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
+    // Map Level.id -> SortOrder (pour un tri fiable)
+    const levelSortOrderMap = useMemo(() => {
+        const map = new Map<string, number>();
+        if (props.levelsDatasource?.status === ValueStatus.Available && props.levelSortOrderAttr) {
+            (props.levelsDatasource.items ?? []).forEach(levelItem => {
+                const order = Number(props.levelSortOrderAttr!.get(levelItem)?.value ?? 0);
+                map.set(levelItem.id, order);
+            });
+        }
+        return map;
+    }, [props.levelsDatasource, props.levelSortOrderAttr]);
+
     // Construction de l'arbre avec notre logique robuste
     const treeData = useMemo<TreeNode[]>(() => {
         if (!props.assetsDatasource?.items || !props.assetName) {
@@ -244,7 +256,7 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
             
             const levelIds = getRefIds(props.assetLevel, item);
             const levelId = levelIds[0]; // Prendre le premier level (mono-ref)
-            const level = levelId ? Number(levelId) || 0 : 0;
+            const levelOrder = levelId ? (levelSortOrderMap.get(levelId) ?? 0) : 0;
             
             const path = parentId ? `${parentId}/${label}` : label;
             const uniqueId = createUniqueId(path, originalId, index);
@@ -256,7 +268,7 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
                 label,
                 children: [],
                 originalItem: item,
-                level,
+                level: levelOrder,
                 parentName: parentId,
                 path
             };
@@ -290,10 +302,7 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
 
         // Trier les nœuds
         const sortNodes = (nodes: TreeNode[]) => {
-            nodes.sort((a, b) => {
-                if (a.level !== b.level) return a.level - b.level;
-                return a.label.localeCompare(b.label);
-            });
+            nodes.sort((a, b) => (a.level - b.level) || a.label.localeCompare(b.label));
             nodes.forEach(node => {
                 if (node.children && node.children.length > 0) {
                     sortNodes(node.children);
@@ -304,7 +313,7 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
         sortNodes(rootNodes);
         console.log(`[AssetsTab] Tree built with ${rootNodes.length} root nodes`);
         return rootNodes;
-    }, [props.assetsDatasource, props.assetName, props.assetParent, props.assetLevel]);
+    }, [props.assetsDatasource, props.assetName, props.assetParent, props.assetLevel, levelSortOrderMap]);
 
     const hasVisibleNodes = useMemo(() => {
         if (!searchTerm) {
@@ -406,9 +415,10 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
                 key: item.id,
                 name: props.variableName?.get(item)?.displayValue || "",
                 unit: props.variableUnit?.get(item)?.displayValue || "",
-                type: props.variableType?.get(item)?.displayValue || ""
+                metric: props.variableType?.get(item)?.displayValue || "",
+                energy: props.variableEnergy?.get(item)?.displayValue || ""
             }));
-    }, [props.selectedAsset, props.variablesDatasource, props.variableName, props.variableUnit, props.variableType, props.variableAsset]);
+    }, [props.selectedAsset, props.variablesDatasource, props.variableName, props.variableUnit, props.variableType, props.variableEnergy, props.variableAsset]);
 
     const getEnergyTags = (item: any) => {
         if (!item) return [];
@@ -430,38 +440,15 @@ export function AssetsTab(props: AssetsTabProps): ReactElement {
     };
 
     const variableColumns = [
+        { title: 'Name', dataIndex: 'name', key: 'name', ellipsis: true },
+        { title: 'Unit', dataIndex: 'unit', key: 'unit', width: 100 },
+        { title: 'Metric', dataIndex: 'metric', key: 'metric', width: 120 },
         {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-            ellipsis: true,
-        },
-        {
-            title: 'Unit',
-            dataIndex: 'unit',
-            key: 'unit',
-            width: 100,
-        },
-        {
-            title: 'Type',
-            dataIndex: 'type',
-            key: 'type',
-            width: 120,
-            render: (type: string) => {
-                // Traduire les types d'énergie en français
-                const energyTypeMap: { [key: string]: string } = {
-                    'Electric': 'Électrique',
-                    'Gas': 'Gaz',
-                    'Water': 'Eau',
-                    'Air': 'Air',
-                    'electric': 'Électrique',
-                    'gas': 'Gaz',
-                    'water': 'Eau',
-                    'air': 'Air'
-                };
-                const translatedType = energyTypeMap[type] || type;
-                return <Tag color="blue">{translatedType}</Tag>;
-            }
+            title: 'Energy',
+            dataIndex: 'energy',
+            key: 'energy',
+            width: 110,
+            render: (e: string) => <Tag color="blue">{e || '—'}</Tag>
         }
     ];
 

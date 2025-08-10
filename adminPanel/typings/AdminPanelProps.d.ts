@@ -5,6 +5,7 @@
  */
 import { CSSProperties } from "react";
 import { ActionValue, ListValue, ListActionValue, ListAttributeValue, ListReferenceValue } from "mendix";
+import { Big } from "big.js";
 
 export interface AdminPanelContainerProps {
     name: string;
@@ -32,7 +33,9 @@ export interface AdminPanelContainerProps {
     variableName?: ListAttributeValue<string>;
     variableUnit?: ListAttributeValue<string>;
     variableType?: ListAttributeValue<string>;
+    variableEnergy?: ListAttributeValue<string>;
     variableAsset?: ListReferenceValue;
+    levelSortOrderAttr?: ListAttributeValue<Big>;
 }
 
 export interface AdminPanelPreviewProps {
@@ -67,5 +70,7 @@ export interface AdminPanelPreviewProps {
     variableName: string;
     variableUnit: string;
     variableType: string;
+    variableEnergy: string;
     variableAsset: string;
+    levelSortOrderAttr: string;
 }

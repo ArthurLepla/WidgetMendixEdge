@@ -136,10 +136,10 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
           {/* Actions wrapper pour toggle et export */}
           <div className="chart-header-actions">
             {/* Toggle IPE */}
-            {showIPEToggle && ipe1Name && ipe2Name && onIPEToggle && activeIPE && (
+            {showIPEToggle && onIPEToggle && (activeIPE === 1 || activeIPE === 2) && (
               <IPEToggle
-                ipe1Name={ipe1Name}
-                ipe2Name={ipe2Name}
+                ipe1Name={ipe1Name || "IPE 1"}
+                ipe2Name={ipe2Name || "IPE 2"}
                 activeIPE={activeIPE}
                 onToggle={onIPEToggle}
               />

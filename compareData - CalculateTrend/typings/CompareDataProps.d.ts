@@ -20,6 +20,7 @@ export interface CompareDataContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
+    devMode: boolean;
     viewMode: ViewModeEnum;
     energyType: EnergyTypeEnum;
     baseUnit: BaseUnitEnum;
@@ -27,8 +28,6 @@ export interface CompareDataContainerProps {
     onAddProductionClick?: ActionValue;
     enableTestMode: boolean;
     enableAdvancedGranularity: boolean;
-    ipe1Name: string;
-    ipe2Name: string;
     selectedMachines?: ListValue;
     attrMachineName?: ListAttributeValue<string>;
     dsMesures?: ListValue;
@@ -37,6 +36,8 @@ export interface CompareDataContainerProps {
     attrConsommation?: ListAttributeValue<Big>;
     dateDebut?: EditableValue<Date>;
     dateFin?: EditableValue<Date>;
+    ipe1Name: string;
+    ipe2Name: string;
     selectedMachines2?: ListValue;
     attrMachineName2?: ListAttributeValue<string>;
     dsMesures2?: ListValue;
@@ -53,6 +54,8 @@ export interface CompareDataContainerProps {
     attrMachineProductionName2?: ListAttributeValue<string>;
     attrProduction2?: ListAttributeValue<Big>;
     attrConsommationIPE2?: ListAttributeValue<Big>;
+    featureList?: ListValue;
+    featureNameAttr?: ListAttributeValue<string>;
 }
 
 export interface CompareDataPreviewProps {
@@ -66,6 +69,7 @@ export interface CompareDataPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
+    devMode: boolean;
     viewMode: ViewModeEnum;
     energyType: EnergyTypeEnum;
     baseUnit: BaseUnitEnum;
@@ -73,8 +77,6 @@ export interface CompareDataPreviewProps {
     onAddProductionClick: {} | null;
     enableTestMode: boolean;
     enableAdvancedGranularity: boolean;
-    ipe1Name: string;
-    ipe2Name: string;
     selectedMachines: {} | { caption: string } | { type: string } | null;
     attrMachineName: string;
     dsMesures: {} | { caption: string } | { type: string } | null;
@@ -83,6 +85,8 @@ export interface CompareDataPreviewProps {
     attrConsommation: string;
     dateDebut: string;
     dateFin: string;
+    ipe1Name: string;
+    ipe2Name: string;
     selectedMachines2: {} | { caption: string } | { type: string } | null;
     attrMachineName2: string;
     dsMesures2: {} | { caption: string } | { type: string } | null;
@@ -99,4 +103,6 @@ export interface CompareDataPreviewProps {
     attrMachineProductionName2: string;
     attrProduction2: string;
     attrConsommationIPE2: string;
+    featureList: {} | { caption: string } | { type: string } | null;
+    featureNameAttr: string;
 }

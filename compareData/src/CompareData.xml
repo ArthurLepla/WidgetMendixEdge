@@ -9,6 +9,10 @@
     <properties>
         <propertyGroup caption="General">
             <propertyGroup caption="Configuration">
+                <property key="devMode" type="boolean" defaultValue="false">
+                    <caption>Mode développeur</caption>
+                    <description>Activer le mode développeur pour simuler les données (sans mapper les attributs réels)</description>
+                </property>
                 <property key="viewMode" type="enumeration" defaultValue="energetic">
                     <caption>Mode de visualisation</caption>
                     <description>Choisir entre le mode énergétique ou IPE</description>
@@ -25,6 +29,17 @@
                         <enumerationValue key="gas">Gaz</enumerationValue>
                         <enumerationValue key="water">Eau</enumerationValue>
                         <enumerationValue key="air">Air</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <!-- Paramètre spécifique au mode IPE : énergie de référence pour résoudre les unités depuis les variables d'asset. -->
+                <property key="ipeEnergyType" type="enumeration" defaultValue="Elec">
+                    <caption>IPE – Énergie ciblée</caption>
+                    <description>Énergie de référence utilisée en mode IPE pour détecter les variantes (IPE / IPE_kg) et résoudre les unités à partir des variables de l'asset sélectionné. Ignoré en mode énergétique.</description>
+                    <enumerationValues>
+                        <enumerationValue key="Elec">Électricité</enumerationValue>
+                        <enumerationValue key="Gaz">Gaz</enumerationValue>
+                        <enumerationValue key="Eau">Eau</enumerationValue>
+                        <enumerationValue key="Air">Air</enumerationValue>
                     </enumerationValues>
                 </property>
                 <property key="baseUnit" type="enumeration" defaultValue="auto">
@@ -51,14 +66,6 @@
                 <property key="enableTestMode" type="boolean" defaultValue="false">
                     <caption>Mode Test</caption>
                     <description>Activer le mode test pour afficher les données de test</description>
-                </property>
-                <property key="ipe1Name" type="string" required="false">
-                    <caption>Nom IPE 1</caption>
-                    <description>Nom affiché pour le premier IPE dans le toggle (requis en mode double)</description>
-                </property>
-                <property key="ipe2Name" type="string" required="false">
-                    <caption>Nom IPE 2</caption>
-                    <description>Nom affiché pour le deuxième IPE dans le toggle (requis en mode double)</description>
                 </property>
             </propertyGroup>
 
@@ -100,7 +107,25 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <!-- Attributs optionnels pour alignement avec Detailswidget (détection fiable du type et de l'énergie) -->
+                <property key="attrMetricType" type="attribute" dataSource="dsMesures" required="false">
+                    <caption>Type de métrique</caption>
+                    <description>Attribut MetricType pour identifier le type de variable (Conso, IPE, IPE_kg, Prod, etc.)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+                <property key="attrEnergyType" type="attribute" dataSource="dsMesures" required="false">
+                    <caption>Type d'énergie</caption>
+                    <description>Attribut EnergyType pour identifier le type d'énergie (Elec, Gaz, Eau, Air, None)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
 
+            <!-- Période d'analyse (déplacée hors de Data source pour s'aligner avec Detailswidget) -->
+            <propertyGroup caption="Période d'analyse">
                 <property key="dateDebut" type="attribute" required="false">
                     <caption>Date de début</caption>
                     <description>Date de début de la période</description>
@@ -155,7 +180,25 @@
                         <attributeType name="Decimal"/>
                     </attributeTypes>
                 </property>
+                <!-- Attributs optionnels pour DS2 (alignement Detailswidget) -->
+                <property key="attrMetricType2" type="attribute" dataSource="dsMesures2" required="false">
+                    <caption>Type de métrique 2</caption>
+                    <description>Attribut MetricType pour le deuxième IPE (Conso, IPE, IPE_kg, Prod, etc.)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+                <property key="attrEnergyType2" type="attribute" dataSource="dsMesures2" required="false">
+                    <caption>Type d'énergie 2</caption>
+                    <description>Attribut EnergyType pour le deuxième IPE (Elec, Gaz, Eau, Air, None)</description>
+                    <attributeTypes>
+                        <attributeType name="Enum"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
 
+            <!-- Période d'analyse 2 -->
+            <propertyGroup caption="Période d'analyse 2">
                 <property key="dateDebut2" type="attribute" required="false">
                     <caption>Date de début 2</caption>
                     <description>Date de début de la période pour le deuxième IPE</description>
@@ -171,6 +214,122 @@
                     </attributeTypes>
                 </property>
             </propertyGroup>
+            <!-- Noms IPE retirés: le libellé du toggle sera dérivé automatiquement (ex: IPE, IPE_kg) -->
+        </propertyGroup>
+
+        <!-- ==================== Granularité ==================== -->
+        <propertyGroup caption="Affichage Granularité (Lecture)">
+            <property key="displayModeAttr" type="attribute" required="false">
+                <caption>Attribut Mode (Lecture)</caption>
+                <description>Attribut pour le mode (Auto/Strict).</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="displayTimeAttr" type="attribute" required="false">
+                <caption>Attribut Time (Lecture)</caption>
+                <description>Attribut pour la valeur de temps.</description>
+                <attributeTypes>
+                    <attributeType name="Integer"/>
+                </attributeTypes>
+            </property>
+            <property key="displayUnitAttr" type="attribute" required="false">
+                <caption>Attribut Unit (Lecture)</caption>
+                <description>Attribut pour l'unité de temps.</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="displayPreviewOKAttr" type="attribute" required="false">
+                <caption>Attribut Preview OK (Lecture)</caption>
+                <description>Attribut booléen indiquant si la configuration est valide.</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Buffer Granularité (Écriture)">
+            <property key="bufferModeAttr" type="attribute" required="false">
+                <caption>Attribut Mode (Écriture)</caption>
+                <description>Attribut pour stocker le changement de mode.</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="bufferTimeAttr" type="attribute" required="false">
+                <caption>Attribut Time (Écriture)</caption>
+                <description>Attribut pour stocker le changement de valeur.</description>
+                <attributeTypes>
+                    <attributeType name="Integer"/>
+                </attributeTypes>
+            </property>
+            <property key="bufferUnitAttr" type="attribute" required="false">
+                <caption>Attribut Unit (Écriture)</caption>
+                <description>Attribut pour stocker le changement d'unité.</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="onModeChange" type="action" required="false">
+                <caption>On Mode Change</caption>
+                <description>Microflow à exécuter quand le mode change.</description>
+            </property>
+            <property key="onTimeChange" type="action" required="false">
+                <caption>On Time/Unit Change</caption>
+                <description>Microflow à exécuter quand la valeur ou l'unité change.</description>
+            </property>
+        </propertyGroup>
+
+        <!-- ==================== Feature Toggles ==================== -->
+        <propertyGroup caption="Feature Toggles">
+            <property key="featureList" type="datasource" isList="true" required="false">
+                <caption>FeatureToggle – liste activée</caption>
+                <description>Liste des features activées pour ce widget</description>
+            </property>
+            <property key="featureNameAttr" type="attribute" dataSource="featureList" required="false">
+                <caption>Attribut FeatureName</caption>
+                <description>Attribut contenant le nom de la feature</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+
+        <!-- ==================== Variables de l'Asset ==================== -->
+        <propertyGroup caption="Variables de l'Asset">
+            <property key="assetVariablesDataSource" type="datasource" isList="true" required="false">
+                <caption>Variables de l'asset</caption>
+                <description>Liste des variables de l'asset sélectionné pour récupérer les unités automatiquement</description>
+            </property>
+            <property key="variableNameAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                <caption>Attribut Nom Variable</caption>
+                <description>Attribut contenant le nom de la variable</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="variableUnitAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                <caption>Attribut Unité Variable</caption>
+                <description>Attribut contenant l'unité de la variable</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="variableMetricTypeAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                <caption>Attribut Type Métrique Variable</caption>
+                <description>Attribut contenant le type de métrique de la variable</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="variableEnergyTypeAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+                <caption>Attribut Type Énergie Variable</caption>
+                <description>Attribut contenant le type d'énergie de la variable</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Common">

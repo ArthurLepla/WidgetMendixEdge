@@ -10,6 +10,7 @@ import { ErrorCard } from "./components/ErrorCard";
 import { EnergyType, ViewMode } from "./utils/types";
 import { ChartContainer } from "./components/ChartContainer";
 import { ENERGY_CONFIG } from "./utils/energyConfig";
+import { extractSmartVariablesData, getSmartIPEUnits } from "./utils/smartUnitUtils";
 import type { Row as ExportRow } from "./components/Export";
 
 import "./ui/CompareData.css";
@@ -138,40 +139,39 @@ const generateMockData = (energyType: EnergyType, viewMode: ViewMode, numMachine
     return { mockStats, mockTimeseries, mockExportData };
 };
 
-export function CompareData({
-    selectedMachines,
-    attrMachineName,
-    dsMesures,
-    attrMachineMesureName,
-    attrTimestamp,
-    attrConsommation,
-    dateDebut,
-    dateFin,
-    energyType,
-    viewMode,
-    baseUnit,
-    ipeMode,
-    onAddProductionClick,
-    enableTestMode,
-    ipe1Name,
-    ipe2Name,
-    selectedMachines2,
-    attrMachineName2,
-    dsMesures2,
-    attrMachineMesureName2,
-    attrTimestamp2,
-    attrConsommation2,
-    dateDebut2,
-    dateFin2,
-    dsProduction_Consommation,
-    attrMachineProductionName,
-    attrConsommationIPE,
-    attrProduction,
-    dsProduction_Consommation2,
-    attrMachineProductionName2,
-    attrConsommationIPE2,
-    attrProduction2
-}: CompareDataContainerProps): ReactElement {
+export function CompareData(props: CompareDataContainerProps): ReactElement {
+    const {
+        selectedMachines,
+        attrMachineName,
+        dsMesures,
+        attrMachineMesureName,
+        attrTimestamp,
+        attrConsommation,
+        dateDebut,
+        dateFin,
+        energyType,
+        viewMode,
+        baseUnit,
+        ipeMode,
+        onAddProductionClick,
+        enableTestMode,
+        selectedMachines2,
+        attrMachineName2,
+        dsMesures2,
+        attrMachineMesureName2,
+        attrTimestamp2,
+        attrConsommation2,
+        dateDebut2,
+        dateFin2,
+        dsProduction_Consommation,
+        attrMachineProductionName,
+        attrConsommationIPE,
+        attrProduction,
+        dsProduction_Consommation2,
+        attrMachineProductionName2,
+        attrConsommationIPE2,
+        attrProduction2
+    } = props;
     const [machinesStats, setMachinesStats] = useState<MachineStats[]>([]);
     const [machinesData, setMachinesData] = useState<MachineData[]>([]);
     const [chartExportData, setChartExportData] = useState<ExportRow[]>([]);
@@ -321,6 +321,10 @@ export function CompareData({
                         const machineName = attrMachineMesureName?.get(mesure).value;
                         const timestamp = attrTimestamp?.get(mesure).value;
                         const value = attrConsommation?.get(mesure).value;
+                        // Filtrage strict par MetricType si disponible
+                        const metricType = (props as any).attrMetricType?.get?.(mesure)?.value as string | undefined;
+                        if (viewMode === "energetic" && metricType && metricType !== "Conso") return;
+                        if (viewMode === "ipe" && metricType && metricType !== "IPE" && metricType !== "IPE_kg") return;
 
                         if (!machineName || !timestamp || !value) return;
 
@@ -583,6 +587,10 @@ export function CompareData({
                         const machineName = attrMachineMesureName2?.get(mesure).value;
                         const timestamp = attrTimestamp2?.get(mesure).value;
                         const value = attrConsommation2?.get(mesure).value;
+                        // Filtrage strict par MetricType si disponible (DS2)
+                        const metricType2 = (props as any).attrMetricType2?.get?.(mesure)?.value as string | undefined;
+                        if (viewMode === "energetic" && metricType2 && metricType2 !== "Conso") return;
+                        if (viewMode === "ipe" && metricType2 && metricType2 !== "IPE" && metricType2 !== "IPE_kg") return;
 
                         if (!machineName || !timestamp || !value) return;
 
@@ -775,11 +783,21 @@ export function CompareData({
     const currentMachinesData = currentProps.machinesData;
     const currentChartExportData = currentProps.chartExportData;
 
+    // Déduction des unités IPE à partir des variables d'asset (si disponibles)
+    const smartVariables = extractSmartVariablesData(
+        (props as any).assetVariablesDataSource,
+        (props as any).variableNameAttr,
+        (props as any).variableUnitAttr,
+        (props as any).variableMetricTypeAttr,
+        (props as any).variableEnergyTypeAttr
+    );
+    const { ipe1Unit, ipe2Unit } = getSmartIPEUnits(smartVariables, (props as any).ipeEnergyType || energyType);
+
     // Déterminer le suffixe du titre selon le mode
     let titleSuffix = "";
     if (ipeMode === "double") {
-        const ipeName = activeIPE === 1 ? (ipe1Name || "IPE 1") : (ipe2Name || "IPE 2");
-        titleSuffix = ` - ${ipeName}`;
+        const ipeNameAuto = activeIPE === 1 ? ipe1Unit : ipe2Unit;
+        titleSuffix = ` - ${ipeNameAuto}`;
     }
 
     const chartTitle = `${enableTestMode ? "[MODE TEST] " : ""}Analyse Comparative: ${currentEnergyConfig.label} (${viewMode === "ipe" ? "IPE" : "Consommation"})${titleSuffix}`;
@@ -824,8 +842,6 @@ export function CompareData({
 
     // Déterminer si le toggle doit être affiché
     const shouldShowToggle: boolean = ipeMode === "double" && viewMode === "ipe" && 
-                            !!(ipe1Name && ipe1Name.trim() !== "") && 
-                            !!(ipe2Name && ipe2Name.trim() !== "") && 
                             machinesStats1.length > 0 && machinesStats2.length > 0;
 
     return createElement(ChartContainer, {
@@ -837,8 +853,8 @@ export function CompareData({
         showHeatMap: false,
         extraHeaderContent: headerInfo,
         showIPEToggle: shouldShowToggle,
-        ipe1Name: ipe1Name || undefined,
-        ipe2Name: ipe2Name || undefined,
+        ipe1Name: ipe1Unit,
+        ipe2Name: ipe2Unit,
         activeIPE: activeIPE,
         onIPEToggle: setActiveIPE
     }, 

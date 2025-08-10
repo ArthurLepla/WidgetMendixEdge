@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createElement, type ReactNode, useState, useEffect } from "react"
-import { Big } from "big.js"
+import Big from "big.js"
 import * as ToggleGroup from "@radix-ui/react-toggle-group"
 // import { LineChart } from "./LineChart" // Still commented out - ensure this is reflected
 // import { HeatMap } from "./HeatMap" // Still commented out - ensure this is reflected

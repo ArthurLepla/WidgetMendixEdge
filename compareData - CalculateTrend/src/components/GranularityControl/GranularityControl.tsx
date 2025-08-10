@@ -9,7 +9,7 @@ import {
   Check,
   ChevronDown
 } from "lucide-react";
-import { SegmentGroup } from '@ark-ui/react';
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import "./GranularityControl.css";
 
 export type GranularityUnit = "minute" | "hour" | "day" | "week" | "month" | "year";
@@ -308,32 +308,25 @@ export const GranularityControl: React.FC<GranularityControlProps> = ({
                   className="granularity-section"
                 >
                   <div className="granularity-section-title">Mode</div>
-                  <SegmentGroup.Root 
+                  <ToggleGroup.Root 
+                    type="single"
                     value={pendingMode}
-                    onValueChange={(e) => handleModeToggle(e.value as "auto" | "strict")}
+                    onValueChange={(value) => value && handleModeToggle(value as "auto" | "strict")}
+                    className="toggle-group-root"
                   >
-                    <SegmentGroup.Indicator />
-                    <SegmentGroup.Item value="auto">
-                      <SegmentGroup.ItemText>
-                        <div className="segment-item-content">
-                          <Zap size={18} className="segment-item-icon" />
-                          <span className="segment-item-label">Auto</span>
-                        </div>
-                      </SegmentGroup.ItemText>
-                      <SegmentGroup.ItemControl />
-                      <SegmentGroup.ItemHiddenInput />
-                    </SegmentGroup.Item>
-                    <SegmentGroup.Item value="strict">
-                      <SegmentGroup.ItemText>
-                        <div className="segment-item-content">
-                          <Settings2 size={18} className="segment-item-icon" />
-                          <span className="segment-item-label">Manuel</span>
-                        </div>
-                      </SegmentGroup.ItemText>
-                      <SegmentGroup.ItemControl />
-                      <SegmentGroup.ItemHiddenInput />
-                    </SegmentGroup.Item>
-                  </SegmentGroup.Root>
+                    <ToggleGroup.Item value="auto" className="toggle-group-item">
+                      <div className="segment-item-content">
+                        <Zap size={18} className="segment-item-icon" />
+                        <span className="segment-item-label">Auto</span>
+                      </div>
+                    </ToggleGroup.Item>
+                    <ToggleGroup.Item value="strict" className="toggle-group-item">
+                      <div className="segment-item-content">
+                        <Settings2 size={18} className="segment-item-icon" />
+                        <span className="segment-item-label">Manuel</span>
+                      </div>
+                    </ToggleGroup.Item>
+                  </ToggleGroup.Root>
                 </div>
 
                 {/* Auto Mode Display */}

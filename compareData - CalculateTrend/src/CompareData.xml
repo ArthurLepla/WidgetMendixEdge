@@ -9,6 +9,10 @@
     <properties>
         <propertyGroup caption="General">
             <propertyGroup caption="Configuration">
+                <property key="devMode" type="boolean" defaultValue="false">
+                    <caption>Mode développeur</caption>
+                    <description>Activer le mode développeur pour simuler les données (sans mapper les attributs réels)</description>
+                </property>
                 <property key="viewMode" type="enumeration" defaultValue="energetic">
                     <caption>Mode de visualisation</caption>
                     <description>Choisir entre le mode énergétique ou IPE</description>
@@ -55,14 +59,6 @@
                 <property key="enableAdvancedGranularity" type="boolean" defaultValue="false">
                     <caption>Contrôle de granularité avancé</caption>
                     <description>Activer le contrôle de granularité avancé avec mode Auto/Strict sélectionnable. Si désactivé, seul le mode automatique sera disponible.</description>
-                </property>
-                <property key="ipe1Name" type="string" required="false">
-                    <caption>Nom IPE 1</caption>
-                    <description>Nom affiché pour le premier IPE dans le toggle (requis en mode double)</description>
-                </property>
-                <property key="ipe2Name" type="string" required="false">
-                    <caption>Nom IPE 2</caption>
-                    <description>Nom affiché pour le deuxième IPE dans le toggle (requis en mode double)</description>
                 </property>
             </propertyGroup>
 
@@ -118,6 +114,16 @@
                     <attributeTypes>
                         <attributeType name="DateTime"/>
                     </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Configuration Double IPE">
+                <property key="ipe1Name" type="string" required="false">
+                    <caption>Nom IPE 1</caption>
+                    <description>Nom affiché pour le premier IPE dans le toggle (requis en mode double)</description>
+                </property>
+                <property key="ipe2Name" type="string" required="false">
+                    <caption>Nom IPE 2</caption>
+                    <description>Nom affiché pour le deuxième IPE dans le toggle (requis en mode double)</description>
                 </property>
             </propertyGroup>
 
@@ -233,6 +239,20 @@
                 <description>Valeur de consommation pour le calcul du deuxième IPE. Requis en mode double IPE.</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        
+        <propertyGroup caption="Feature Toggles">
+            <property key="featureList" type="datasource" isList="true" required="false">
+                <caption>Feature flags</caption>
+                <description>Liste des fonctionnalités activées (ex: Double_IPE, Granularite_Manuelle)</description>
+            </property>
+            <property key="featureNameAttr" type="attribute" dataSource="featureList" required="false">
+                <caption>Nom de la feature</caption>
+                <description>Attribut texte contenant le nom de la feature</description>
+                <attributeTypes>
+                    <attributeType name="String" />
                 </attributeTypes>
             </property>
         </propertyGroup>

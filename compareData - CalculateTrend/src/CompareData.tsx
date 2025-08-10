@@ -1,5 +1,5 @@
 import { ReactElement, createElement, useEffect, useState, ReactNode } from "react";
-import { Big } from "big.js";
+import Big from "big.js";
 import { CompareDataContainerProps } from "../typings/CompareDataProps";
 import { MachineCard } from "./components/MachineCard";
 import { LineChart, MachineData } from "./components/LineChart";
@@ -11,13 +11,20 @@ import { EnergyType, ViewMode } from "./utils/types";
 import { ChartContainer } from "./components/ChartContainer";
 import { ENERGY_CONFIG } from "./utils/energyConfig";
 import type { Row as ExportRow } from "./components/Export";
+import { useDoubleIPEToggle, useGranulariteManuelleToggle } from "./hooks/use-feature-toggle";
 
 import "./ui/CompareData.css";
 
 // Fonction utilitaire pour normaliser les noms de machines
 function normalizeMachineName(name: string | undefined): string {
     if (!name) return "";
-    return name.trim().toLowerCase().replace(/\s+/g, ' ');
+    const normalized = name.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (process.env.NODE_ENV !== "production") {
+        // Log dev-only pour diagnostiquer les normalisations
+        // eslint-disable-next-line no-console
+        console.debug("[CompareData] normalizeMachineName:", { input: name, normalized });
+    }
+    return normalized;
 }
 
 interface MachineStats {
@@ -156,6 +163,8 @@ export function CompareData({
     enableAdvancedGranularity,
     ipe1Name,
     ipe2Name,
+    featureList,
+    featureNameAttr,
     selectedMachines2,
     attrMachineName2,
     dsMesures2,
@@ -192,6 +201,12 @@ export function CompareData({
     const [granularityValue, setGranularityValue] = useState<number>(5);
     const [granularityUnit, setGranularityUnit] = useState<"minute" | "hour" | "day" | "week" | "month" | "year">("minute");
 
+    // Feature flags (fallback vers props existantes si non fournis)
+    const isDoubleIPEActive = useDoubleIPEToggle(featureList, featureNameAttr) || (ipeMode === "double");
+    const allowManualGranularity = useGranulariteManuelleToggle(featureList, featureNameAttr) || !!enableAdvancedGranularity;
+
+    const effectiveIpeMode: "single" | "double" = isDoubleIPEActive && ipeMode === "double" ? "double" : "single";
+
     // Handlers pour la granularité
     const handleGranularityModeChange = (mode: "Auto" | "Strict") => {
         setGranularityMode(mode === "Auto" ? "auto" : "strict");
@@ -204,12 +219,13 @@ export function CompareData({
     };
 
     const handleGranularityUnitChange = (unit: string) => {
-        setGranularityUnit(unit as "minute" | "hour" | "day" | "week" | "month" | "year");
+        const mapped = unit === "second" ? "minute" : unit;
+        setGranularityUnit(mapped as "minute" | "hour" | "day" | "week" | "month" | "year");
         console.log("Granularity unit changed to:", unit);
     };
 
     const getCurrentIPEProps = () => {
-        if (ipeMode === "single" || activeIPE === 1) {
+        if (effectiveIpeMode === "single" || activeIPE === 1) {
             return {
                 selectedMachines,
                 attrMachineName,
@@ -223,9 +239,9 @@ export function CompareData({
                 attrMachineProductionName,
                 attrConsommationIPE,
                 attrProduction,
-                machinesStats: ipeMode === "single" ? machinesStats : machinesStats1,
-                machinesData: ipeMode === "single" ? machinesData : machinesData1,
-                chartExportData: ipeMode === "single" ? chartExportData : chartExportData1
+                machinesStats: effectiveIpeMode === "single" ? machinesStats : machinesStats1,
+                machinesData: effectiveIpeMode === "single" ? machinesData : machinesData1,
+                chartExportData: effectiveIpeMode === "single" ? chartExportData : chartExportData1
             };
         } else {
             return {
@@ -256,7 +272,7 @@ export function CompareData({
         setIsLoading(true);
         setError(null);
 
-        if (enableTestMode && (ipeMode === "single" || activeIPE === 1)) {
+        if (enableTestMode && (effectiveIpeMode === "single" || activeIPE === 1)) {
             console.log("CompareData Widget: TEST MODE ENABLED - IPE 1");
             const mockStartDate = dateDebut?.value ? new Date(dateDebut.value) : new Date(new Date().setDate(new Date().getDate() - 7));
             const mockEndDate = dateFin?.value ? new Date(dateFin.value) : new Date();
@@ -268,7 +284,7 @@ export function CompareData({
             const { mockStats, mockTimeseries, mockExportData } = generateMockData(energyType as EnergyType, viewMode as ViewMode, 8, 200, mockStartDate, mockEndDate);
             
             if (isMounted) {
-                if (ipeMode === "single") {
+                if (effectiveIpeMode === "single") {
                     setMachinesStats(mockStats);
                     setMachinesData(mockTimeseries);
                     setChartExportData(mockExportData);
@@ -314,7 +330,7 @@ export function CompareData({
                         if(isMounted) {
                             setError("NO_MACHINE_SELECTED");
                             setIsLoading(false);
-                            if (ipeMode === "single") {
+                        if (effectiveIpeMode === "single") {
                                 setMachinesStats([]);
                                 setMachinesData([]);
                                 setChartExportData([]);
@@ -481,7 +497,7 @@ export function CompareData({
                     });
 
                     if (isMounted) {
-                        if (ipeMode === "single") {
+                        if (effectiveIpeMode === "single") {
                             setMachinesStats(stats);
                             setMachinesData(timeseriesData);
                             setChartExportData(currentChartExportData);
@@ -539,7 +555,7 @@ export function CompareData({
 
     // useEffect pour IPE 2 (mode double uniquement)
     useEffect(() => {
-        if (ipeMode !== "double") return;
+        if (effectiveIpeMode !== "double") return;
 
         let isMounted = true;
 
@@ -864,10 +880,8 @@ export function CompareData({
 
     // Déterminer si le toggle doit être affiché
     const shouldShowToggle: boolean =
-        ipeMode === "double" &&
+        isDoubleIPEActive &&
         viewMode === "ipe" &&
-        !!(ipe1Name && ipe1Name.trim() !== "") &&
-        !!(ipe2Name && ipe2Name.trim() !== "") &&
         machinesStats1.length > 0 &&
         machinesStats2.length > 0;
 
@@ -887,8 +901,8 @@ export function CompareData({
             activeIPE: activeIPE,
             onIPEToggle: setActiveIPE,
             // Props pour la granularité
-            showGranularityControl: enableAdvancedGranularity,
-            showSimpleGranularity: !enableAdvancedGranularity,
+            showGranularityControl: !!allowManualGranularity,
+            showSimpleGranularity: !allowManualGranularity,
             granularityMode: granularityMode,
             granularityValue: granularityValue,
             granularityUnit: granularityUnit,

@@ -1,6 +1,6 @@
 import { ReactElement, createElement, useState, useMemo } from "react";
 import { AdminPanelContainerProps } from "../typings/AdminPanelProps";
-import { ValueStatus } from "mendix";
+import { ObjectItem, ValueStatus } from "mendix";
 import { Tabs, Layout, Card, Row, Col, Statistic, Button, Space, message, ConfigProvider, theme, App } from "antd";
 import { 
     Database, 
@@ -22,7 +22,7 @@ const { Content } = Layout;
 export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
     const [activeTab, setActiveTab] = useState("assets");
     const [loading, setLoading] = useState(false);
-    const [selectedAsset, setSelectedAsset] = useState<any>(null);
+    const [selectedAsset, setSelectedAsset] = useState<ObjectItem | null>(null);
 
     // KPIs pour les assets
     const assetsKPIs = useMemo(() => {
@@ -168,7 +168,7 @@ export function AdminPanel(props: AdminPanelContainerProps): ReactElement {
                         <AssetsTab
                             {...props}
                             selectedAsset={selectedAsset}
-                            onSelectAsset={setSelectedAsset}
+                            onSelectAsset={(asset) => setSelectedAsset(asset)}
                         />
                     </Space>
                 </motion.div>

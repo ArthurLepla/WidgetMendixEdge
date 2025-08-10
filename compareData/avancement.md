@@ -5,6 +5,45 @@ Implémentation de la fonctionnalité Double IPE permettant de gérer deux IPE d
 
 ---
 
+## 📅 2025-08-10 - Alignement XML avec Detailswidget – CalculateTrend ✅
+
+### ⌛ Changement :
+- Réorganisation du fichier `src/CompareData.xml` pour s’aligner sur la structure du widget `detailswidget - CalculateTrend` :
+  - Ajout de `ipeEnergyType` (Enum Elec/Gaz/Eau/Air) pour résoudre les unités IPE via les variables d’asset.
+  - Ajout des attributs optionnels `attrMetricType`, `attrEnergyType` et leurs pendants `attrMetricType2`, `attrEnergyType2` pour DS2.
+  - Déplacement des dates dans des groupes dédiés « Période d’analyse » et « Période d’analyse 2 ».
+  - Ajout des groupes Granularité (lecture/écriture) avec `displayModeAttr`, `displayTimeAttr`, `displayUnitAttr`, `displayPreviewOKAttr`, et buffers `bufferModeAttr`, `bufferTimeAttr`, `bufferUnitAttr` + actions `onModeChange`, `onTimeChange`.
+  - Ajout du groupe Feature Toggles (`featureList`, `featureNameAttr`).
+  - Ajout du groupe Variables de l’Asset (`assetVariablesDataSource`, `variableNameAttr`, `variableUnitAttr`, `variableMetricTypeAttr`, `variableEnergyTypeAttr`).
+ - Suppression du groupe « Configuration Double IPE » (noms IPE). Les libellés du toggle seront désormais dérivés automatiquement (ex: IPE, IPE_kg) comme dans `detailswidget`.
+
+### 🤔 Analyse :
+- Convergence des widgets sur un contrat commun de configuration, facilitant la mutualisation de la logique (granularité, auto‑unités IPE, toggles).
+- Rétrocompatibilité préservée (toutes les nouvelles propriétés sont optionnelles, valeurs par défaut inchangées).
+- Prépare l’intégration des helpers d’auto‑unités et des contrôles de granularité sans impacter l’existant.
+
+### 🔜 Prochaines étapes :
+- Étendre `typings/CompareDataProps.d.ts` (auto‑généré) via build pour inclure les nouvelles props.
+- Implémenter la granularité lecture/écriture et l’auto‑déduction d’unités IPE dans `CompareData.tsx`.
+- Ajouter tests unitaires sur la résolution d’unités et le basculement IPE.
+
+---
+
+## 📅 2025-08-10 - Filtrage strict par MetricType + labels IPE par défaut ✅
+
+### ⌛ Changement :
+- `src/CompareData.tsx` : filtration stricte des séries en fonction de `attrMetricType`/`attrMetricType2` (si présents) — `energetic` => Conso uniquement, `ipe` => IPE/IPE_kg uniquement.
+- Ajustement du suffixe titre en mode double IPE avec labels par défaut (“IPE”/“IPE_kg”) en attendant la déduction automatique depuis les variables d’asset.
+- `ChartContainer` : le toggle ne dépend plus des noms IPE.
+
+### 🤔 Analyse :
+- Évite les mélanges de métriques qui faussent les totaux et graphiques.
+- Prépare l’intégration des unités/labels automatiques sans casser l’UX.
+
+### 🔜 Prochaines étapes :
+- Déduire `ipe1Name`/`ipe2Name` automatiquement depuis `assetVariablesDataSource` et `ipeEnergyType`.
+- Propager ces labels calculés au `ChartContainer`.
+
 ## 📅 2024-12-19 - Initialisation du projet Double IPE
 
 ### ⌛ Changement :

@@ -107,7 +107,6 @@
                 <caption>Feature Name</caption>
                 <description>Name of the feature</description>
                 <attributeTypes>
-                    <attributeType name="String"/>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
@@ -146,7 +145,13 @@
                 <caption>Variable Type</caption>
                 <description>Type of the variable</description>
                 <attributeTypes>
-                    <attributeType name="String"/>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+            <property key="variableEnergy" type="attribute" required="false" dataSource="variablesDatasource">
+                <caption>Variable Energy</caption>
+                <description>Energy type of the variable (Enum)</description>
+                <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
@@ -157,6 +162,16 @@
                 <associationTypes>
                     <associationType name="Reference"/>
                 </associationTypes>
+            </property>
+        </propertyGroup>
+        
+        <propertyGroup caption="Level Attributes">
+            <property key="levelSortOrderAttr" type="attribute" required="false" dataSource="levelsDatasource">
+                <caption>Level SortOrder</caption>
+                <description>Order field from Level used to sort the tree</description>
+                <attributeTypes>
+                    <attributeType name="Integer"/>
+                </attributeTypes>
             </property>
         </propertyGroup>
     </properties>

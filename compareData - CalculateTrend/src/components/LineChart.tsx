@@ -1,6 +1,6 @@
 import { ReactElement, createElement, useEffect, useRef, memo } from "react";
 import * as echarts from "echarts";
-import { Big } from "big.js";
+import Big from "big.js";
 import { getColorForName } from "../utils/colorUtils";
 import { NoData } from "./NoData";
 import { EnergyType } from "../utils/types";
