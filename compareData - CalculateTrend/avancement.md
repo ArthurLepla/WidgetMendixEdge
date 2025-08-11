@@ -99,6 +99,16 @@ Le validateur du schéma Mendix n'autorise pas l'attribut `category` sur `<prope
 ### 💜 Prochaines étapes :
 - Lancer une reconstruction du widget pour vérifier la génération des typings.
 
+### ⌛ Changement (2025-08-11 – z-index Mendix compatibility):
+- Ajustement des z-index pour respecter la hiérarchie Mendix : `.chart-header-actions` (z-index: 10), `.export-menu` (z-index: 20), `.granularity-control` (z-index: 20). Les menus dropdowns restent à z-index: 1000 pour passer devant le header local.
+
+### 🤔 Analyse:
+Mendix utilise des z-index entre 50-1000 pour ses éléments UI (modales, sélecteurs, tooltips). En gardant nos contrôles en dessous de 50, on évite les conflits de stacking context et on permet aux éléments Mendix de s'afficher correctement au-dessus de nos widgets.
+
+### 💜 Prochaines étapes:
+- Vérifier que Detailswidget utilise la même stratégie de z-index pour la cohérence.
+- Documenter cette contrainte dans les guidelines de développement widget.
+
 ## 2024-07-26
 
 ### ⌛ Changement :

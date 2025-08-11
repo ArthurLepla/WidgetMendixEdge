@@ -2,7 +2,7 @@
 .granularity-control {
   position: relative;
   display: inline-block;
-  z-index: 100; /* Alignement avec Detailswidget */
+  z-index: 20; /* Rester en dessous des éléments Mendix (50+) */
 }
 
 /* Bouton principal */

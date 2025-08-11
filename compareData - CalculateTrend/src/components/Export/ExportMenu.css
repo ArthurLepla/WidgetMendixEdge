@@ -2,7 +2,7 @@
 .export-menu {
   position: relative !important;
   display: inline-block;
-  z-index: 100; /* Alignement avec Detailswidget */
+  z-index: 20; /* Rester en dessous des éléments Mendix (50+) */
   /* Isolation du contexte de positionnement */
   transform: translateZ(0);
 }

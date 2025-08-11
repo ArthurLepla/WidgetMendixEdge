@@ -84,7 +84,7 @@
   flex: 1;
   /* Ces propriétés peuvent être surchargées par ExportMenu.css */
   position: relative;
-  /* Pas de z-index sur le container principal - laisser les enfants gérer leur stacking */
+  z-index: 10; /* Rester en dessous des éléments Mendix (50+) */
 }
 
 /* Styles pour l'affichage simple de la granularité - Harmonisé avec export-button */
