@@ -12,6 +12,7 @@
   margin-bottom: 1.5rem;
   overflow: visible; /* Changé de hidden à visible pour permettre l'affichage des dropdowns */
   transition: all 0.3s ease-in-out;
+  isolation: isolate; /* Crée un nouveau contexte d'empilement pour éviter les collisions de z-index globales */
 }
 
 .chart-container:hover {
@@ -84,7 +85,13 @@
   flex: 1;
   /* Ces propriétés peuvent être surchargées par ExportMenu.css */
   position: relative;
-  z-index: 10; /* Rester en dessous des éléments Mendix (50+) */
+  z-index: 10; /* valeur locale par défaut */
+}
+
+/* Override plus spécifique pour éviter les collisions avec des règles globales portant le même sélecteur */
+.chart-container .chart-header-actions {
+  position: relative;
+  z-index: 10; /* Prioritaire sur .chart-header-actions global grâce à la spécificité accrue */
 }
 
 /* Styles pour l'affichage simple de la granularité - Harmonisé avec export-button */
