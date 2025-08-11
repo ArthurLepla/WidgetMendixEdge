@@ -15,6 +15,50 @@ Ces changements unifient CompareData avec le widget Détails: même gating des f
 - Documenter côté app Mendix que les datasources doivent être pré‑filtrées par `EnergyType`/`MetricType`.
 - Tests: IPE simple/double, granularité ON/OFF via flags, export trié et en UTC.
 
+## 2025-01-27
+
+### ⌛ Changement: Correction des incohérences de features et amélioration du diagnostic
+- **Problème identifié**: Hook `useFeatureMap` sans `useMemo` causant des états figés des features
+- **Solution**: Ajout de `useMemo` avec dépendances correctes dans `use-feature-toggle.ts`
+- **Problème identifié**: Contrôle de granularité affiché même en mode IPE
+- **Solution**: Restriction `showGranularityControls={isGranulariteManuelleEnabled && detectedMode === "energetic"}`
+- **Amélioration**: Diagnostic détaillé de la source de données avec analyse du premier élément
+- **Amélioration**: Mode développeur enrichi avec affichage clair des features (✅/❌)
+- **Amélioration**: Messages d'erreur plus précis pour guider la configuration XPath
+
+### 🤔 Analyse:
+Les logs montraient `totalItems: 0` dès le début, indiquant un problème en amont (XPath Mendix). Le diagnostic amélioré permettra d'identifier si c'est un problème de configuration ou de données. Les features sont maintenant correctement réactives aux changements de configuration.
+
+## 2025-01-27 (suite)
+
+### ⌛ Changement: Correction de l'affichage IPEUnavailable et amélioration de la gestion des erreurs
+- **Problème identifié**: Le composant `IPEUnavailable` n'était affiché que dans des conditions très restrictives (mode IPE + validation stricte)
+- **Solution**: Extension de l'utilisation d'`IPEUnavailable` pour tous les cas d'absence de données
+- **Amélioration**: Remplacement des messages d'erreur simples par le composant `IPEUnavailable` plus informatif
+- **Amélioration**: Affichage d'`IPEUnavailable` même quand aucune donnée n'arrive du tout (XPath incorrect)
+- **Amélioration**: Messages contextuels selon le mode (IPE vs Énergétique)
+
+### 🤔 Analyse:
+Le composant `IPEUnavailable` était sous-utilisé car il ne s'affichait qu'en mode IPE avec validation stricte. Maintenant, il s'affiche dans tous les cas d'absence de données, offrant une meilleure UX avec des messages contextuels et des recommandations d'action.
+
+### ⌛ Changement (2025-01-27): Correction du composant ConsumptionUnavailable
+
+- **Problème identifié**: Le composant `ConsumptionUnavailable.tsx` avait plusieurs incohérences par rapport à `IPEUnavailable.tsx`
+- **Correction**: Renommage de la prop `ipeCount` → `consumptionCount` pour plus de clarté
+- **Amélioration**: Implémentation de la fonction `getThemeColors()` avec thèmes dynamiques selon le `recommendedMode`
+- **Amélioration**: Logique de recommandation conditionnelle basée sur le mode (fallback/single/double)
+- **Amélioration**: Affichage conditionnel des assets disponibles avec consommation
+- **Amélioration**: Harmonisation du style et de la structure avec `IPEUnavailable.tsx`
+- **Amélioration**: Correction de la grammaire dans le badge (pluriel conditionnel)
+
+### 🤔 Analyse:
+Le composant `ConsumptionUnavailable` était une version simplifiée de `IPEUnavailable` sans la logique avancée de thèmes et de recommandations. La correction aligne les deux composants sur la même architecture, offrant une expérience utilisateur cohérente et des recommandations contextuelles appropriées selon le mode d'affichage.
+
+### 💜 Prochaines étapes:
+- Vérifier que les props `consumptionCount` sont correctement passées depuis le composant parent
+- Tester les différents modes de recommandation (fallback/single/double)
+- Considérer l'extraction des thèmes dans un fichier partagé pour éviter la duplication
+
 # Journal d'avancement du projet
 
 ## 2025-08-11
@@ -79,6 +123,18 @@ Les unités IPE ne sont plus hardcodées: elles sont résolues à partir des var
 - Exposer clairement dans le XML les propriétés `assetVariablesDataSource` et attributs associés (déjà présentes) dans la doc.
 - Étendre la détection (fallback par nom via `getMetricTypeFromName`) pour les jeux de données incomplets.
 
+## 2025-01-27 (correction finale)
+
+### ⌛ Changement: Logique intelligente selon la feature Double IPE et correction du bouton granularité
+- **Problème identifié**: Le bouton de granularité n'était affiché qu'en mode énergétique, et la logique des unités IPE n'était pas intelligente selon la feature Double IPE.
+- **Solution**: 
+  - Correction de `showGranularityControls` pour s'afficher en mode énergétique ET IPE quand la feature est activée
+  - Logique intelligente des unités IPE : en mode Double IPE activé → deux variantes distinctes (IPE_kg/IPE), en mode simple → même unité pour les deux
+  - Amélioration des logs pour tracer la résolution des unités
+
+### 🤔 Analyse:
+Le système est maintenant cohérent avec Detailswidget : la granularité s'affiche dans les deux modes quand la feature est activée, et les unités IPE s'adaptent intelligemment selon la configuration Double IPE. Cela améliore l'UX en évitant la confusion entre les modes simple et double.
+
 ### ⌛ Changement :
 Activation de l’UI de granularité manuelle existante:
 - `ChartContainer` affiche `GranularityPopover` quand la feature Granularité est active (`showGranularityControls`).
@@ -136,6 +192,37 @@ L'ancienne logique était trop simpliste et ne gérait pas les subtilités comme
 ### 💜 Prochaines étapes:
 - Tester avec différents jeux de données (séries avec/sans métadonnées explicites, variables Smart complètes/incomplètes).
 - Vérifier que les unités IPE affichées correspondent exactement à celles de Detailswidget pour les mêmes assets.
+
+### ⌛ Changement (2025-01-11 – Diagnostic et correction des doublons de données):
+- **Système de logging ultra-détaillé** : Création de `debugDataLogger.ts` pour analyser les données brutes et détecter les problèmes de filtrage
+- **Détection des doublons** : Identification automatique des timestamps multiples avec analyse des causes (même asset avec valeurs différentes, types de métriques mixtes)
+- **Filtrage intelligent** : Implémentation d'un système de déduplication basé sur `assetName_timestamp` pour éliminer les doublons
+- **Composant IPEUnavailable** : Intégration du composant de Detailswidget avec adaptation pour CompareData (affichage des assets sélectionnés vs disponibles)
+- **Logging en temps réel** : Analyse des données avant/après filtrage avec recommandations automatiques
+- **Mode développeur enrichi** : Affichage des statistiques de doublons et warnings dans l'interface de debug
+
+### 🤔 Analyse :
+Le problème des données multiples au même timestamp était causé par un manque de filtrage au niveau du traitement des données. Le nouveau système de logging révèle les patterns de doublons et permet d'identifier les causes (variables multiples, types de métriques mixtes). Le filtrage par clé unique `assetName_timestamp` élimine efficacement les doublons tout en préservant la première occurrence valide. L'intégration du composant IPEUnavailable améliore l'UX en guidant l'utilisateur vers des solutions alternatives.
+
+### 💜 Prochaines étapes :
+- Tester avec des données réelles pour valider l'élimination des doublons
+- Optimiser les performances du logging pour les gros volumes de données
+- Ajouter des paramètres de configuration pour activer/désactiver le logging détaillé
+
+### ⌛ Changement (2025-01-11 – Diagnostic avancé et messages d'aide):
+- **Diagnostic automatique des données manquantes** : Analyse des types de métriques et d'énergie disponibles avec messages d'aide contextuels
+- **Logs de filtrage détaillés** : Affichage des données exclues avec raison (IPE vs Conso, énergie spécifique)
+- **Messages IPEUnavailable améliorés** : Diagnostic précis du problème (données Conso vs IPE, énergie manquante, XPath incorrect)
+- **Debug mode permanent** : Activation automatique du debug pour diagnostiquer les problèmes de configuration
+- **Recommandations XPath** : Suggestions automatiques de XPath pour corriger les problèmes de filtrage
+
+### 🤔 Analyse :
+Le problème principal était que les utilisateurs recevaient des données de type "Conso" (consommation) alors qu'ils étaient en mode IPE. Le système de diagnostic révèle maintenant exactement pourquoi aucune donnée n'est affichée et guide l'utilisateur vers la solution (modification du XPath dans Mendix Studio Pro). Les messages d'erreur sont maintenant contextuels et actionnables.
+
+### 💜 Prochaines étapes :
+- Tester avec différents XPath pour valider les recommandations
+- Ajouter des exemples de XPath dans la documentation
+- Créer un guide de configuration pour les différents modes (IPE Électrique, IPE Gaz, etc.)
 
 ## 2024-07-26
 

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ValueStatus, ListValue, ListAttributeValue } from "mendix";
 // Système de debug simple pour les hooks
 const debug = (message: string, data?: any) => {
@@ -16,18 +17,19 @@ export function useFeatureMap(
     featureList: ListValue | undefined,
     featureNameAttr: ListAttributeValue<string> | undefined
 ): Set<string> {
-    // Recalcule à chaque changement de statut ou de contenu de la liste pour éviter les états figés
-    if (featureList?.status !== ValueStatus.Available || !featureNameAttr) {
-        return new Set<string>();
-    }
+    return useMemo(() => {
+        if (featureList?.status !== ValueStatus.Available || !featureNameAttr) {
+            return new Set<string>();
+        }
 
-    const activeNames = (featureList.items ?? [])
-        .map(item => featureNameAttr.get(item)?.value)
-        .filter((value): value is string => !!value);
+        const activeNames = (featureList.items ?? [])
+            .map(item => featureNameAttr.get(item)?.value)
+            .filter((value): value is string => !!value);
 
-    const map = new Set<string>(activeNames);
-    debug("Features actifs", Array.from(map));
-    return map;
+        const map = new Set<string>(activeNames);
+        debug("Features actifs", Array.from(map));
+        return map;
+    }, [featureList?.status, featureList?.items, featureNameAttr]);
 }
 
 /**
