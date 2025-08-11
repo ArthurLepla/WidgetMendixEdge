@@ -7,7 +7,16 @@ import { CompareDataContainerProps } from "../typings/CompareDataProps";
 import { ChartContainer } from "./components/ChartContainer/ChartContainer";
 import { useDoubleIPEToggle, useGranulariteManuelleToggle } from "./hooks/use-feature-toggle";
 import { energyConfigs } from "./utils/energy";
-import { extractSmartVariablesData, getSmartIPEUnits } from "./utils/smartUnitUtils";
+import { 
+    extractSmartVariablesData, 
+    getSmartIPEUnits, 
+    getIPEVariantsFromVariables,
+    getSmartIPEUnitForSeries,
+    debugSmartVariables,
+    WIDGET_TO_SMART_ENERGY_MAPPING,
+    type SmartVariableData,
+    type SmartEnergyType
+} from "./utils/smartUnitUtils";
 
 // Système de debug simple
 const debug = (message: string, data?: any) => {
@@ -98,6 +107,7 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
     const [assetsStats, setAssetsStats] = useState<AssetStats[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [smartVariables, setSmartVariables] = useState<SmartVariableData[]>([]);
 
     // Feature toggles
     const isDoubleIPEEnabled = useDoubleIPEToggle(featureList, featureNameAttr);
@@ -140,15 +150,22 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
         return energyTypes[0] || "Elec";
     }, [timeSeriesDataSource?.items, energyTypeAttr]);
 
-    // Extraction des variables Smart (si disponibles)
-    const smartVariables = useMemo(() => {
-        return extractSmartVariablesData(
+    // Chargement et extraction des variables Smart de l'asset
+    useEffect(() => {
+        const variables = extractSmartVariablesData(
             assetVariablesDataSource,
             variableNameAttr,
             variableUnitAttr,
             variableMetricTypeAttr,
             variableEnergyTypeAttr
         );
+        
+        setSmartVariables(variables);
+        
+        // Debug complet des variables Smart
+        const debugInfo = debugSmartVariables(variables);
+        debug("Smart Variables loaded", debugInfo);
+        
     }, [
         assetVariablesDataSource,
         variableNameAttr,
@@ -157,11 +174,76 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
         variableEnergyTypeAttr
     ]);
 
-    // Résolution des unités IPE via Smart Variables
+    // Résolution intelligente des unités IPE basée sur les métadonnées de série
     const smartIPEUnits = useMemo(() => {
-        if (detectedMode !== "ipe") return {} as { ipe1Unit?: string; ipe2Unit?: string };
-        return getSmartIPEUnits(smartVariables, detectedEnergyType);
-    }, [smartVariables, detectedMode, detectedEnergyType]);
+        if (detectedMode !== "ipe") return { ipe1Unit: "", ipe2Unit: "" };
+
+        // Conversion du type d'énergie widget vers enum Smart
+        const smartEnergyType = WIDGET_TO_SMART_ENERGY_MAPPING[detectedEnergyType] || 'Elec';
+        
+        // Récupération des métadonnées de série si disponibles
+        const firstItem = timeSeriesDataSource?.items && timeSeriesDataSource.items.length > 0
+            ? timeSeriesDataSource.items[0]
+            : undefined;
+
+        const seriesMetricType = firstItem && metricTypeAttr ? metricTypeAttr.get(firstItem)?.value : null;
+        const seriesEnergyType = firstItem && energyTypeAttr ? energyTypeAttr.get(firstItem)?.value : null;
+
+        // Résolution des unités IPE avec priorité aux métadonnées de série
+        const seriesIPE1Unit = getSmartIPEUnitForSeries(
+            smartVariables,
+            seriesMetricType,
+            seriesEnergyType,
+            detectedEnergyType
+        );
+
+        // Variantes disponibles depuis les variables de l'asset
+        const variants = getIPEVariantsFromVariables(smartVariables, smartEnergyType as SmartEnergyType);
+        const baseIpeKgUnit = variants.find(v => v.metricType === 'IPE_kg')?.unit;
+        const baseIpeUnit = variants.find(v => v.metricType === 'IPE')?.unit;
+
+        // Fallback général
+        const fallbackIPE = getSmartIPEUnits(smartVariables, detectedEnergyType);
+
+        // Logique de résolution sophistiquée comme dans Detailswidget
+        const hasSeriesExplicit = (seriesMetricType || '').trim() === 'IPE' || (seriesMetricType || '').trim() === 'IPE_kg';
+
+        let ipe1Unit = '';
+        let ipe2Unit = '';
+
+        if (!hasSeriesExplicit) {
+            // Cas le plus fréquent: la série ne précise pas le MetricType → priorité aux variantes détectées
+            ipe1Unit = baseIpeKgUnit || seriesIPE1Unit || fallbackIPE.ipe1Unit;
+            ipe2Unit = baseIpeUnit || fallbackIPE.ipe2Unit;
+        } else {
+            // Respecter les indications explicites de série quand présentes
+            ipe1Unit = ((seriesMetricType?.trim() === 'IPE_kg') ? (baseIpeKgUnit || seriesIPE1Unit)
+                : (seriesMetricType?.trim() === 'IPE') ? (baseIpeUnit || seriesIPE1Unit)
+                : '') || seriesIPE1Unit || baseIpeKgUnit || baseIpeUnit || fallbackIPE.ipe1Unit;
+
+            ipe2Unit = ((seriesMetricType?.trim() === 'IPE_kg') ? (baseIpeKgUnit)
+                : (seriesMetricType?.trim() === 'IPE') ? (baseIpeUnit)
+                : '') || baseIpeUnit || baseIpeKgUnit || fallbackIPE.ipe2Unit;
+        }
+
+        debug("Smart IPE Units resolved", { 
+            ipe1Unit, 
+            ipe2Unit, 
+            seriesMetricType, 
+            seriesEnergyType,
+            variants: variants.length,
+            fallback: fallbackIPE
+        });
+
+        return { ipe1Unit, ipe2Unit };
+    }, [
+        smartVariables,
+        detectedMode,
+        detectedEnergyType,
+        timeSeriesDataSource?.items,
+        metricTypeAttr,
+        energyTypeAttr
+    ]);
 
     // Configuration énergétique basée sur la détection
     const energyConfig = useMemo(() => {
@@ -297,8 +379,6 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
         detectedEnergyType
     ]);
 
-    // (calculateAction supprimé)
-
     // Affichage conditionnel selon l'état
     if (devMode) {
         return (
@@ -310,6 +390,8 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                     <div>Assets sélectionnés: {selectedAssetNames.join(", ") || "Aucun"}</div>
                     <div>Double IPE activé: {isDoubleIPEEnabled ? "Oui" : "Non"}</div>
                     <div>Granularité manuelle: {isGranulariteManuelleEnabled ? "Oui" : "Non"}</div>
+                    <div>Unités IPE résolues: {smartIPEUnits.ipe1Unit} / {smartIPEUnits.ipe2Unit}</div>
+                    <div>Variables Smart: {smartVariables.length}</div>
                 </div>
             </div>
         );

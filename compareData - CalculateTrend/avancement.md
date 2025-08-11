@@ -99,6 +99,22 @@ Le validateur du schéma Mendix n'autorise pas l'attribut `category` sur `<prope
 ### 💜 Prochaines étapes :
 - Lancer une reconstruction du widget pour vérifier la génération des typings.
 
+### ⌛ Changement (2025-08-11 – Correction erreurs TypeScript et alignement Detailswidget):
+- Suppression de l'import `ValueStatus` inutilisé dans `smartUnitUtils.ts` ✅
+- **Correction majeure de `getSmartIPEUnitForSeries`** : remplacement de la logique simplifiée par celle de Detailswidget avec 3 niveaux de fallback sophistiqués
+
+### 🤔 Analyse :
+- `ValueStatus` : correctement supprimé (utilitaires purs, pas de gestion d'état)
+- `smartEnergyType` : **ERREUR** - la fonction avait une logique simplifiée vs Detailswidget
+- **Solution** : Remplacé par la logique complète de Detailswidget :
+  1. Série avec énergie explicite → IPE_kg/IPE direct
+  2. Énergie du widget → IPE_kg/IPE avec mapping
+  3. Dernier recours → première unité IPE disponible
+
+### 💜 Prochaines étapes :
+- Vérifier que la compilation fonctionne sans erreurs
+- Tester la résolution d'unités IPE avec différentes configurations
+
 ### ⌛ Changement (2025-08-11 – z-index Mendix compatibility):
 - Ajustement des z-index pour respecter la hiérarchie Mendix : `.chart-header-actions` (z-index: 10), `.export-menu` (z-index: 20), `.granularity-control` (z-index: 20). Les menus dropdowns restent à z-index: 1000 pour passer devant le header local.
 
@@ -108,6 +124,18 @@ Mendix utilise des z-index entre 50-1000 pour ses éléments UI (modales, sélec
 ### 💜 Prochaines étapes:
 - Vérifier que Detailswidget utilise la même stratégie de z-index pour la cohérence.
 - Documenter cette contrainte dans les guidelines de développement widget.
+
+### ⌛ Changement (2025-08-11 – alignement logique Detailswidget):
+- **SmartUnitUtils complet** : Remplacement complet du système de résolution des unités IPE pour aligner avec la logique sophistiquée de Detailswidget. Ajout des types `SmartMetricType`/`SmartEnergyType`, mappings complets, et fonctions de résolution intelligente.
+- **Résolution IPE sophistiquée** : Priorité aux métadonnées de série (`metricTypeAttr`/`energyTypeAttr`), fallback vers les variantes détectées dans les variables Smart, puis fallback général. Gestion des cas explicites vs implicites.
+- **Debug et observabilité** : Ajout de `debugSmartVariables()` et logs détaillés pour tracer la résolution des unités IPE en mode développement.
+
+### 🤔 Analyse:
+L'ancienne logique était trop simpliste et ne gérait pas les subtilités comme les métadonnées de série, les fallbacks multiples, ou la détection d'énergie. La nouvelle approche respecte la hiérarchie de résolution de Detailswidget : série explicite → variantes détectées → fallback général, garantissant une cohérence parfaite entre les widgets.
+
+### 💜 Prochaines étapes:
+- Tester avec différents jeux de données (séries avec/sans métadonnées explicites, variables Smart complètes/incomplètes).
+- Vérifier que les unités IPE affichées correspondent exactement à celles de Detailswidget pour les mêmes assets.
 
 ## 2024-07-26
 
