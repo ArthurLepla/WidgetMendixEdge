@@ -1,10 +1,9 @@
 import { Big } from "big.js";
 import { EnergyType } from "./types";
 import { ENERGY_CONFIG } from "./energyConfig";
-import { BaseUnitEnum } from "../../typings/CompareDataProps";
 
-// Alias pour le type de base
-export type BaseUnit = BaseUnitEnum;
+// BaseUnitEnum n'est plus exporté par CompareDataProps, on définit ici les valeurs attendues
+export type BaseUnit = "auto" | "kWh" | "m3" | "Wh" | "GWh" | "MWh" | "L" | "Nm3" | "MJ" | "thermie" | "BTU" | "ft3" | "gal" | "unit";
 
 interface ConversionResult {
     value: number;

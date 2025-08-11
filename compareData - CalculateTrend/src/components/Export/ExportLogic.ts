@@ -3,23 +3,29 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export interface Row {
-  timestamp: Date | string;
-  value: number;
-  name?: string; // Pour stocker le nom de l'objet/machine de NameAttr
-  [key: string]: any; 
+  asset: string;
+  timestamp: Date; // Important: Date strict, pas string
+  value: number; // Important : number, pas Big
+  metricType?: string;
+  energyType?: string;
+  [key: string]: any; // Permettre d'autres propriétés
 }
 
 // La fonction addMachineNameToData n'est plus nécessaire si 'name' vient des données individuelles.
 
-export function downloadExcel(data: Row[], filename = "export", machineName?: string /* machineName est pour le nom de fichier ici */) {
+export function downloadExcel(
+  data: Row[],
+  filename = "export",
+  machineName?: string /* machineName est pour le nom de fichier ici */
+) {
   // const processedData = addMachineNameToData(data, machineName); // Supprimé
   const ws = XLSX.utils.json_to_sheet(
-    data.map(r => ({ 
-      Timestamp: r.timestamp instanceof Date 
-        ? r.timestamp.toISOString() 
-        : r.timestamp,
+    data.map(r => ({
+      Asset: r.asset,
+      Timestamp: r.timestamp.toISOString(),
       Valeur: r.value,
-      "Nom Machine": r.name // Utilisation de r.name provenant de NameAttr
+      "Type métrique": r.metricType ?? "",
+      "Type énergie": r.energyType ?? ""
     }))
   );
   const wb = XLSX.utils.book_new();
@@ -28,22 +34,32 @@ export function downloadExcel(data: Row[], filename = "export", machineName?: st
   saveAs(new Blob([wbout]), `${filename}${machineName ? "_" + machineName : ""}.xlsx`); // Ajustement du nom de fichier pour inclure machineName s'il est fourni
 }
 
-export function downloadCsv(data: Row[], filename = "export", machineName?: string /* machineName est pour le nom de fichier ici */) {
+export function downloadCsv(
+  data: Row[],
+  filename = "export",
+  machineName?: string /* machineName est pour le nom de fichier ici */
+) {
   // const processedData = addMachineNameToData(data, machineName); // Supprimé
-  const ws = XLSX.utils.json_to_sheet(data.map(r => ({
-    Timestamp: r.timestamp instanceof Date 
-      ? r.timestamp.toISOString() 
-      : r.timestamp,
-    Valeur: r.value,
-    "Nom Machine": r.name // Utilisation de r.name provenant de NameAttr
-  })));
+  const ws = XLSX.utils.json_to_sheet(
+    data.map(r => ({
+      Asset: r.asset,
+      Timestamp: r.timestamp.toISOString(),
+      Valeur: r.value,
+      "Type métrique": r.metricType ?? "",
+      "Type énergie": r.energyType ?? ""
+    }))
+  );
   const csvOutput = XLSX.utils.sheet_to_csv(ws);
   // Ajout du BOM UTF-8 pour une meilleure compatibilité avec Excel
   const blob = new Blob(["\uFEFF" + csvOutput], { type: "text/csv;charset=utf-8;" });
   saveAs(blob, `${filename}${machineName ? "_" + machineName : ""}.csv`); // Ajustement du nom de fichier
 }
 
-export function downloadJson(data: Row[], filename = "export", machineName?: string /* machineName est pour le nom de fichier ici */) {
+export function downloadJson(
+  data: Row[],
+  filename = "export",
+  machineName?: string /* machineName est pour le nom de fichier ici */
+) {
   // const processedData = addMachineNameToData(data, machineName); // Supprimé
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   saveAs(blob, `${filename}${machineName ? "_" + machineName : ""}.json`); // Ajustement du nom de fichier

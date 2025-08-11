@@ -2,14 +2,14 @@
 .export-menu {
   position: relative !important;
   display: inline-block;
-  z-index: 100;
+  z-index: 100; /* Alignement avec Detailswidget */
   /* Isolation du contexte de positionnement */
   transform: translateZ(0);
 }
 
 /* Styles pour le dropdown Ant Design - Plus agressifs */
 .export-dropdown-antd {
-  z-index: 9999 !important;
+  z-index: 9999 !important; /* Alignement avec Detailswidget */
 }
 
 /* Forcer le dropdown à se positionner correctement */

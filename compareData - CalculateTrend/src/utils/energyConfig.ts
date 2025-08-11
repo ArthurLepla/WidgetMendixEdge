@@ -1,7 +1,13 @@
-import { EnergyType, EnergyConfig } from "./types";
+import { EnergyType } from "./types";
 
 // Palette de base avec 16 couleurs soigneusement choisies
-export const ENERGY_CONFIG: Record<EnergyType, EnergyConfig> = {
+export const ENERGY_CONFIG: Record<EnergyType, {
+    label: string;
+    color: string;
+    BackgroundIconColor: string;
+    unit: string;
+    ipeUnit: string;
+}> = {
     electricity: {
         label: "Électricité",
         color: "#38a13c",

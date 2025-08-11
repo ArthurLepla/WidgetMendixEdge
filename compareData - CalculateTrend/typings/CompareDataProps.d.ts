@@ -7,13 +7,25 @@ import { CSSProperties } from "react";
 import { ActionValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
 import { Big } from "big.js";
 
-export type ViewModeEnum = "energetic" | "ipe";
+export type ViewModeConfigEnum = "energetic" | "ipe";
 
-export type EnergyTypeEnum = "electricity" | "gas" | "water" | "air";
+export interface SelectedAssetType {
+    selectedAssetName: EditableValue<string>;
+}
 
-export type BaseUnitEnum = "auto" | "kWh" | "m3";
+export interface DateRangeType {
+    startDateAttr: EditableValue<Date>;
+    endDateAttr: EditableValue<Date>;
+}
 
-export type IpeModeEnum = "single" | "double";
+export interface SelectedAssetPreviewType {
+    selectedAssetName: string;
+}
+
+export interface DateRangePreviewType {
+    startDateAttr: string;
+    endDateAttr: string;
+}
 
 export interface CompareDataContainerProps {
     name: string;
@@ -21,41 +33,32 @@ export interface CompareDataContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     devMode: boolean;
-    viewMode: ViewModeEnum;
-    energyType: EnergyTypeEnum;
-    baseUnit: BaseUnitEnum;
-    ipeMode: IpeModeEnum;
-    onAddProductionClick?: ActionValue;
-    enableTestMode: boolean;
-    enableAdvancedGranularity: boolean;
-    selectedMachines?: ListValue;
-    attrMachineName?: ListAttributeValue<string>;
-    dsMesures?: ListValue;
-    attrMachineMesureName?: ListAttributeValue<string>;
-    attrTimestamp?: ListAttributeValue<Date>;
-    attrConsommation?: ListAttributeValue<Big>;
-    dateDebut?: EditableValue<Date>;
-    dateFin?: EditableValue<Date>;
-    ipe1Name: string;
-    ipe2Name: string;
-    selectedMachines2?: ListValue;
-    attrMachineName2?: ListAttributeValue<string>;
-    dsMesures2?: ListValue;
-    attrMachineMesureName2?: ListAttributeValue<string>;
-    attrTimestamp2?: ListAttributeValue<Date>;
-    attrConsommation2?: ListAttributeValue<Big>;
-    dateDebut2?: EditableValue<Date>;
-    dateFin2?: EditableValue<Date>;
-    dsProduction_Consommation?: ListValue;
-    attrMachineProductionName?: ListAttributeValue<string>;
-    attrProduction?: ListAttributeValue<Big>;
-    attrConsommationIPE?: ListAttributeValue<Big>;
-    dsProduction_Consommation2?: ListValue;
-    attrMachineProductionName2?: ListAttributeValue<string>;
-    attrProduction2?: ListAttributeValue<Big>;
-    attrConsommationIPE2?: ListAttributeValue<Big>;
+    viewModeConfig: ViewModeConfigEnum;
+    selectedAsset: SelectedAssetType[];
+    dateRange: DateRangeType[];
+    timeSeriesDataSource: ListValue;
+    timestampAttr: ListAttributeValue<Date>;
+    valueAttr: ListAttributeValue<Big>;
+    assetNameAttr: ListAttributeValue<string>;
+    metricTypeAttr?: ListAttributeValue<string>;
+    energyTypeAttr?: ListAttributeValue<string>;
+    assetVariablesDataSource?: ListValue;
+    variableNameAttr?: ListAttributeValue<string>;
+    variableUnitAttr?: ListAttributeValue<string>;
+    variableMetricTypeAttr?: ListAttributeValue<string>;
+    variableEnergyTypeAttr?: ListAttributeValue<string>;
+    displayModeAttr?: EditableValue<string>;
+    displayTimeAttr?: EditableValue<Big>;
+    displayUnitAttr?: EditableValue<string>;
+    displayPreviewOKAttr?: EditableValue<boolean>;
+    bufferModeAttr?: EditableValue<string>;
+    bufferTimeAttr?: EditableValue<Big>;
+    bufferUnitAttr?: EditableValue<string>;
+    onModeChange?: ActionValue;
+    onTimeChange?: ActionValue;
     featureList?: ListValue;
     featureNameAttr?: ListAttributeValue<string>;
+    onAddProductionClick?: ActionValue;
 }
 
 export interface CompareDataPreviewProps {
@@ -70,39 +73,30 @@ export interface CompareDataPreviewProps {
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
     devMode: boolean;
-    viewMode: ViewModeEnum;
-    energyType: EnergyTypeEnum;
-    baseUnit: BaseUnitEnum;
-    ipeMode: IpeModeEnum;
-    onAddProductionClick: {} | null;
-    enableTestMode: boolean;
-    enableAdvancedGranularity: boolean;
-    selectedMachines: {} | { caption: string } | { type: string } | null;
-    attrMachineName: string;
-    dsMesures: {} | { caption: string } | { type: string } | null;
-    attrMachineMesureName: string;
-    attrTimestamp: string;
-    attrConsommation: string;
-    dateDebut: string;
-    dateFin: string;
-    ipe1Name: string;
-    ipe2Name: string;
-    selectedMachines2: {} | { caption: string } | { type: string } | null;
-    attrMachineName2: string;
-    dsMesures2: {} | { caption: string } | { type: string } | null;
-    attrMachineMesureName2: string;
-    attrTimestamp2: string;
-    attrConsommation2: string;
-    dateDebut2: string;
-    dateFin2: string;
-    dsProduction_Consommation: {} | { caption: string } | { type: string } | null;
-    attrMachineProductionName: string;
-    attrProduction: string;
-    attrConsommationIPE: string;
-    dsProduction_Consommation2: {} | { caption: string } | { type: string } | null;
-    attrMachineProductionName2: string;
-    attrProduction2: string;
-    attrConsommationIPE2: string;
+    viewModeConfig: ViewModeConfigEnum;
+    selectedAsset: SelectedAssetPreviewType[];
+    dateRange: DateRangePreviewType[];
+    timeSeriesDataSource: {} | { caption: string } | { type: string } | null;
+    timestampAttr: string;
+    valueAttr: string;
+    assetNameAttr: string;
+    metricTypeAttr: string;
+    energyTypeAttr: string;
+    assetVariablesDataSource: {} | { caption: string } | { type: string } | null;
+    variableNameAttr: string;
+    variableUnitAttr: string;
+    variableMetricTypeAttr: string;
+    variableEnergyTypeAttr: string;
+    displayModeAttr: string;
+    displayTimeAttr: string;
+    displayUnitAttr: string;
+    displayPreviewOKAttr: string;
+    bufferModeAttr: string;
+    bufferTimeAttr: string;
+    bufferUnitAttr: string;
+    onModeChange: {} | null;
+    onTimeChange: {} | null;
     featureList: {} | { caption: string } | { type: string } | null;
     featureNameAttr: string;
+    onAddProductionClick: {} | null;
 }

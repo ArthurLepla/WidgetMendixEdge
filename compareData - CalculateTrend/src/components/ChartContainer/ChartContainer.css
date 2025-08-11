@@ -84,7 +84,7 @@
   flex: 1;
   /* Ces propriétés peuvent être surchargées par ExportMenu.css */
   position: relative;
-  z-index: 1;
+  /* Pas de z-index sur le container principal - laisser les enfants gérer leur stacking */
 }
 
 /* Styles pour l'affichage simple de la granularité - Harmonisé avec export-button */
