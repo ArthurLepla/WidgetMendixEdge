@@ -350,3 +350,39 @@
     gap: 0.5rem;
   }
 } 
+.simple-granularity-display {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  /* SUPPRIMÉ font-size: 2rem - Le container ne contient pas de texte direct */
+  /* SUPPRIMÉ font-weight: 700 - Le container ne contient pas de texte direct */
+  color: #4b5563;           /* ← Couleur héritée par les enfants */
+  min-width: 20rem;
+  height: auto;             /* ← Hauteur calculée automatiquement */
+  /* Protection contre les conflits CSS externe */
+  box-sizing: border-box;   /* ← Cohérence avec export-button */
+  line-height: 1.2;         /* ← Contrôle précis de la hauteur */
+  justify-content: flex-start;  /* ← Alignement cohérent */
+  position: relative;       /* ← Contexte de positionnement */
+}
+
+.simple-granularity-label {
+  font-weight: 600;         /* ← Ajusté pour maintenir hiérarchie (container: 700, label: 600) */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.44rem;       /* ← Harmonisé avec export-button-text */
+}
+
+.simple-granularity-value {
+  font-weight: 600;
+  color: #374151;
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.4rem;
+  font-size: 1.35rem;       /* ← Légèrement ajusté pour équilibrer avec le nouveau label */
+  white-space: nowrap;      /* ← Évite le retour à la ligne */
+}

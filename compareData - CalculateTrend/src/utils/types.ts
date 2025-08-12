@@ -3,8 +3,7 @@
  * Compatible avec les composants existants
  */
 
-// Types d'énergie compatibles avec les composants existants
-export type EnergyType = "electricity" | "gas" | "water" | "air";
+// Note: EnergyType est maintenant défini dans energy.ts pour éviter la duplication
 
 // Modes d'affichage
 export type ViewMode = "energetic" | "ipe";

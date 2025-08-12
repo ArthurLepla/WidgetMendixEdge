@@ -5,16 +5,13 @@ import { Inbox } from "lucide-react";
 
 import { CompareDataContainerProps } from "../typings/CompareDataProps";
 import { ChartContainer } from "./components/ChartContainer/ChartContainer";
-import { useDoubleIPEToggle, useGranulariteManuelleToggle } from "./hooks/use-feature-toggle";
-import { energyConfigs } from "./utils/energy";
+import { useDoubleIPEToggle, useGranulariteManuelleToggle, useDebugFeatures } from "./hooks/use-feature-toggle";
+import { energyConfigs, getMetricTypeFromName } from "./utils/energy";
 import { 
     extractSmartVariablesData, 
     getSmartIPEUnits, 
-    getIPEVariantsFromVariables,
     debugSmartVariables,
-    WIDGET_TO_SMART_ENERGY_MAPPING,
-    type SmartVariableData,
-    type SmartEnergyType
+    type SmartVariableData
 } from "./utils/smartUnitUtils";
 import { IPEUnavailable } from "./components/IPEUnavailable";
 import { ConsumptionUnavailable } from "./components/ConsumptionUnavailable";
@@ -55,12 +52,12 @@ const METRIC_TYPES = {
 } as const;
 
 
-// Système de debug simple
-const debug = (message: string, data?: any) => {
-    if (process.env.NODE_ENV === "development") {
-        console.log(`[CompareData] ${message}`, data || "");
-    }
-};
+    // Système de debug simple
+    const debug = (message: string, data?: any) => {
+        if (process.env.NODE_ENV === "development") {
+            console.log(`[CompareData] ${message}`, data || "");
+        }
+    };
 
 // Composant pour afficher le message d'absence de données
 const NoDataMessage = () => (
@@ -132,6 +129,37 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
     // Feature toggles
     const isDoubleIPEEnabled = useDoubleIPEToggle(featureList, featureNameAttr);
     const isGranulariteManuelleEnabled = useGranulariteManuelleToggle(featureList, featureNameAttr);
+    
+    // Debug des features (temporaire)
+    useDebugFeatures(featureList, featureNameAttr);
+    
+    // Log forcé pour diagnostiquer les features (temporaire)
+    useEffect(() => {
+        console.log("🔍 DEBUG FORCÉ - Features dans CompareData:", {
+            featureList: featureList?.status,
+            featureNameAttr: !!featureNameAttr,
+            featureListItems: featureList?.items?.length || 0,
+            isDoubleIPEEnabled,
+            isGranulariteManuelleEnabled,
+            devMode
+        });
+        
+        // Log détaillé des features si disponibles
+        if (featureList?.status === ValueStatus.Available && featureNameAttr) {
+            const features = (featureList.items || [])
+                .map(item => featureNameAttr.get(item)?.value)
+                .filter((value): value is string => !!value);
+            
+            console.log("🔍 DEBUG FORCÉ - Features détectées:", {
+                allFeatures: features,
+                count: features.length,
+                hasGranulariteManuelle: features.includes("Granularite_Manuelle"),
+                hasDoubleIPE: features.includes("Double_IPE"),
+                hasGranulariteManuelleAlt: features.includes("Granularité_Manuelle"),
+                hasDoubleIPEAlt: features.includes("DoubleIPE")
+            });
+        }
+    }, [featureList, featureNameAttr, isDoubleIPEEnabled, isGranulariteManuelleEnabled, devMode]);
 
     // Log de montage du composant
     useEffect(() => {
@@ -245,58 +273,103 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
         variableEnergyTypeAttr
     ]);
 
-    // Résolution intelligente des unités IPE basée sur les métadonnées et la configuration
-    const smartIPEUnits = useMemo(() => {
-        if (viewModeConfig !== "ipe") return { ipe1Unit: "", ipe2Unit: "" };
-
-        // Conversion du type d'énergie widget vers enum Smart
-        const smartEnergyType = WIDGET_TO_SMART_ENERGY_MAPPING[energyTypeConfig] || 'Elec';
-        
-        // Variantes disponibles depuis les variables des assets
-        const variants = getIPEVariantsFromVariables(smartVariables, smartEnergyType as SmartEnergyType);
-        const baseIpeKgUnit = variants.find(v => v.metricType === 'IPE_kg')?.unit;
-        const baseIpeUnit = variants.find(v => v.metricType === 'IPE')?.unit;
-
-        // Fallback général
-        const fallbackIPE = getSmartIPEUnits(smartVariables, energyTypeConfig);
-
-        // Logique de résolution intelligente selon la feature Double IPE
-        let ipe1Unit = '';
-        let ipe2Unit = '';
-
-        if (isDoubleIPEEnabled) {
-            // Mode Double IPE activé : afficher les deux variantes
-            ipe1Unit = baseIpeKgUnit || fallbackIPE.ipe1Unit;
-            ipe2Unit = baseIpeUnit || fallbackIPE.ipe2Unit;
-        } else {
-            // Mode IPE simple : utiliser la variante la plus appropriée
-            const preferredUnit = baseIpeKgUnit || baseIpeUnit || fallbackIPE.ipe1Unit;
-            ipe1Unit = preferredUnit;
-            ipe2Unit = preferredUnit; // Même unité pour les deux en mode simple
+    // Détection du double IPE et résolution des unités basée sur les variables des assets sélectionnés
+    const { smartIPEUnits, hasDoubleIPESupport } = useMemo(() => {
+        if (viewModeConfig !== "ipe") {
+            return { smartIPEUnits: { ipe1Unit: "", ipe2Unit: "" }, hasDoubleIPESupport: false };
         }
 
-        debug("Smart IPE Units resolved", { 
+        // Conversion du type d'énergie widget vers enum Smart (pour référence future)
+        // const smartEnergyType = WIDGET_TO_SMART_ENERGY_MAPPING[energyTypeConfig] || 'Elec';
+        
+        // Scanner les variables des assets sélectionnés pour détecter le double IPE
+        const selectedAssetIds = selectedAssets.map(a => a.id);
+        const relevantVariables = (variablesDataSource?.items || []).filter(variable => {
+            // Vérifier si la variable a le bon type d'énergie
+            const varEnergyType = variableEnergyTypeAttr?.get(variable)?.value;
+            if (varEnergyType !== energyTypeConfig) return false;
+            
+            // Vérifier si la variable est liée à un asset sélectionné
+            // Note: nous devons vérifier via les TimeSeriesPoints pour trouver la liaison
+            const isLinkedToSelectedAsset = (timeSeriesDataSource?.items || []).some(tsPoint => {
+                const assetRef = tsAssetAssociation?.get(tsPoint)?.value;
+                const variableRef = tsVariableAssociation?.get(tsPoint)?.value;
+                return assetRef && selectedAssetIds.includes(assetRef.id) && 
+                       variableRef && variableRef.id === variable.id;
+            });
+            
+            return isLinkedToSelectedAsset;
+        });
+        
+        // Rechercher les types IPE disponibles
+        const availableIPETypes = new Set<string>();
+        const unitsByType = new Map<string, string>();
+        
+        relevantVariables.forEach(variable => {
+            const metricType = variableMetricTypeAttr?.get(variable)?.value as string;
+            const unit = variableUnitAttr?.get(variable)?.value as string || "";
+            
+            if (metricType === METRIC_TYPES.IPE || metricType === METRIC_TYPES.IPE_KG) {
+                availableIPETypes.add(metricType);
+                if (!unitsByType.has(metricType) && unit) {
+                    unitsByType.set(metricType, unit);
+                }
+            }
+        });
+        
+        const hasIPE_kg = availableIPETypes.has(METRIC_TYPES.IPE_KG);
+        const hasIPE = availableIPETypes.has(METRIC_TYPES.IPE);
+        const doubleIPESupport = hasIPE_kg && hasIPE;
+        
+        // Fallback général
+        const fallbackIPE = getSmartIPEUnits(smartVariables, energyTypeConfig);
+        
+        // Résolution des unités
+        let ipe1Unit = unitsByType.get(METRIC_TYPES.IPE_KG) || fallbackIPE.ipe1Unit;
+        let ipe2Unit = unitsByType.get(METRIC_TYPES.IPE) || fallbackIPE.ipe2Unit;
+        
+        // En mode simple, utiliser la variante disponible
+        if (!isDoubleIPEEnabled || !doubleIPESupport) {
+            const preferredUnit = ipe1Unit || ipe2Unit || fallbackIPE.ipe1Unit;
+            ipe1Unit = preferredUnit;
+            ipe2Unit = preferredUnit;
+        }
+
+        debug("Double IPE detection et unités résolues", { 
             ipe1Unit, 
             ipe2Unit, 
             energyTypeConfig,
-            variants: variants.length,
-            fallback: fallbackIPE,
+            hasIPE_kg,
+            hasIPE,
+            doubleIPESupport,
             isDoubleIPEEnabled,
-            baseIpeKgUnit,
-            baseIpeUnit
+            relevantVariables: relevantVariables.length,
+            selectedAssets: selectedAssets.length,
+            availableTypes: Array.from(availableIPETypes)
         });
 
-        return { ipe1Unit, ipe2Unit };
+        return { 
+            smartIPEUnits: { ipe1Unit, ipe2Unit }, 
+            hasDoubleIPESupport: doubleIPESupport 
+        };
     }, [
         smartVariables,
         viewModeConfig,
         energyTypeConfig,
-        isDoubleIPEEnabled
+        isDoubleIPEEnabled,
+        selectedAssets,
+        variablesDataSource,
+        timeSeriesDataSource,
+        variableEnergyTypeAttr,
+        variableMetricTypeAttr,
+        variableUnitAttr,
+        tsAssetAssociation,
+        tsVariableAssociation
     ]);
 
     // Configuration énergétique basée sur la configuration
     const energyConfig = useMemo(() => {
-        return energyConfigs[energyTypeConfig.toLowerCase() as keyof typeof energyConfigs] || energyConfigs.elec;
+        return energyConfigs[energyTypeConfig as keyof typeof energyConfigs] || energyConfigs.Elec;
     }, [energyTypeConfig]);
 
     // Traitement des données temporelles avec validation
@@ -384,6 +457,15 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                         };
                     })
                 });
+            } else {
+                // Aide au diagnostic quand la DS est vide
+                debug("⚠️ DataSource TimeSeries vide - aucun point renvoyé par la page", {
+                    viewMode: viewModeConfig,
+                    energyType: energyTypeConfig,
+                    selectedAssets: selectedAssets.map(a => a.name),
+                    startDate: startDateAttr?.value,
+                    endDate: endDateAttr?.value
+                });
             }
 
             selectedAssets.forEach(assetInfo => {
@@ -411,12 +493,19 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                         assetName: assetInfo.name
                     });
                     
-                    // Vérifier s'il y a des variables pour cet asset qui pourraient indiquer des données manquantes
-                    const assetVariables = (variablesDataSource?.items || []).filter(variable => {
-                        if (!tsVariableAssociation) return false;
-                        const linkedAssetRef = tsVariableAssociation.get(variable)?.value;
-                        return linkedAssetRef?.id === assetInfo.id;
+                    // Vérifier s'il y a des variables pour cet asset via les TimeSeriesPoints
+                    const assetVariableIds = new Set<string>();
+                    (timeSeriesDataSource?.items || []).forEach(tsPoint => {
+                        const tsAssetRef = tsAssetAssociation?.get(tsPoint)?.value;
+                        const tsVariableRef = tsVariableAssociation?.get(tsPoint)?.value;
+                        if (tsAssetRef?.id === assetInfo.id && tsVariableRef) {
+                            assetVariableIds.add(tsVariableRef.id);
+                        }
                     });
+                    
+                    const assetVariables = (variablesDataSource?.items || []).filter(variable => 
+                        assetVariableIds.has(variable.id)
+                    );
                     
                     debug(`📋 Variables disponibles pour ${assetInfo.name}:`, {
                         count: assetVariables.length,
@@ -428,69 +517,76 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                         }))
                     });
                     
-                    warnings.push(`Aucune donnée temporelle trouvée pour l'asset "${assetInfo.name}" - Vérifiez que CalculateAssetCompleteMetrics a été exécuté`);
+                    // Message d'erreur plus spécifique avec recommandations
+                    const errorMessage = `Aucune donnée temporelle trouvée pour l'asset "${assetInfo.name}" - ` +
+                        `Exécutez l'action "CalculateAssetCompleteMetrics" avec : ` +
+                        `SelectedAssetName="${assetInfo.name}", EnergyType="${energyTypeConfig}", ` +
+                        `DateRange=${startDateAttr?.value?.toISOString()} à ${endDateAttr?.value?.toISOString()}`;
+                    
+                    warnings.push(errorMessage);
                     return;
                 }
 
-                // Filtrage simplifé selon le plan : pas de Production, focus sur Conso et IPE seulement
-                const filteredPoints = assetTimeSeriesPoints.filter(tsPoint => {
+                // Statistiques de rejet/acceptation pour diagnostic fin
+                const rejectStats = {
+                    totalPoints: assetTimeSeriesPoints.length,
+                    missingVariableAssociation: 0,
+                    variableNotInVariablesDS: 0,
+                    wrongAssetLink: 0,
+                    invalidByMode: 0,
+                    notConsoMetric: 0,
+                    energyMismatch: 0,
+                    missingTimestamp: 0,
+                    missingValue: 0
+                };
+
+                // Filtrage correct avec vérification des associations Variable-Asset
+                const filteredPointsWithVariables = assetTimeSeriesPoints.map(tsPoint => {
                     // 1) Récupérer la variable associée au point via tsVariableAssociation
                     const variableRef = tsVariableAssociation?.get(tsPoint)?.value;
                     if (!variableRef) {
-                        // FALLBACK TEMPORAIRE : si pas d'association Variable mais qu'on a des variables pour cet asset
-                        debug(`⚠️ TimeSeriesPoint ${tsPoint.id} sans association Variable - tentative fallback`);
-                        
-                        // Si on n'a pas l'association, on peut quand même essayer de filtrer les variables par asset
-                        // et accepter tous les points de cet asset (moins précis mais fonctionnel)
-                        const assetVariables = (variablesDataSource?.items || []).filter(variable => {
-                            if (!tsVariableAssociation) return true; // Pas de vérif possible
-                            const linkedAssetRef = tsVariableAssociation.get(variable)?.value;
-                            return linkedAssetRef?.id === assetInfo.id;
-                        });
-                        
-                        const hasValidVariables = assetVariables.some(variable => {
-                            const metricType = variableMetricTypeAttr?.get(variable)?.value as string;
-                            const energyType = variableEnergyTypeAttr?.get(variable)?.value as string;
-                            
-                            if (viewModeConfig === "energetic") {
-                                return metricType === METRIC_TYPES.CONSO && energyType === energyTypeConfig;
-                            } else if (viewModeConfig === "ipe") {
-                                return (metricType === METRIC_TYPES.IPE || metricType === METRIC_TYPES.IPE_KG) && energyType === energyTypeConfig;
-                            }
-                            return false;
-                        });
-                        
-                        debug(`🔄 Fallback pour ${assetInfo.name}:`, {
-                            assetVariables: assetVariables.length,
-                            hasValidVariables
-                        });
-                        
-                        return hasValidVariables;
+                        rejectStats.missingVariableAssociation++;
+                        debug(`❌ TimeSeriesPoint ${tsPoint.id} sans association Variable - SKIP`);
+                        return null;
                     }
 
                     // 2) Trouver la variable correspondante dans variablesDataSource
-                    const variable = (variablesDataSource?.items || []).find(v => v.id === variableRef.id);
-                    if (!variable) {
-                        debug(`❌ Variable ${variableRef.id} introuvable - SKIP`);
-                        return false;
+                    const variable = (variablesDataSource?.items || []).find(v => v.id === variableRef.id) || (variableRef as any);
+                    if ((variablesDataSource?.items || []).find(v => v.id === variableRef.id) == null) {
+                        // La variable n'est pas dans la DS fournie — on tente un fallback direct via l'association
+                        rejectStats.variableNotInVariablesDS++;
+                        debug(`⚠️ Variable ${variableRef.id} absente de variablesDataSource — utilisation du fallback via association`);
                     }
 
-                    // 3) Vérification optionnelle : variable liée à l'asset
-                    if (tsVariableAssociation) {
-                        const linkedAssetRef = tsVariableAssociation.get(variable)?.value;
-                        if (linkedAssetRef?.id !== assetInfo.id) {
-                            debug(`❌ Variable ${variable.id} pas liée à l'asset ${assetInfo.name} - SKIP`);
-                            return false;
-                        }
+                    // 3) Vérification stricte : variable liée à l'asset correct
+                    const variableAssetRef = tsAssetAssociation?.get(tsPoint)?.value;
+                    if (!variableAssetRef || variableAssetRef.id !== assetInfo.id) {
+                        rejectStats.wrongAssetLink++;
+                        debug(`❌ TimeSeriesPoint ${tsPoint.id} pas lié à l'asset ${assetInfo.name} - SKIP`);
+                        return null;
                     }
 
-                    // 4) Extraire MetricType et EnergyType
-                    const metricType = variableMetricTypeAttr?.get(variable)?.value as string;
-                    const energyType = variableEnergyTypeAttr?.get(variable)?.value as string;
-                    const variableName = variableNameAttr?.get(variable)?.value;
-                    const variableUnit = variableUnitAttr?.get(variable)?.value;
+                    // 4) Extraire MetricType et EnergyType avec fallbacks robustes
+                    let metricType = "" as string;
+                    let energyType = undefined as string | undefined;
+                    let variableName = undefined as string | undefined;
+                    let variableUnit = undefined as string | undefined;
+                    try {
+                        metricType = (variableMetricTypeAttr?.get(variable as any)?.value as string) || "";
+                        energyType = variableEnergyTypeAttr?.get(variable as any)?.value as string | undefined;
+                        variableName = variableNameAttr?.get(variable as any)?.value;
+                        variableUnit = variableUnitAttr?.get(variable as any)?.value;
+                    } catch (e) {
+                        debug("⚠️ Lecture attributs variable via fallback a échoué", { error: (e as Error)?.message });
+                    }
 
-                    debug(`🔍 Filtrage point:`, {
+                    // Fallback: déduire le metricType depuis le nom si l'attribut est vide
+                    if (!metricType || metricType.trim().length === 0) {
+                        const inferred = getMetricTypeFromName(variableName);
+                        if (inferred) metricType = inferred;
+                    }
+
+                    debug(`🔍 Évaluation point:`, {
                         tsPointId: tsPoint.id,
                         variableId: variable.id,
                         variableName,
@@ -502,166 +598,181 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                         assetName: assetInfo.name
                     });
 
-                    // 5) Filtrage par mode selon le plan
+                    // 5) Filtrage par mode
+                    let isValid = false;
                     if (viewModeConfig === "energetic") {
-                        // Energetic: MetricType=Conso, EnergyType=widget config
-                        const validMetric = metricType === METRIC_TYPES.CONSO;
-                        const validEnergy = energyType === energyTypeConfig;
-                        
-                        if (!validMetric) {
-                            debug(`❌ Energetic: MetricType ${metricType} !== ${METRIC_TYPES.CONSO}`);
+                        // Energetic: MetricType=Conso, EnergyType=widget config (tolérer energyType manquant ou "None")
+                        const energyMatches = !energyType || energyType === energyTypeConfig || energyType === "None";
+                        isValid = metricType === METRIC_TYPES.CONSO && energyMatches;
+                        if (!isValid) {
+                            if (metricType !== METRIC_TYPES.CONSO) {
+                                rejectStats.notConsoMetric++;
+                            } else {
+                                rejectStats.energyMismatch++;
+                            }
                         }
-                        if (!validEnergy) {
-                            debug(`❌ Energetic: EnergyType ${energyType} !== ${energyTypeConfig}`);
+                    } else if (viewModeConfig === "ipe") {
+                        // IPE: MetricType=IPE ou IPE_kg, EnergyType=widget config
+                        isValid = (metricType === METRIC_TYPES.IPE || metricType === METRIC_TYPES.IPE_KG) && energyType === energyTypeConfig;
+                        if (!isValid) {
+                            rejectStats.invalidByMode++;
                         }
-                        
-                        return validMetric && validEnergy;
-                    } 
-                    
-                    if (viewModeConfig === "ipe") {
-                        // IPE: MetricType=IPE ou IPE_kg, EnergyType=widget config, PAS de Production
-                        const validMetric = (metricType === METRIC_TYPES.IPE || metricType === METRIC_TYPES.IPE_KG);
-                        const validEnergy = energyType === energyTypeConfig;
-                        
-                        if (!validMetric) {
-                            debug(`❌ IPE: MetricType ${metricType} not in [${METRIC_TYPES.IPE}, ${METRIC_TYPES.IPE_KG}]`);
-                        }
-                        if (!validEnergy) {
-                            debug(`❌ IPE: EnergyType ${energyType} !== ${energyTypeConfig}`);
-                        }
-                        
-                        return validMetric && validEnergy;
                     }
 
-                    debug(`❌ Mode ${viewModeConfig} non supporté`);
-                    return false;
-                });
+                    if (!isValid) {
+                        debug(`❌ Point rejeté: mode=${viewModeConfig}, metric=${metricType}, energy=${energyType}`, {
+                            reason: viewModeConfig === "energetic"
+                                ? {
+                                    expectedMetric: METRIC_TYPES.CONSO,
+                                    energyTypeConfig,
+                                    energyMatches: (!energyType || energyType === energyTypeConfig)
+                                  }
+                                : {
+                                    expectedMetric: [METRIC_TYPES.IPE, METRIC_TYPES.IPE_KG],
+                                    energyTypeConfig
+                                  }
+                        });
+                        return null;
+                    }
 
-                debug(`✅ Points filtrés pour ${assetInfo.name}:`, filteredPoints.length);
+                    return {
+                        tsPoint,
+                        variable,
+                        metricType,
+                        energyType,
+                        variableName,
+                        variableUnit: variableUnit || ""
+                    };
+                }).filter(item => item !== null);
 
-                if (filteredPoints.length === 0) {
-                    // Debug détaillé en cas d'échec
-                    debug(`❌ Échec filtrage pour ${assetInfo.name}:`, {
+                debug(`✅ Points filtrés pour ${assetInfo.name}:`, filteredPointsWithVariables.length);
+
+                if (filteredPointsWithVariables.length === 0) {
+                    // Message d'erreur spécifique selon le mode
+                    const modeLabel = viewModeConfig === "energetic" ? "consommation" : "IPE";
+                    const errorMessage = `Aucune donnée ${modeLabel} trouvée pour l'asset "${assetInfo.name}" avec le type d'énergie ${energyTypeConfig}. Vérifiez que les variables sont correctement associées et que CalculateAssetCompleteMetrics a été exécuté.`;
+                    
+                    debug(`❌ ${errorMessage}`, {
                         totalTSPoints: assetTimeSeriesPoints.length,
-                        filteredPoints: filteredPoints.length,
                         targetMode: viewModeConfig,
                         targetEnergy: energyTypeConfig,
                         availableVariables: (variablesDataSource?.items || []).length
                     });
                     
-                    // Analyser les premiers points pour comprendre pourquoi ils sont rejetés
-                    const debugSample = assetTimeSeriesPoints.slice(0, 2);
-                    debugSample.forEach((tsPoint, idx) => {
-                        const varRef = tsVariableAssociation?.get(tsPoint)?.value;
-                        debug(`💬 Debug point ${idx}:`, {
-                            tsPointId: tsPoint.id,
-                            hasVariableRef: !!varRef,
-                            variableRefId: varRef?.id || 'none'
-                        });
-                        
-                        if (varRef) {
-                            const variable = (variablesDataSource?.items || []).find(v => v.id === varRef.id);
-                            if (variable) {
-                                const mt = variableMetricTypeAttr?.get(variable)?.value;
-                                const et = variableEnergyTypeAttr?.get(variable)?.value;
-                                debug(`💬 Variable ${varRef.id}:`, {
-                                    metricType: mt,
-                                    energyType: et,
-                                    name: variableNameAttr?.get(variable)?.value,
-                                    unit: variableUnitAttr?.get(variable)?.value
-                                });
-                            } else {
-                                debug(`❌ Variable ${varRef.id} introuvable`);
-                            }
-                        }
-                    });
+                    warnings.push(errorMessage);
+                    return;
+                }
+
+                // Grouper les points par type de métrique pour support du double IPE
+                const pointsByMetricType = new Map<string, typeof filteredPointsWithVariables>();
+                filteredPointsWithVariables.forEach(item => {
+                    const key = item.metricType;
+                    if (!pointsByMetricType.has(key)) {
+                        pointsByMetricType.set(key, []);
+                    }
+                    pointsByMetricType.get(key)!.push(item);
+                });
+
+                debug(`📊 Métriques disponibles pour ${assetInfo.name}:`, {
+                    metrics: Array.from(pointsByMetricType.keys()),
+                    counts: Array.from(pointsByMetricType.entries()).map(([k, v]) => ({ [k]: v.length }))
+                });
+
+                // Traiter chaque type de métrique séparément
+                // En mode IPE simple (pas de double IPE actif), ne garder qu'une variante:
+                // priorité à IPE_kg, sinon IPE si IPE_kg indisponible
+                const metricTypesAvailable = Array.from(pointsByMetricType.keys());
+                const singleIPEmode = viewModeConfig === "ipe" && (!isDoubleIPEEnabled || !hasDoubleIPESupport);
+                const allowedMetricTypes: string[] = singleIPEmode
+                    ? (metricTypesAvailable.includes(METRIC_TYPES.IPE_KG)
+                        ? [METRIC_TYPES.IPE_KG]
+                        : [metricTypesAvailable[0]])
+                    : metricTypesAvailable;
+
+                allowedMetricTypes.forEach((metricType) => {
+                    const pointsWithVars = pointsByMetricType.get(metricType)!;
+                    // Extraire les données temporelles
+                    const temporalData = pointsWithVars.map(item => {
+                        const timestamp = timestampAttr.get(item.tsPoint)?.value;
+                        const value = valueAttr.get(item.tsPoint)?.value;
+                        if (!timestamp) rejectStats.missingTimestamp++;
+                        if (value === undefined || value === null) rejectStats.missingValue++;
+                        return { timestamp, value, unit: item.variableUnit };
+                    }).filter(d => d.timestamp && d.value !== undefined);
+
+                    if (temporalData.length === 0) {
+                        warnings.push(`Données temporelles invalides pour l'asset "${assetInfo.name}" métrique ${metricType}`);
+                        return;
+                    }
+
+                    // Trier par timestamp croissant
+                    const sortedData = temporalData
+                        .map(d => ({ timestamp: d.timestamp!, value: new Big(d.value!), unit: d.unit }))
+                        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+                    const sortedTimestamps = sortedData.map(d => d.timestamp);
+                    const sortedValues = sortedData.map(d => d.value);
                     
-                    warnings.push(`Aucune donnée correspondant au filtre (${viewModeConfig}/${energyTypeConfig}) pour l'asset "${assetInfo.name}"`);
-                    return;
-                }
-
-                // Extraire les données temporelles
-                const timestamps: Date[] = [];
-                const values: Big[] = [];
-
-                filteredPoints.forEach(tsPoint => {
-                    const timestamp = timestampAttr.get(tsPoint)?.value;
-                    const value = valueAttr.get(tsPoint)?.value;
-
-                    if (timestamp && value !== undefined) {
-                        timestamps.push(timestamp);
-                        values.push(new Big(value));
+                    // Récupérer l'unité depuis la variable (prioritaire) ou fallback
+                    let assetUnit = sortedData[0].unit || "";
+                    if (!assetUnit) {
+                        if (viewModeConfig === "energetic") {
+                            assetUnit = energyConfig.unit;
+                        } else if (metricType === METRIC_TYPES.IPE_KG) {
+                            assetUnit = smartIPEUnits.ipe1Unit;
+                        } else if (metricType === METRIC_TYPES.IPE) {
+                            assetUnit = smartIPEUnits.ipe2Unit;
+                        } else {
+                            assetUnit = smartIPEUnits.ipe1Unit; // fallback
+                        }
                     }
+
+                    // Calculer les statistiques
+                    const currentValue = sortedValues[sortedValues.length - 1];
+                    const maxValue = sortedValues.reduce((max, val) => val.gt(max) ? val : max, sortedValues[0]);
+                    const minValue = sortedValues.reduce((min, val) => val.lt(min) ? val : min, sortedValues[0]);
+                    const sumValue = sortedValues.reduce((sum, val) => sum.plus(val), new Big(0));
+                    const avgValue = sumValue.div(sortedValues.length);
+
+                    // Créer nom de série unique pour double IPE
+                    const seriesName = viewModeConfig === "ipe" && isDoubleIPEEnabled && pointsByMetricType.size > 1
+                        ? `${assetInfo.name} (${metricType})`
+                        : assetInfo.name;
+
+                    // Créer les objets de données avec unité
+                    processedAssets.push({
+                        name: seriesName,
+                        assetId: assetInfo.id,
+                        timestamps: sortedTimestamps,
+                        values: sortedValues,
+                        metricType,
+                        energyType: energyTypeConfig,
+                        unit: assetUnit
+                    });
+
+                    processedStats.push({
+                        name: seriesName,
+                        assetId: assetInfo.id,
+                        currentValue,
+                        maxValue,
+                        minValue,
+                        avgValue,
+                        sumValue
+                    });
+
+                    debug(`✅ Série ${seriesName} traitée avec succès:`, {
+                        metricType,
+                        unit: assetUnit,
+                        dataPoints: sortedValues.length,
+                        currentValue: currentValue.toString(),
+                        avgValue: avgValue.toString()
+                    });
                 });
 
-                if (timestamps.length === 0) {
-                    warnings.push(`Données temporelles invalides pour l'asset "${assetInfo.name}"`);
-                    return;
-                }
-
-                // Trier par timestamp croissant
-                const sortedData = timestamps
-                    .map((timestamp, index) => ({ timestamp, value: values[index] }))
-                    .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-
-                const sortedTimestamps = sortedData.map(d => d.timestamp);
-                const sortedValues = sortedData.map(d => d.value);
-
-                // Calculer les statistiques
-                const currentValue = sortedValues[sortedValues.length - 1];
-                const maxValue = sortedValues.reduce((max, val) => val.gt(max) ? val : max, sortedValues[0]);
-                const minValue = sortedValues.reduce((min, val) => val.lt(min) ? val : min, sortedValues[0]);
-                const sumValue = sortedValues.reduce((sum, val) => sum.plus(val), new Big(0));
-                const avgValue = sumValue.div(sortedValues.length);
-
-                // Déterminer l'unité depuis la première variable trouvée pour cet asset
-                let assetUnit = "";
-                if (filteredPoints.length > 0) {
-                    const firstPoint = filteredPoints[0];
-                    const firstVarRef = tsVariableAssociation?.get(firstPoint)?.value;
-                    if (firstVarRef) {
-                        const firstVar = (variablesDataSource?.items || []).find(v => v.id === firstVarRef.id);
-                        assetUnit = variableUnitAttr?.get(firstVar!)?.value || "";
-                    }
-                }
-
-                // Fallback unit si variable sans unité
-                if (!assetUnit) {
-                    assetUnit = viewModeConfig === "energetic" 
-                        ? energyConfig.unit 
-                        : smartIPEUnits.ipe1Unit;
-                }
-
-                // Mode IPE: utiliser IPE_kg par défaut (plan priorité)
-                const assetMetricType = viewModeConfig === "energetic" 
-                    ? METRIC_TYPES.CONSO 
-                    : METRIC_TYPES.IPE_KG;
-
-                // Créer les objets de données avec unité
-                processedAssets.push({
-                    name: assetInfo.name,
-                    assetId: assetInfo.id,
-                    timestamps: sortedTimestamps,
-                    values: sortedValues,
-                    metricType: assetMetricType,
-                    energyType: energyTypeConfig,
-                    unit: assetUnit
-                });
-
-                processedStats.push({
-                    name: assetInfo.name,
-                    assetId: assetInfo.id,
-                    currentValue,
-                    maxValue,
-                    minValue,
-                    avgValue,
-                    sumValue
-                });
-
-                debug(`✅ Asset ${assetInfo.name} traité avec succès:`, {
-                    dataPoints: sortedValues.length,
-                    currentValue: currentValue.toString(),
-                    avgValue: avgValue.toString()
+                // Log de synthèse pour l'asset
+                debug(`📈 Bilan filtrage pour ${assetInfo.name}:`, {
+                    ...rejectStats,
+                    acceptedAfterFilter: processedAssets.filter(a => a.assetId === assetInfo.id).length
                 });
             });
 
@@ -726,10 +837,24 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                     <div className="tw-ml-4">
                         <div>Double IPE: {isDoubleIPEEnabled ? "✅ Activé" : "❌ Désactivé"}</div>
                         <div>Granularité manuelle: {isGranulariteManuelleEnabled ? "✅ Activé" : "❌ Désactivé"}</div>
+                        <div className="tw-font-medium tw-text-purple-600">🔍 Debug Features:</div>
+                        <div className="tw-ml-4 tw-text-xs">
+                            <div>FeatureList Status: {featureList?.status || "undefined"}</div>
+                            <div>FeatureList Items: {featureList?.items?.length || 0}</div>
+                            <div>FeatureNameAttr: {featureNameAttr ? "✅" : "❌"}</div>
+                            {featureList?.status === ValueStatus.Available && featureNameAttr && (
+                                <div>Features détectées: {[
+                                    ...(featureList.items || [])
+                                        .map(item => featureNameAttr.get(item)?.value)
+                                        .filter((value): value is string => !!value)
+                                ].join(", ") || "Aucune"}</div>
+                            )}
+                        </div>
                     </div>
                     <div className="tw-font-medium tw-text-blue-600">📊 Données:</div>
                     <div className="tw-ml-4">
                         <div>Unités IPE résolues: {smartIPEUnits.ipe1Unit} / {smartIPEUnits.ipe2Unit}</div>
+                        <div>Support Double IPE: {hasDoubleIPESupport ? "✅ Détecté" : "❌ Absent"}</div>
                         <div>Variables Smart: {smartVariables.length}</div>
                         <div>Assets traités: {assetsData.length}</div>
                         <div>Points temporels totaux: {assetsData.reduce((sum, asset) => sum + asset.values.length, 0)}</div>
@@ -837,7 +962,7 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                 stats={assetsStats}
                 energyConfig={energyConfig}
                 viewMode={viewModeConfig as "energetic" | "ipe"}
-                showDoubleIPEToggle={isDoubleIPEEnabled && viewModeConfig === "ipe"}
+                showDoubleIPEToggle={isDoubleIPEEnabled && viewModeConfig === "ipe" && hasDoubleIPESupport}
                 showGranularityControls={isGranulariteManuelleEnabled && (viewModeConfig === "energetic" || viewModeConfig === "ipe")}
                 onAddProductionClick={onAddProductionClick}
                 startDate={startDateAttr?.value}

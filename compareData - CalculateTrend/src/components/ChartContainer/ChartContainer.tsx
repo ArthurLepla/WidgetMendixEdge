@@ -12,7 +12,7 @@ import { PieChart } from "../PieChart";
 import { MachineTable } from "../MachineTable";
 import { ExportMenu } from "../Export/ExportMenu";
 import type { Row } from "../Export/ExportLogic";
-import { EnergyType } from "../../utils/types";
+import { EnergyType } from "../../utils/energy";
 import { GranularityPopover } from "../GranularityControl";
 
 import "./ChartContainer.css";
@@ -47,14 +47,14 @@ interface ChartContainerProps {
 
 // Affichage figé en mode "dashboard" (plus de modes sélectionnables)
 
-// Conversion des types d'énergie
+// Conversion des types d'énergie - aligné avec le système Mendix
 const mapEnergyConfigToType = (energyConfig: EnergyConfig): EnergyType => {
     const name = energyConfig.name.toLowerCase();
-    if (name.includes("électr") || name.includes("elec")) return "electricity";
-    if (name.includes("gaz") || name.includes("gas")) return "gas";
-    if (name.includes("eau") || name.includes("water")) return "water";
-    if (name.includes("air")) return "air";
-    return "electricity"; // par défaut
+    if (name.includes("électr") || name.includes("elec")) return "Elec";
+    if (name.includes("gaz") || name.includes("gas")) return "Gaz";
+    if (name.includes("eau") || name.includes("water")) return "Eau";
+    if (name.includes("air")) return "Air";
+    return "Elec"; // par défaut
 };
 
 // Fonction pour obtenir l'icône d'énergie
@@ -182,6 +182,24 @@ export function ChartContainer({
         activeData.some(item => item.name === stat.name)
     );
 
+    // Extraire l'unité depuis les données actives (unité réelle des variables)
+    const actualUnit = useMemo(() => {
+        if (activeData.length === 0) return energyConfig.unit;
+        
+        // Prendre l'unité de la première série de données
+        const firstUnit = activeData[0].unit;
+        
+        // Vérifier que toutes les séries ont la même unité
+        const allSameUnit = activeData.every(asset => asset.unit === firstUnit);
+        
+        if (!allSameUnit) {
+            console.warn("[ChartContainer] Unités différentes détectées dans les séries:", 
+                activeData.map(d => ({ name: d.name, unit: d.unit })));
+        }
+        
+        return firstUnit || energyConfig.unit;
+    }, [activeData, energyConfig.unit]);
+
     // Conversion AssetData vers MachineData pour les composants existants
     const machineData: MachineData[] = activeData.map(asset => ({
         name: asset.name,
@@ -271,7 +289,8 @@ export function ChartContainer({
                         viewMode: viewMode,
                         totalConsommationIPE: machine.totalConsommationIPE,
                         totalProduction: machine.totalProduction,
-                        ipeValue: machine.ipeValue
+                        ipeValue: machine.ipeValue,
+                        unit: actualUnit
                     })
                 )
             ),
@@ -282,7 +301,8 @@ export function ChartContainer({
                         data: machineData,
                         type: energyType,
                         viewMode: viewMode,
-                        onAddProductionClick: handleAddProductionClick
+                        onAddProductionClick: handleAddProductionClick,
+                        unit: actualUnit
                     })
                 ),
                 createElement("div", { className: "widget-chart-right" },
@@ -293,7 +313,8 @@ export function ChartContainer({
                             sumValue: m.sumValue
                         })),
                         type: energyType,
-                        viewMode: viewMode
+                        viewMode: viewMode,
+                        unit: actualUnit
                     })
                 )
             ),
@@ -308,7 +329,8 @@ export function ChartContainer({
                         maxValue: m.maxValue
                     })),
                     type: energyType,
-                    viewMode: viewMode
+                    viewMode: viewMode,
+                    unit: actualUnit
                 })
             )
         );
@@ -338,29 +360,34 @@ export function ChartContainer({
                         onToggle: handleIPEToggle
                     }),
 
-                    // Granularité manuelle (si activée)
-                    showGranularityControls && (viewMode === "energetic" || viewMode === "ipe") && (
-                        createElement(GranularityControlOrPopover as any, {
-                            mode: granularityMode,
-                            value: granularityValue,
-                            unit: granularityUnit,
-                            onModeChange: (m: "Auto" | "Strict") => {
-                                const next = m === "Auto" ? "auto" : "strict";
-                                setGranularityMode(next);
-                                if (onModeChange?.canExecute) onModeChange.execute();
-                            },
-                            onValueChange: (v: number) => {
-                                setGranularityValue(v);
-                                if (onTimeChange?.canExecute) onTimeChange.execute();
-                            },
-                            onUnitChange: (u: any) => {
-                                setGranularityUnit(u);
-                                if (onTimeChange?.canExecute) onTimeChange.execute();
-                            },
-                            autoGranularity: { value: autoGranularity.value, unit: autoGranularity.unit },
-                            isDisabled: !hasData,
-                            analysisDurationMs: analysisDurationMs
-                        })
+                    // Granularité: si activée, afficher le contrôle; sinon, simple display
+                    (viewMode === "energetic" || viewMode === "ipe") && (
+                        showGranularityControls
+                            ? createElement(GranularityControlOrPopover as any, {
+                                mode: granularityMode,
+                                value: granularityValue,
+                                unit: granularityUnit,
+                                onModeChange: (m: "Auto" | "Strict") => {
+                                    const next = m === "Auto" ? "auto" : "strict";
+                                    setGranularityMode(next);
+                                    if (onModeChange?.canExecute) onModeChange.execute();
+                                },
+                                onValueChange: (v: number) => {
+                                    setGranularityValue(v);
+                                    if (onTimeChange?.canExecute) onTimeChange.execute();
+                                },
+                                onUnitChange: (u: any) => {
+                                    setGranularityUnit(u);
+                                    if (onTimeChange?.canExecute) onTimeChange.execute();
+                                },
+                                autoGranularity: { value: autoGranularity.value, unit: autoGranularity.unit },
+                                isDisabled: !hasData,
+                                analysisDurationMs: analysisDurationMs
+                            })
+                            : createElement("div", { className: "simple-granularity-display" },
+                                createElement("span", { className: "simple-granularity-label" }, "Granularité"),
+                                createElement("span", { className: "simple-granularity-value" }, `Auto: ${autoGranularity.value} ${autoGranularity.unit}`)
+                            )
                     ),
 
                     // Menu d'export

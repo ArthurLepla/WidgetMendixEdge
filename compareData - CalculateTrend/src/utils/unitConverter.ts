@@ -1,6 +1,7 @@
 import { Big } from "big.js";
-import { EnergyType } from "./types";
-import { ENERGY_CONFIG } from "./energyConfig";
+import { EnergyType } from "./energy";
+import { energyConfigs } from "./energy";
+import { getUnitForEnergyAndMetric, getMetricTypeFromViewMode } from "./energy";
 
 // BaseUnitEnum n'est plus exporté par CompareDataProps, on définit ici les valeurs attendues
 export type BaseUnit = "auto" | "kWh" | "m3" | "Wh" | "GWh" | "MWh" | "L" | "Nm3" | "MJ" | "thermie" | "BTU" | "ft3" | "gal" | "unit";
@@ -24,13 +25,13 @@ export const getSmartUnit = (
     viewMode: "energetic" | "ipe",
     baseUnit: BaseUnit = "auto"
 ): ConversionResult => {
-    // Pour le mode IPE, on ne fait PAS de conversion d'unités
-    // On garde les valeurs en unité de base spécifiée ou par défaut
+    // Pour le mode IPE, utiliser la même logique que getUnitForEnergyAndMetric
     if (viewMode === "ipe") {
         const numericValue = value.toNumber();
-        const config = ENERGY_CONFIG[type as EnergyType];
+        const metricType = getMetricTypeFromViewMode(viewMode);
+        const unit = getUnitForEnergyAndMetric(type, metricType);
         
-        // Si une unité de base est spécifiée et différente de "auto"
+        // Si une unité de base est spécifiée et différente de "auto", l'utiliser
         if (baseUnit !== "auto") {
             const baseUnitForIPE = getBaseUnitForIPE(baseUnit);
             return {
@@ -41,7 +42,7 @@ export const getSmartUnit = (
         
         return {
             value: numericValue,
-            unit: config.ipeUnit
+            unit: unit
         };
     }
 
@@ -59,15 +60,15 @@ export const getSmartUnit = (
 
     // Mode auto : conversion automatique selon le type d'énergie
     switch (type) {
-        case "electricity":
+        case "Elec":
             return convertElectricityUnit(value);
-        case "gas":
-        case "water":
-        case "air":
+        case "Gaz":
+        case "Eau":
+        case "Air":
             return convertVolumeUnit(value);
         default:
             // Par défaut, renvoyer la valeur sans conversion
-            const defaultConfig = ENERGY_CONFIG[type as EnergyType];
+            const defaultConfig = energyConfigs[type as EnergyType];
             return {
                 value: value.toNumber(),
                 unit: defaultConfig.unit

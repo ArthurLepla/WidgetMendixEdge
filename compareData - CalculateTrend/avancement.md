@@ -92,6 +92,61 @@ Le composant `ConsumptionUnavailable` était une version simplifiée de `IPEUnav
 - Considérer l'extraction des thèmes dans un fichier partagé pour éviter la duplication
 
 # Journal d'avancement du projet
+## 2025-08-12
+
+### ⌛ Changement :
+Diagnostic renforcé et tolérance énergie en mode Conso dans `src/CompareData.tsx`.
+
+### 🤔 Analyse :
+Pour résoudre l'absence d'affichage en mode consommation malgré la présence de variables, nous avons:
+- Ajouté un bilan de filtrage par asset avec compteurs de rejets (variable manquante, mauvais asset, metric non Conso, mismatch énergie, timestamp/valeur manquants) et nombre de séries acceptées.
+- Accepté explicitement `EnergyType = None` en mode Conso (en plus de l'énergie configurée) afin d'éviter un filtrage trop strict.
+- Ajouté un fallback quand la variable associée n'est pas présente dans `variablesDataSource` (utilisation directe de l'association `tsVariableAssociation`).
+- Logué clairement le cas « DataSource TimeSeries vide » avec contexte (assets, période, mode/énergie) pour détecter un XPath trop restrictif.
+
+### 💜 Prochaines étapes :
+- Côté Mendix, élargir le XPath TimeSeries (Conso seule, ou `Elec OR None`).
+- Surveiller les nouveaux logs en prod (activer via `?debugCompare=1`/`2`).
+
+
+## 2025-01-11
+
+### ⌛ Changement (2025-01-11 – Correction erreur association Mendix) :
+Correction de l'erreur "An ObjectItem can only be passed to a template that is linked to the same data source" dans `src/CompareData.tsx` :
+- **Problème identifié** : Utilisation incorrecte de `tsVariableAssociation.get(variable)` où `variable` provient de `variablesDataSource`, mais `tsVariableAssociation` fonctionne uniquement sur les objets de `timeSeriesDataSource`
+- **Solution** : Restructuration de la logique pour utiliser l'association dans le bon sens :
+  1. Parcourir les `TimeSeriesPoints` via `timeSeriesDataSource`
+  2. Utiliser `tsAssetAssociation.get(tsPoint)` et `tsVariableAssociation.get(tsPoint)` pour obtenir les références
+  3. Construire un `Set` des IDs de variables liées à l'asset
+  4. Filtrer `variablesDataSource` basé sur ce Set
+- **Amélioration** : Diagnostic plus précis avec `timeSeriesCount: 0` révélant l'absence de données temporelles
+
+### 🤔 Analyse :
+L'erreur Mendix était causée par une mauvaise compréhension du sens des associations. Les associations Mendix sont directionnelles et ne peuvent être utilisées que dans le sens défini (TimeSeriesPoint → Variable, pas l'inverse). La correction respecte cette contrainte et améliore la robustesse du code en gérant correctement les cas où `timeSeriesDataSource` est vide.
+
+### 💜 Prochaines étapes :
+- Tester avec des données réelles pour valider le filtrage correct des variables par asset
+- Vérifier que les messages de diagnostic "Aucune donnée temporelle" s'affichent correctement
+- Considérer l'ajout d'un mode de fallback pour les cas où les associations ne sont pas configurées
+
+---
+
+### ⌛ Changement (2025-01-11 – Diagnostic données manquantes) :
+Amélioration du diagnostic pour identifier les causes d'absence de données temporelles :
+- **Problème identifié** : `timeSeriesCount: 0` - aucun TimeSeriesPoint dans la base de données
+- **Cause racine** : L'action Java `CalculateAssetCompleteMetrics` n'a pas été exécutée ou a échoué
+- **Amélioration** : Message d'erreur spécifique avec paramètres recommandés pour l'exécution de l'action
+- **Diagnostic enrichi** : Affichage des variables disponibles par asset pour valider la configuration
+
+### 🤔 Analyse :
+Le widget fonctionne correctement mais ne peut afficher que les données existantes. L'absence de TimeSeriesPoint indique que l'action `CalculateAssetCompleteMetrics` doit être exécutée pour générer les données temporelles via l'API IIH. Le diagnostic amélioré guide l'utilisateur vers la solution appropriée.
+
+### 💜 Prochaines étapes :
+- Exécuter `CalculateAssetCompleteMetrics` pour l'asset "EDF" avec les paramètres recommandés
+- Vérifier les logs Mendix pour confirmer l'exécution réussie de l'action
+- Tester le widget après génération des données temporelles
+
+---
 
 ## 2025-08-11
 

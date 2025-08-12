@@ -2,8 +2,8 @@
  * Utilitaires pour la gestion des types d'énergie et métriques dans CompareData
  */
 
-// Types d'énergie supportés
-export type EnergyType = "elec" | "gaz" | "eau" | "air";
+// Types d'énergie supportés - aligné avec Mendix
+export type EnergyType = "Elec" | "Gaz" | "Eau" | "Air";
 
 // Types de métriques
 export const METRIC_TYPES = {
@@ -15,43 +15,48 @@ export const METRIC_TYPES = {
     CUSTOM: "Custom"
 } as const;
 
-// Configuration pour chaque type d'énergie
+// Configuration pour chaque type d'énergie - aligné avec les logs Mendix
 export interface EnergyConfig {
     name: string;
     color: string;
     unit: string;
     icon: string;
     description: string;
+    ipeUnit: string; // Unité pour IPE
 }
 
 export const energyConfigs: Record<EnergyType, EnergyConfig> = {
-    elec: {
+    Elec: {
         name: "Électricité",
         color: "#38a13c",
         unit: "kWh",
         icon: "⚡",
-        description: "Consommation électrique"
+        description: "Consommation électrique",
+        ipeUnit: "kWh/pcs"
     },
-    gaz: {
+    Gaz: {
         name: "Gaz",
         color: "#f9be01", 
-        unit: "m³",
+        unit: "kWh", // ✅ Corrigé : gaz en kWh, pas m³
         icon: "🔥",
-        description: "Consommation de gaz"
+        description: "Consommation de gaz",
+        ipeUnit: "kWh/pcs"
     },
-    eau: {
+    Eau: {
         name: "Eau",
         color: "#3293f3",
         unit: "m³", 
         icon: "💧",
-        description: "Consommation d'eau"
+        description: "Consommation d'eau",
+        ipeUnit: "m³/pcs"
     },
-    air: {
+    Air: {
         name: "Air comprimé",
         color: "#66d8e6",
         unit: "m³",
         icon: "💨", 
-        description: "Consommation d'air comprimé"
+        description: "Consommation d'air comprimé",
+        ipeUnit: "m³/pcs"
     }
 };
 
@@ -93,27 +98,27 @@ export function getMetricTypeFromName(variableName?: string): string {
 /**
  * Détermine le type d'énergie à partir du nom d'une variable
  * @param variableName - Nom de la variable
- * @returns Type d'énergie détecté
+ * @returns Type d'énergie détecté - aligné avec Mendix
  */
 export function getEnergyTypeFromName(variableName?: string): EnergyType {
-    if (!variableName) return "elec";
+    if (!variableName) return "Elec";
     
     const name = variableName.toLowerCase().trim();
     
     if (name.includes("gaz") || name.includes("gas")) {
-        return "gaz";
+        return "Gaz";
     }
     
     if (name.includes("eau") || name.includes("water")) {
-        return "eau";
+        return "Eau";
     }
     
     if (name.includes("air") || name.includes("compressed")) {
-        return "air";
+        return "Air";
     }
     
     // Par défaut électricité
-    return "elec";
+    return "Elec";
 }
 
 /**
@@ -150,18 +155,19 @@ export function shouldDisplayVariable(
  * Obtient l'unité appropriée pour un type d'énergie et de métrique
  * @param energyType - Type d'énergie
  * @param metricType - Type de métrique
- * @returns Unité appropriée
+ * @returns Unité appropriée - aligné avec les logs Mendix
  */
 export function getUnitForEnergyAndMetric(energyType: EnergyType, metricType: string): string {
     const config = energyConfigs[energyType];
     
-    // Pour IPE, toujours retourner l'unité d'énergie par kg
-    if (metricType === METRIC_TYPES.IPE) {
+    // Pour IPE_kg, retourner l'unité d'énergie par kg
+    if (metricType === METRIC_TYPES.IPE_KG) {
         return `${config.unit}/kg`;
     }
     
-    if (metricType === METRIC_TYPES.IPE_KG) {
-        return `${config.unit}/kg`;
+    // Pour IPE (par pièce), retourner l'unité d'énergie par pièce
+    if (metricType === METRIC_TYPES.IPE) {
+        return `${config.unit}/pcs`; // ✅ Corrigé : IPE par pièce, pas par kg
     }
     
     // Pour la production en kg
@@ -179,33 +185,15 @@ export function getUnitForEnergyAndMetric(energyType: EnergyType, metricType: st
 }
 
 /**
- * Obtient la couleur appropriée pour un asset dans un graphique de comparaison
- * @param index - Index de l'asset dans la liste
- * @param energyType - Type d'énergie (optionnel)
- * @returns Couleur hex
+ * Détermine le type de métrique approprié selon le mode d'affichage
+ * @param viewMode - Mode d'affichage ("energetic" ou "ipe")
+ * @returns Type de métrique approprié
  */
-export function getAssetColor(index: number, energyType?: EnergyType): string {
-    // Si un type d'énergie est spécifié, utiliser sa couleur comme base
-    if (energyType && energyConfigs[energyType]) {
-        const baseColor = energyConfigs[energyType].color;
-        // Varier l'opacité ou la teinte selon l'index
-        const opacity = Math.max(0.6, 1 - (index * 0.2));
-        return `${baseColor}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`;
+export function getMetricTypeFromViewMode(viewMode: "energetic" | "ipe"): string {
+    if (viewMode === "ipe") {
+        return METRIC_TYPES.IPE; // IPE par pièce
     }
-    
-    // Palette de couleurs par défaut pour la comparaison
-    const defaultColors = [
-        "#38a13c", // Vert
-        "#f9be01", // Jaune
-        "#3293f3", // Bleu
-        "#66d8e6", // Cyan
-        "#e74c3c", // Rouge
-        "#9b59b6", // Violet
-        "#f39c12", // Orange
-        "#1abc9c", // Turquoise
-        "#34495e", // Gris foncé
-        "#95a5a6"  // Gris clair
-    ];
-    
-    return defaultColors[index % defaultColors.length];
+    return METRIC_TYPES.CONSO; // Consommation
 }
+
+// Note: getAssetColor() supprimé - utiliser colorUtils.ts à la place

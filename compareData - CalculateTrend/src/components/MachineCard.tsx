@@ -1,9 +1,9 @@
 import { ReactElement, createElement, useState } from "react";
 import { Zap, Flame, Droplet, Wind, Info, X } from "lucide-react";
 import { Big } from "big.js";
-import { EnergyType } from "../utils/types";
-import { ENERGY_CONFIG } from "../utils/energyConfig";
-import { formatSmartValue, BaseUnit } from "../utils/unitConverter";
+import { EnergyType } from "../utils/energy";
+import { energyConfigs } from "../utils/energy";
+import { formatSmartValue, BaseUnit, getSmartUnit } from "../utils/unitConverter";
 import "./MachineCard.css";
 
 export interface MachineCardProps {
@@ -19,18 +19,20 @@ export interface MachineCardProps {
     totalConsommationIPE?: Big;
     totalProduction?: Big;
     ipeValue?: Big;
+    // Unité calculée au niveau container (ex: kWh/kg ou kWh/pcs)
+    unit?: string;
 }
 
 const getIcon = (type: EnergyType, className: string): ReactElement => {
-    const config = ENERGY_CONFIG[type];
+    const config = energyConfigs[type];
     switch (type) {
-        case "electricity":
+        case "Elec":
             return createElement(Zap, { className, style: { color: config.color } });
-        case "gas":
+        case "Gaz":
             return createElement(Flame, { className, style: { color: config.color } });
-        case "water":
+        case "Eau":
             return createElement(Droplet, { className, style: { color: config.color } });
-        case "air":
+        case "Air":
             return createElement(Wind, { className, style: { color: config.color } });
         default:
             return createElement(Zap, { className, style: { color: config.color } });
@@ -59,7 +61,7 @@ const IPEInfoModal = ({
 }) => {
     if (!isOpen) return null;
 
-    const config = ENERGY_CONFIG[energyType];
+    const config = energyConfigs[energyType];
 
     return createElement("div", {
         className: "ipe-modal-overlay",
@@ -150,18 +152,26 @@ export const MachineCard = ({
     baseUnit = "auto",
     totalConsommationIPE,
     totalProduction,
-    ipeValue
+    ipeValue,
+    unit
 }: MachineCardProps): ReactElement => {
     const [showIPEModal, setShowIPEModal] = useState(false);
-    const config = ENERGY_CONFIG[type];
+    const config = energyConfigs[type];
     const hasData = !sumValue.eq(0);
 
-    // Utiliser la conversion intelligente des unités
-    const formattedSum = formatSmartValue(sumValue, type, viewMode, baseUnit);
-    const formattedMin = formatSmartValue(minValue, type, viewMode, baseUnit);
-    const formattedMax = formatSmartValue(maxValue, type, viewMode, baseUnit);
+    const format = (value: Big): string => {
+        if (viewMode === "ipe" && unit) {
+            const converted = getSmartUnit(value, type, viewMode, baseUnit).value; // valeur brute en IPE
+            const decimals = 2;
+            return `${converted.toFixed(decimals)} ${unit}`;
+        }
+        return formatSmartValue(value, type, viewMode, baseUnit);
+    };
 
-    // Vérifier si nous avons les données nécessaires pour afficher l'info IPE
+    const formattedSum = format(sumValue);
+    const formattedMin = format(minValue);
+    const formattedMax = format(maxValue);
+
     const canShowIPEInfo = viewMode === "ipe" && 
                           totalConsommationIPE && 
                           totalProduction && 
@@ -180,7 +190,7 @@ export const MachineCard = ({
             createElement("div", { className: "flex items-center gap-4" },
                 createElement("div", { 
                     className: "machine-card-icon", 
-                    style: { backgroundColor: config.BackgroundIconColor } 
+                    style: { backgroundColor: `${config.color}20` } 
                 }, getIcon(type, "w-10 h-10 sm-w-12 sm-h-12 lg-w-14 lg-h-14")),
                 createElement("h3", { className: "title-medium flex-1 leading-tight text-gray-900 pr-8" }, name)
             ),
@@ -207,9 +217,9 @@ export const MachineCard = ({
             isOpen: showIPEModal,
             onClose: () => setShowIPEModal(false),
             machineName: name,
-            totalConsommationIPE: totalConsommationIPE,
-            totalProduction: totalProduction,
-            ipeValue: ipeValue,
+            totalConsommationIPE: totalConsommationIPE!,
+            totalProduction: totalProduction!,
+            ipeValue: ipeValue!,
             energyType: type,
             baseUnit: baseUnit
         })

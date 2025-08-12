@@ -1,7 +1,7 @@
 import { ReactElement, createElement, useState } from "react";
 import { Big } from "big.js";
-import { EnergyType } from "../utils/types";
-import { formatSmartValue, compareValues, BaseUnit } from "../utils/unitConverter";
+import { EnergyType } from "../utils/energy";
+import { formatSmartValue, compareValues, BaseUnit, getSmartUnit } from "../utils/unitConverter";
 
 interface MachineTableProps {
     machines: {
@@ -14,12 +14,13 @@ interface MachineTableProps {
     type: EnergyType;
     viewMode: "energetic" | "ipe";
     baseUnit?: BaseUnit;
+    unit?: string; // Unité fournie par ChartContainer
 }
 
 type SortColumn = 'name' | 'currentValue' | 'minValue' | 'sumValue' | 'maxValue';
 type SortDirection = 'asc' | 'desc';
 
-export const MachineTable = ({ machines, type, viewMode, baseUnit = "auto" }: MachineTableProps): ReactElement => {
+export const MachineTable = ({ machines, type, viewMode, baseUnit = "auto", unit }: MachineTableProps): ReactElement => {
     const [sortColumn, setSortColumn] = useState<SortColumn>('currentValue');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -114,16 +115,24 @@ export const MachineTable = ({ machines, type, viewMode, baseUnit = "auto" }: Ma
                                     {machine.name}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-[var(--font-size-table-cell)] leading-[var(--line-height-table-cell)] text-right font-semibold text-gray-900">
-                                    {formatSmartValue(machine.currentValue, type, viewMode, baseUnit)}
+                                    {viewMode === "ipe" && unit
+                                        ? `${getSmartUnit(machine.currentValue, type, viewMode, baseUnit).value.toFixed(2)} ${unit}`
+                                        : formatSmartValue(machine.currentValue, type, viewMode, baseUnit)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-[var(--font-size-table-cell)] leading-[var(--line-height-table-cell)] text-right font-semibold text-gray-900">
-                                    {formatSmartValue(machine.sumValue, type, viewMode, baseUnit)}
+                                    {viewMode === "ipe" && unit
+                                        ? `${getSmartUnit(machine.sumValue, type, viewMode, baseUnit).value.toFixed(2)} ${unit}`
+                                        : formatSmartValue(machine.sumValue, type, viewMode, baseUnit)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-[var(--font-size-table-cell)] leading-[var(--line-height-table-cell)] text-right text-gray-900">
-                                    {formatSmartValue(machine.minValue, type, viewMode, baseUnit)}
+                                    {viewMode === "ipe" && unit
+                                        ? `${getSmartUnit(machine.minValue, type, viewMode, baseUnit).value.toFixed(2)} ${unit}`
+                                        : formatSmartValue(machine.minValue, type, viewMode, baseUnit)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-[var(--font-size-table-cell)] leading-[var(--line-height-table-cell)] text-right text-gray-900">
-                                    {formatSmartValue(machine.maxValue, type, viewMode, baseUnit)}
+                                    {viewMode === "ipe" && unit
+                                        ? `${getSmartUnit(machine.maxValue, type, viewMode, baseUnit).value.toFixed(2)} ${unit}`
+                                        : formatSmartValue(machine.maxValue, type, viewMode, baseUnit)}
                                 </td>
                             </tr>
                         ))}

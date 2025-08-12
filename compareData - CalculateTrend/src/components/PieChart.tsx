@@ -3,8 +3,8 @@ import * as echarts from "echarts";
 import { Big } from "big.js";
 import { getColorForName } from "../utils/colorUtils";
 import { NoData } from "./NoData";
-import { EnergyType } from "../utils/types";
-import { getUnit } from "../utils/energyConfig";
+import { EnergyType } from "../utils/energy";
+import { getUnitForEnergyAndMetric, getMetricTypeFromViewMode } from "../utils/energy";
 import { getSmartUnit, getBaseValueForComparison } from "../utils/unitConverter";
 
 interface PieChartProps {
@@ -15,6 +15,7 @@ interface PieChartProps {
     }[];
     type: EnergyType;
     viewMode: "energetic" | "ipe";
+    unit?: string; // Unité personnalisée (prioritaire sur getUnit)
 }
 
 const truncateText = (text: string, maxLength: number = 20): string => {
@@ -22,10 +23,10 @@ const truncateText = (text: string, maxLength: number = 20): string => {
     return text.slice(0, maxLength - 3) + '...';
 };
 
-export const PieChart = ({ machines, type, viewMode }: PieChartProps): ReactElement => {
+export const PieChart = ({ machines, type, viewMode, unit: customUnit }: PieChartProps): ReactElement => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
-    const unit = getUnit(type, viewMode);
+            const unit = customUnit || getUnitForEnergyAndMetric(type, getMetricTypeFromViewMode(viewMode));
     
     const total = machines.reduce((sum, machine) => sum.plus(machine.sumValue), new Big(0));
     const smartTotal = getSmartUnit(total, type, viewMode);
@@ -41,14 +42,17 @@ export const PieChart = ({ machines, type, viewMode }: PieChartProps): ReactElem
         chartInstance.current = chart;
 
         const data = machines.map(machine => {
-            const smartValue = getSmartUnit(machine.sumValue, type, viewMode);
-            
+            // En mode IPE, on force l'utilisation de l'unité fournie par le container (kWh/kg ou kWh/pcs)
+            const smartValue = viewMode === "ipe" 
+                ? { value: machine.sumValue.toNumber(), unit }
+                : getSmartUnit(machine.sumValue, type, viewMode);
+
             // Calculer le pourcentage basé sur les valeurs en unité de base (brutes)
             // Cela évite les problèmes de comparaison entre différentes unités converties
             const baseValue = getBaseValueForComparison(machine.sumValue);
             const baseTotal = getBaseValueForComparison(total);
             const percentage = baseTotal === 0 ? 0 : (baseValue / baseTotal) * 100;
-            
+
             return {
                 name: machine.name,
                 originalValue: machine.sumValue.toNumber(), // Garder la valeur originale pour référence
@@ -64,7 +68,7 @@ export const PieChart = ({ machines, type, viewMode }: PieChartProps): ReactElem
 
         const option = {
             title: {
-                text: viewMode === "ipe" ? `Répartition des sommes d'IPE (${smartTotal.unit})` : `Répartition des sommes de consommation (${smartTotal.unit})`,
+                text: viewMode === "ipe" ? `Répartition des sommes d'IPE (${unit})` : `Répartition des sommes de consommation (${smartTotal.unit})`,
                 left: 'center',
                 top: 10,
                 textStyle: {

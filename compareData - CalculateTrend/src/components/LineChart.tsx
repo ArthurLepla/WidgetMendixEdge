@@ -3,8 +3,8 @@ import * as echarts from "echarts";
 import Big from "big.js";
 import { getColorForName } from "../utils/colorUtils";
 import { NoData } from "./NoData";
-import { EnergyType } from "../utils/types";
-import { getUnit } from "../utils/energyConfig";
+import { EnergyType } from "../utils/energy";
+import { getUnitForEnergyAndMetric, getMetricTypeFromViewMode } from "../utils/energy";
 
 export interface MachineData {
     name: string;
@@ -17,6 +17,7 @@ interface LineChartProps {
     type: EnergyType;
     viewMode: "energetic" | "ipe";
     onAddProductionClick?: () => void; // Action Mendix pour rediriger vers la page de saisie de production
+    unit?: string; // Unité personnalisée (prioritaire sur getUnit)
 }
 
 // Constants de style
@@ -251,10 +252,10 @@ const arePropsEqual = (prevProps: LineChartProps, nextProps: LineChartProps): bo
     return true;
 };
 
-const LineChartComponent = ({ data, type, viewMode, onAddProductionClick }: LineChartProps): ReactElement => {
+const LineChartComponent = ({ data, type, viewMode, onAddProductionClick, unit: customUnit }: LineChartProps): ReactElement => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
-    const unit = getUnit(type, viewMode);
+            const unit = customUnit || getUnitForEnergyAndMetric(type, getMetricTypeFromViewMode(viewMode));
 
     useEffect(() => {
         if (!chartRef.current || data.length === 0) return;
