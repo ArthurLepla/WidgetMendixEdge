@@ -4,28 +4,12 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
+import { ActionValue, EditableValue, ListValue, ListActionValue, ListAttributeValue, ListReferenceValue } from "mendix";
 import { Big } from "big.js";
 
 export type ViewModeConfigEnum = "energetic" | "ipe";
 
-export interface SelectedAssetType {
-    selectedAssetName: EditableValue<string>;
-}
-
-export interface DateRangeType {
-    startDateAttr: EditableValue<Date>;
-    endDateAttr: EditableValue<Date>;
-}
-
-export interface SelectedAssetPreviewType {
-    selectedAssetName: string;
-}
-
-export interface DateRangePreviewType {
-    startDateAttr: string;
-    endDateAttr: string;
-}
+export type EnergyTypeConfigEnum = "Elec" | "Gaz" | "Eau" | "Air";
 
 export interface CompareDataContainerProps {
     name: string;
@@ -34,19 +18,27 @@ export interface CompareDataContainerProps {
     tabIndex?: number;
     devMode: boolean;
     viewModeConfig: ViewModeConfigEnum;
-    selectedAsset: SelectedAssetType[];
-    dateRange: DateRangeType[];
+    energyTypeConfig: EnergyTypeConfigEnum;
+    selectedAssetNames: EditableValue<string>;
+    assetsDataSource: ListValue;
+    assetNameAttr: ListAttributeValue<string>;
+    assetIsElecAttr?: ListAttributeValue<boolean>;
+    assetIsGazAttr?: ListAttributeValue<boolean>;
+    assetIsEauAttr?: ListAttributeValue<boolean>;
+    assetIsAirAttr?: ListAttributeValue<boolean>;
     timeSeriesDataSource: ListValue;
     timestampAttr: ListAttributeValue<Date>;
     valueAttr: ListAttributeValue<Big>;
-    assetNameAttr: ListAttributeValue<string>;
-    metricTypeAttr?: ListAttributeValue<string>;
-    energyTypeAttr?: ListAttributeValue<string>;
-    assetVariablesDataSource?: ListValue;
+    tsAssetAssociation: ListReferenceValue;
+    tsVariableAssociation?: ListReferenceValue;
+    variablesDataSource?: ListValue;
     variableNameAttr?: ListAttributeValue<string>;
     variableUnitAttr?: ListAttributeValue<string>;
     variableMetricTypeAttr?: ListAttributeValue<string>;
     variableEnergyTypeAttr?: ListAttributeValue<string>;
+    variableAssetAssociation?: ListReferenceValue;
+    startDateAttr: EditableValue<Date>;
+    endDateAttr: EditableValue<Date>;
     displayModeAttr?: EditableValue<string>;
     displayTimeAttr?: EditableValue<Big>;
     displayUnitAttr?: EditableValue<string>;
@@ -58,6 +50,7 @@ export interface CompareDataContainerProps {
     onTimeChange?: ActionValue;
     featureList?: ListValue;
     featureNameAttr?: ListAttributeValue<string>;
+    onAssetClick?: ListActionValue;
     onAddProductionClick?: ActionValue;
 }
 
@@ -74,19 +67,27 @@ export interface CompareDataPreviewProps {
     translate: (text: string) => string;
     devMode: boolean;
     viewModeConfig: ViewModeConfigEnum;
-    selectedAsset: SelectedAssetPreviewType[];
-    dateRange: DateRangePreviewType[];
+    energyTypeConfig: EnergyTypeConfigEnum;
+    selectedAssetNames: string;
+    assetsDataSource: {} | { caption: string } | { type: string } | null;
+    assetNameAttr: string;
+    assetIsElecAttr: string;
+    assetIsGazAttr: string;
+    assetIsEauAttr: string;
+    assetIsAirAttr: string;
     timeSeriesDataSource: {} | { caption: string } | { type: string } | null;
     timestampAttr: string;
     valueAttr: string;
-    assetNameAttr: string;
-    metricTypeAttr: string;
-    energyTypeAttr: string;
-    assetVariablesDataSource: {} | { caption: string } | { type: string } | null;
+    tsAssetAssociation: string;
+    tsVariableAssociation: string;
+    variablesDataSource: {} | { caption: string } | { type: string } | null;
     variableNameAttr: string;
     variableUnitAttr: string;
     variableMetricTypeAttr: string;
     variableEnergyTypeAttr: string;
+    variableAssetAssociation: string;
+    startDateAttr: string;
+    endDateAttr: string;
     displayModeAttr: string;
     displayTimeAttr: string;
     displayUnitAttr: string;
@@ -98,5 +99,6 @@ export interface CompareDataPreviewProps {
     onTimeChange: {} | null;
     featureList: {} | { caption: string } | { type: string } | null;
     featureNameAttr: string;
+    onAssetClick: {} | null;
     onAddProductionClick: {} | null;
 }

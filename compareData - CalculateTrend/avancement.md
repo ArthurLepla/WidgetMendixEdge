@@ -1,3 +1,35 @@
+### ⌛ Changement (2025-01-11 – Correction erreurs XML) :
+Correction des erreurs de validation XML dans `src/CompareData.xml` :
+- **tsAssetAssociation** : Ajout de `<selectableObjects><entity name="Smart.Asset"/></selectableObjects>`
+- **tsVariableAssociation** : Ajout de `<selectableObjects><entity name="Smart.Variable"/></selectableObjects>`
+- **variableAssetAssociation** : Ajout de `<selectableObjects><entity name="Smart.Asset"/></selectableObjects>`
+
+### 🤔 Analyse :
+Les propriétés d'association de type `association` dans Mendix doivent spécifier soit `selectableObjects` soit `isMetaData="true"` pour indiquer quelles entités peuvent être sélectionnées. Sans ces attributs, le validateur XML génère des erreurs. Les corrections permettent au widget de se compiler correctement et d'être utilisable dans Mendix Studio Pro.
+
+### 💜 Prochaines étapes :
+- Tester la configuration des associations dans Mendix Studio Pro
+- Vérifier que les entités Smart.Asset et Smart.Variable sont bien disponibles dans le projet
+
+---
+
+### ⌛ Changement (2025-01-11 – Correction erreurs TypeScript) :
+Correction des erreurs TypeScript dans `src/CompareData.tsx` :
+- **Ligne 342** : Remplacement de `tsPoint.getValue('TimeSeriesPoint_Variable')` par `tsAssetAssociation?.get(tsPoint)?.value` pour utiliser correctement l'association Mendix via `ListReferenceValue`
+- **Lignes 652-653** : Suppression de la vérification `onAssetClick?.canExecute` car `ListActionValue` n'a pas cette propriété, simplification en `if (asset && onAssetClick)`
+
+### 🤔 Analyse :
+Les erreurs provenaient de l'utilisation incorrecte des APIs Mendix :
+- `getValue()` n'existe pas sur `ObjectItem` - il faut utiliser les associations via `ListReferenceValue.get()`
+- `ListActionValue` n'a pas de propriété `canExecute` - seules les `ActionValue` l'ont
+- La correction aligne le code avec les patterns utilisés dans `detailswidget - CalculateTrend`
+
+### 💜 Prochaines étapes :
+- Vérifier que les associations Mendix sont correctement configurées dans le XML
+- Tester l'exécution des actions `onAssetClick` avec des données réelles
+
+---
+
 ### ⌛ Changement (2025-08-09): Alignement CompareData avec Detailswidget (Double IPE, granularité, Big.js, export UTC)
 
 - `src/CompareData.tsx`: import `Big` par défaut, branchement des features via hooks (`useDoubleIPEToggle`, `useGranulariteManuelleToggle`), calcul `shouldShowToggle` piloté par feature flag, mapping granularité (control avancé vs affichage simple), normalisation `second`→`minute`.
@@ -180,6 +212,18 @@ Mendix utilise des z-index entre 50-1000 pour ses éléments UI (modales, sélec
 ### 💜 Prochaines étapes:
 - Vérifier que Detailswidget utilise la même stratégie de z-index pour la cohérence.
 - Documenter cette contrainte dans les guidelines de développement widget.
+
+### ⌛ Changement (2025-08-11 – Corrections TS2339 et TS2339/execute):
+
+- `src/CompareData.editorPreview.tsx` : remplacement de `props.selectedAsset` (inexistant dans `CompareDataPreviewProps`) par un comptage sûr basé sur `assetsDataSource`.
+- `src/CompareData.tsx` : correction de l'appel d'action liste `onAssetClick` — utilisation de `onAssetClick.get(asset)` pour obtenir un `ActionValue`, puis exécution conditionnelle (`canExecute`) via `action.execute()`.
+
+### 🤔 Analyse :
+Les typings générés n'exposent pas `selectedAsset` côté preview et `ListActionValue` ne s'exécute pas directement. L'accès via `get(item)` respecte l'API Mendix et élimine l'erreur `Property 'execute' does not exist on type 'ListActionValue'`.
+
+### 💜 Prochaines étapes :
+- Vérifier en exécution réelle que l'action est bien déclenchée avec l'`asset` attendu.
+- Si besoin, afficher un état désactivé lorsque `action?.canExecute` est faux.
 
 ### ⌛ Changement (2025-08-11 – alignement logique Detailswidget):
 - **SmartUnitUtils complet** : Remplacement complet du système de résolution des unités IPE pour aligner avec la logique sophistiquée de Detailswidget. Ajout des types `SmartMetricType`/`SmartEnergyType`, mappings complets, et fonctions de résolution intelligente.

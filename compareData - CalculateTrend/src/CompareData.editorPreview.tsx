@@ -3,7 +3,7 @@ import { CompareDataPreviewProps } from "../typings/CompareDataProps";
 import { BarChart3 } from "lucide-react";
 
 export function preview(props: CompareDataPreviewProps): ReactElement {
-    const selectedAssetCount = props.selectedAsset ? 1 : 0;
+    const selectedAssetCount = props.assetsDataSource ? 1 : 0;
     const hasTimeSeriesData = !!props.timeSeriesDataSource;
     
     return (

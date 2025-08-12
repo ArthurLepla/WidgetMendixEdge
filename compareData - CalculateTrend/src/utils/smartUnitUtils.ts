@@ -1,8 +1,8 @@
 // src/utils/smartUnitUtils.ts
 import { ListValue, ListAttributeValue, ValueStatus } from "mendix";
 
-// Types Smart compatibles avec DetailsWidget
-export type SmartMetricType = 'Conso' | 'Prod' | 'Prod_kg' | 'IPE' | 'IPE_kg';
+// Types Smart alignés exactement avec DetailsWidget
+export type SmartMetricType = 'Conso' | 'IPE' | 'IPE_kg' | 'Prod' | 'Prod_kg' | 'Custom';
 export type SmartEnergyType = 'Elec' | 'Gaz' | 'Eau' | 'Air' | 'None';
 
 export interface SmartVariableData {

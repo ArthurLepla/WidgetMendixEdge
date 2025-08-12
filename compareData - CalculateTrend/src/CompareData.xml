@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget id="mendix.comparedata.CompareData" pluginWidget="true" needsEntityContext="false" offlineCapable="true"
+<widget id="mendix.comparedata.CompareData" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
         supportedPlatform="Web"
         xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>Compare Data</name>
-    <description>Widget de comparaison des données de consommation entre assets</description>
+    <description>Widget de comparaison des données de consommation entre assets - Version refactorisée</description>
     <icon/>
     <properties>
         <!-- ==================== Configuration Générale ==================== -->
@@ -21,193 +21,247 @@
                     <enumerationValue key="ipe">IPE</enumerationValue>
                 </enumerationValues>
             </property>
+            <property key="energyTypeConfig" type="enumeration" required="true" defaultValue="Elec">
+                <caption>Type d'énergie</caption>
+                <description>Type d'énergie à afficher pour filtrer les données TimeSeriesPoint et Variables</description>
+                <enumerationValues>
+                    <enumerationValue key="Elec">Électricité</enumerationValue>
+                    <enumerationValue key="Gaz">Gaz</enumerationValue>
+                    <enumerationValue key="Eau">Eau</enumerationValue>
+                    <enumerationValue key="Air">Air comprimé</enumerationValue>
+                </enumerationValues>
+            </property>
         </propertyGroup>
 
-        <!-- ==================== Assets Sélectionnés ==================== -->
-        <propertyGroup caption="Assets">
-        <property key="selectedAsset" type="object" isList="true" required="true">
-            <caption>Assets sélectionnés</caption>
-            <description>Objet contenant les assets sélectionnés (noms concaténés)</description>
-            <properties>
-            <property key="selectedAssetName" type="attribute" required="true">
-                <caption>Noms des assets</caption>
-                <category>Assets</category>
-                <description>Noms des assets sélectionnés, séparés par des virgules</description>
-                <attributeTypes><attributeType name="String"/></attributeTypes>
+        <!-- ==================== Assets Sélectionnés (Multi-selection via Headers Widget) ==================== -->
+        <propertyGroup caption="Assets à Comparer">
+            <property key="selectedAssetNames" type="attribute" required="true">
+                <caption>Noms assets sélectionnés (concaténés)</caption>
+                <description>String contenant les noms des assets sélectionnés, séparés par des virgules (fourni par Headers Widget)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
             </property>
-            </properties>
-        </property>
-
-        <property key="dateRange" type="object" isList="true" required="true">
-            <caption>Plage de dates</caption>
-            <description>Objet contenant les dates de début et fin</description>
-            <properties>
-            <property key="startDateAttr" type="attribute" required="true">
-                <caption>Date de début</caption>
-                <category>Assets</category>
-                <description>Attribut date de début</description>
-                <attributeTypes><attributeType name="DateTime"/></attributeTypes>
+            <property key="assetsDataSource" type="datasource" isList="true" required="true">
+                <caption>Tous les assets disponibles</caption>
+                <description>Source complète des entités Smart.Asset pour résolution des noms concaténés</description>
             </property>
-            <property key="endDateAttr" type="attribute" required="true">
-                <caption>Date de fin</caption>
-                <category>Assets</category>
-                <description>Attribut date de fin</description>
-                <attributeTypes><attributeType name="DateTime"/></attributeTypes>
+            <property key="assetNameAttr" type="attribute" dataSource="assetsDataSource" required="true">
+                <caption>Nom Asset</caption>
+                <description>Attribut nom de l'asset (Smart.Asset.Nom) pour correspondance</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
             </property>
-            </properties>
-        </property>
+            <property key="assetIsElecAttr" type="attribute" dataSource="assetsDataSource" required="false">
+                <caption>Flag Électricité</caption>
+                <description>Attribut booléen isElec pour auto-détection d'énergie</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsGazAttr" type="attribute" dataSource="assetsDataSource" required="false">
+                <caption>Flag Gaz</caption>
+                <description>Attribut booléen isGaz pour auto-détection d'énergie</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsEauAttr" type="attribute" dataSource="assetsDataSource" required="false">
+                <caption>Flag Eau</caption>
+                <description>Attribut booléen isEau pour auto-détection d'énergie</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
+            <property key="assetIsAirAttr" type="attribute" dataSource="assetsDataSource" required="false">
+                <caption>Flag Air</caption>
+                <description>Attribut booléen isAir pour auto-détection d'énergie</description>
+                <attributeTypes>
+                    <attributeType name="Boolean"/>
+                </attributeTypes>
+            </property>
         </propertyGroup>
 
-
-        <!-- ==================== Données Temporelles ==================== -->
-        <propertyGroup caption="Données">
+        <!-- ==================== Données Temporelles (TimeSeriesPoint) ==================== -->
+        <propertyGroup caption="Données Temporelles">
             <property key="timeSeriesDataSource" type="datasource" isList="true" required="true">
-                <caption>Données temporelles</caption>
-                <description>Source de données des séries temporelles calculées</description>
+                <caption>Points de données</caption>
+                <description>Source de données des points temporels - entités Smart.TimeSeriesPoint</description>
             </property>
             <property key="timestampAttr" type="attribute" dataSource="timeSeriesDataSource" required="true">
                 <caption>Timestamp</caption>
-                <description>Attribut timestamp des données</description>
+                <description>Attribut timestamp des TimeSeriesPoint</description>
                 <attributeTypes>
                     <attributeType name="DateTime"/>
                 </attributeTypes>
             </property>
             <property key="valueAttr" type="attribute" dataSource="timeSeriesDataSource" required="true">
                 <caption>Valeur</caption>
-                <description>Attribut valeur des données</description>
+                <description>Attribut valeur des TimeSeriesPoint</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="assetNameAttr" type="attribute" dataSource="timeSeriesDataSource" required="true">
-                <caption>Nom Asset</caption>
-                <description>Attribut nom de l'asset associé</description>
-                <attributeTypes>
-                    <attributeType name="String"/>
-                </attributeTypes>
+
+            <!-- Association TimeSeriesPoint -> Asset -->
+            <property key="tsAssetAssociation" type="association"
+                      dataSource="timeSeriesDataSource"
+                      selectableObjects="assetsDataSource" required="true">
+                <caption>Association Asset</caption>
+                <description>Association TimeSeriesPoint -> Asset pour lien direct avec Smart.Asset</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
             </property>
-            <property key="metricTypeAttr" type="attribute" dataSource="timeSeriesDataSource" required="false">
-                <caption>Type métrique</caption>
-                <description>Attribut type de métrique (Conso, IPE, etc.)</description>
-                <attributeTypes>
-                    <attributeType name="Enum"/>
-                </attributeTypes>
-            </property>
-            <property key="energyTypeAttr" type="attribute" dataSource="timeSeriesDataSource" required="false">
-                <caption>Type énergie</caption>
-                <description>Attribut type d'énergie (Elec, Gaz, Eau, Air)</description>
-                <attributeTypes>
-                    <attributeType name="Enum"/>
-                </attributeTypes>
+
+            <!-- Association TimeSeriesPoint -> Variable -->
+            <property key="tsVariableAssociation" type="association"
+                      dataSource="timeSeriesDataSource"
+                      selectableObjects="variablesDataSource" required="false">
+                <caption>Association Variable</caption>
+                <description>Association TimeSeriesPoint -> Variable pour obtenir MetricType et EnergyType</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
             </property>
         </propertyGroup>
 
-        <!-- ==================== Variables des Assets ==================== -->
-        <propertyGroup caption="Variables des Assets">
-            <property key="assetVariablesDataSource" type="datasource" isList="true" required="false">
+        <!-- ==================== Variables des Assets (Automatique) ==================== -->
+        <propertyGroup caption="Variables Assets">
+            <property key="variablesDataSource" type="datasource" isList="true" required="false">
                 <caption>Variables des assets</caption>
-                <description>Liste des variables des assets sélectionnés pour récupérer les unités automatiquement</description>
+                <description>Source des variables Smart.Variable pour résolution automatique des unités</description>
             </property>
-            <property key="variableNameAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+            <property key="variableNameAttr" type="attribute" dataSource="variablesDataSource" required="false">
                 <caption>Nom Variable</caption>
-                <description>Attribut contenant le nom de la variable</description>
+                <description>Attribut nom de la variable</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
-            <property key="variableUnitAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
+            <property key="variableUnitAttr" type="attribute" dataSource="variablesDataSource" required="false">
                 <caption>Unité Variable</caption>
-                <description>Attribut contenant l'unité de la variable</description>
+                <description>Attribut unité de la variable</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
-            <property key="variableMetricTypeAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
-                <caption>Type Métrique Variable</caption>
-                <description>Attribut contenant le type de métrique de la variable</description>
+            <property key="variableMetricTypeAttr" type="attribute" dataSource="variablesDataSource" required="false">
+                <caption>Type Métrique</caption>
+                <description>Enum MetricType de la variable (Conso, IPE, IPE_kg, Prod, etc.)</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
-            <property key="variableEnergyTypeAttr" type="attribute" dataSource="assetVariablesDataSource" required="false">
-                <caption>Type Énergie Variable</caption>
-                <description>Attribut contenant le type d'énergie de la variable</description>
+            <property key="variableEnergyTypeAttr" type="attribute" dataSource="variablesDataSource" required="false">
+                <caption>Type Énergie</caption>
+                <description>Enum EnergyType de la variable (Elec, Gaz, Eau, Air, None)</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+
+            <!-- Association Variable -> Asset -->
+            <property key="variableAssetAssociation" type="association"
+                      dataSource="variablesDataSource"
+                      selectableObjects="assetsDataSource" required="false">
+                <caption>Association Variable-Asset</caption>
+                <description>Association Variable -> Asset pour lier variables aux assets</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
+            </property>
+        </propertyGroup>
+
+        <!-- ==================== Plage de Dates ==================== -->
+        <propertyGroup caption="Période d'Analyse">
+            <property key="startDateAttr" type="attribute" required="true">
+                <caption>Date de début</caption>
+                <description>Attribut date de début de la période</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="endDateAttr" type="attribute" required="true">
+                <caption>Date de fin</caption>
+                <description>Attribut date de fin de la période</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
                 </attributeTypes>
             </property>
         </propertyGroup>
 
-        <!-- ==================== Contrôles d'Affichage ==================== -->
-        <propertyGroup caption="Contrôles d'Affichage">
+        <!-- ==================== Contrôles Granularité ==================== -->
+        <propertyGroup caption="Contrôles Granularité">
             <property key="displayModeAttr" type="attribute" required="false">
-                <caption>Attribut Mode (Écriture)</caption>
-                <description>Attribut pour stocker le changement de mode d'affichage</description>
+                <caption>Attribut Mode (Lecture)</caption>
+                <description>Attribut pour le mode de granularité (Auto/Strict)</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
             <property key="displayTimeAttr" type="attribute" required="false">
-                <caption>Attribut Temps (Écriture)</caption>
-                <description>Attribut pour stocker le changement de temps</description>
+                <caption>Attribut Temps (Lecture)</caption>
+                <description>Attribut pour la valeur temporelle</description>
                 <attributeTypes>
                     <attributeType name="Integer"/>
                 </attributeTypes>
             </property>
             <property key="displayUnitAttr" type="attribute" required="false">
-                <caption>Attribut Unité (Écriture)</caption>
-                <description>Attribut pour stocker le changement d'unité</description>
+                <caption>Attribut Unité (Lecture)</caption>
+                <description>Attribut pour l'unité temporelle</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
             <property key="displayPreviewOKAttr" type="attribute" required="false">
-                <caption>Attribut Preview OK (Écriture)</caption>
-                <description>Attribut pour confirmer les changements</description>
+                <caption>Attribut Preview OK (Lecture)</caption>
+                <description>Attribut booléen de validation</description>
                 <attributeTypes>
                     <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
             <property key="bufferModeAttr" type="attribute" required="false">
                 <caption>Attribut Mode Buffer (Écriture)</caption>
-                <description>Attribut pour le buffer de mode</description>
+                <description>Attribut buffer pour modification mode</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
             <property key="bufferTimeAttr" type="attribute" required="false">
-                <caption>Attribut Time Buffer (Écriture)</caption>
-                <description>Attribut pour le buffer de temps</description>
+                <caption>Attribut Temps Buffer (Écriture)</caption>
+                <description>Attribut buffer pour modification temps</description>
                 <attributeTypes>
                     <attributeType name="Integer"/>
                 </attributeTypes>
             </property>
             <property key="bufferUnitAttr" type="attribute" required="false">
-                <caption>Attribut Unit Buffer (Écriture)</caption>
-                <description>Attribut pour le buffer d'unité</description>
+                <caption>Attribut Unité Buffer (Écriture)</caption>
+                <description>Attribut buffer pour modification unité</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
             <property key="onModeChange" type="action" required="false">
-                <caption>On Mode Change</caption>
-                <description>Microflow à exécuter quand le mode change</description>
+                <caption>Action Mode Change</caption>
+                <description>Microflow à exécuter lors du changement de mode</description>
             </property>
             <property key="onTimeChange" type="action" required="false">
-                <caption>On Time/Unit Change</caption>
-                <description>Microflow à exécuter quand la valeur ou l'unité change</description>
+                <caption>Action Time/Unit Change</caption>
+                <description>Microflow à exécuter lors du changement de temps/unité</description>
             </property>
         </propertyGroup>
 
         <!-- ==================== Feature Toggles ==================== -->
         <propertyGroup caption="Feature Toggles">
             <property key="featureList" type="datasource" isList="true" required="false">
-                <caption>FeatureToggle – liste activée</caption>
-                <description>Liste des features activées pour ce widget</description>
+                <caption>Features activées</caption>
+                <description>Liste des feature toggles activées pour ce widget</description>
             </property>
             <property key="featureNameAttr" type="attribute" dataSource="featureList" required="false">
-                <caption>Attribut FeatureName</caption>
-                <description>Attribut contenant le nom de la feature</description>
+                <caption>Nom Feature</caption>
+                <description>Enum contenant le nom de la feature</description>
                 <attributeTypes>
                     <attributeType name="Enum"/>
                 </attributeTypes>
@@ -216,9 +270,13 @@
 
         <!-- ==================== Actions ==================== -->
         <propertyGroup caption="Actions">
+            <property key="onAssetClick" type="action" required="false" dataSource="assetsDataSource">
+                <caption>Action Click Asset</caption>
+                <description>Action à exécuter lors du clic sur un asset</description>
+            </property>
             <property key="onAddProductionClick" type="action" required="false">
-                <caption>Action de saisie de production</caption>
-                <description>Action à exécuter pour naviguer vers la page de saisie de production</description>
+                <caption>Action Ajout Production</caption>
+                <description>Action pour naviguer vers la saisie de production</description>
             </property>
         </propertyGroup>
     </properties>

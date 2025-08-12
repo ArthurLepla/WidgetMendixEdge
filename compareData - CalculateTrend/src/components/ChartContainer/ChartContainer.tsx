@@ -40,6 +40,9 @@ interface ChartContainerProps {
     bufferUnitAttr?: EditableValue<string>;
     onModeChange?: ActionValue;
     onTimeChange?: ActionValue;
+    // Props spécifiques au comparatif
+    onAssetClick?: (assetId: string) => void;
+    selectedAssets?: Array<{ id: string; name: string }>;
 }
 
 // Affichage figé en mode "dashboard" (plus de modes sélectionnables)
