@@ -457,15 +457,6 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                         };
                     })
                 });
-            } else {
-                // Aide au diagnostic quand la DS est vide
-                debug("⚠️ DataSource TimeSeries vide - aucun point renvoyé par la page", {
-                    viewMode: viewModeConfig,
-                    energyType: energyTypeConfig,
-                    selectedAssets: selectedAssets.map(a => a.name),
-                    startDate: startDateAttr?.value,
-                    endDate: endDateAttr?.value
-                });
             }
 
             selectedAssets.forEach(assetInfo => {
@@ -527,25 +518,14 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                     return;
                 }
 
-                // Statistiques de rejet/acceptation pour diagnostic fin
-                const rejectStats = {
-                    totalPoints: assetTimeSeriesPoints.length,
-                    missingVariableAssociation: 0,
-                    variableNotInVariablesDS: 0,
-                    wrongAssetLink: 0,
-                    invalidByMode: 0,
-                    notConsoMetric: 0,
-                    energyMismatch: 0,
-                    missingTimestamp: 0,
-                    missingValue: 0
-                };
+
 
                 // Filtrage correct avec vérification des associations Variable-Asset
                 const filteredPointsWithVariables = assetTimeSeriesPoints.map(tsPoint => {
                     // 1) Récupérer la variable associée au point via tsVariableAssociation
                     const variableRef = tsVariableAssociation?.get(tsPoint)?.value;
+                    
                     if (!variableRef) {
-                        rejectStats.missingVariableAssociation++;
                         debug(`❌ TimeSeriesPoint ${tsPoint.id} sans association Variable - SKIP`);
                         return null;
                     }
@@ -554,14 +534,14 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                     const variable = (variablesDataSource?.items || []).find(v => v.id === variableRef.id) || (variableRef as any);
                     if ((variablesDataSource?.items || []).find(v => v.id === variableRef.id) == null) {
                         // La variable n'est pas dans la DS fournie — on tente un fallback direct via l'association
-                        rejectStats.variableNotInVariablesDS++;
                         debug(`⚠️ Variable ${variableRef.id} absente de variablesDataSource — utilisation du fallback via association`);
                     }
+
+
 
                     // 3) Vérification stricte : variable liée à l'asset correct
                     const variableAssetRef = tsAssetAssociation?.get(tsPoint)?.value;
                     if (!variableAssetRef || variableAssetRef.id !== assetInfo.id) {
-                        rejectStats.wrongAssetLink++;
                         debug(`❌ TimeSeriesPoint ${tsPoint.id} pas lié à l'asset ${assetInfo.name} - SKIP`);
                         return null;
                     }
@@ -604,19 +584,11 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                         // Energetic: MetricType=Conso, EnergyType=widget config (tolérer energyType manquant ou "None")
                         const energyMatches = !energyType || energyType === energyTypeConfig || energyType === "None";
                         isValid = metricType === METRIC_TYPES.CONSO && energyMatches;
-                        if (!isValid) {
-                            if (metricType !== METRIC_TYPES.CONSO) {
-                                rejectStats.notConsoMetric++;
-                            } else {
-                                rejectStats.energyMismatch++;
-                            }
-                        }
+
                     } else if (viewModeConfig === "ipe") {
                         // IPE: MetricType=IPE ou IPE_kg, EnergyType=widget config
                         isValid = (metricType === METRIC_TYPES.IPE || metricType === METRIC_TYPES.IPE_KG) && energyType === energyTypeConfig;
-                        if (!isValid) {
-                            rejectStats.invalidByMode++;
-                        }
+
                     }
 
                     if (!isValid) {
@@ -695,8 +667,7 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                     const temporalData = pointsWithVars.map(item => {
                         const timestamp = timestampAttr.get(item.tsPoint)?.value;
                         const value = valueAttr.get(item.tsPoint)?.value;
-                        if (!timestamp) rejectStats.missingTimestamp++;
-                        if (value === undefined || value === null) rejectStats.missingValue++;
+
                         return { timestamp, value, unit: item.variableUnit };
                     }).filter(d => d.timestamp && d.value !== undefined);
 
@@ -769,11 +740,7 @@ export function CompareData(props: CompareDataContainerProps): ReactElement {
                     });
                 });
 
-                // Log de synthèse pour l'asset
-                debug(`📈 Bilan filtrage pour ${assetInfo.name}:`, {
-                    ...rejectStats,
-                    acceptedAfterFilter: processedAssets.filter(a => a.assetId === assetInfo.id).length
-                });
+
             });
 
             setProcessingWarnings(warnings);
