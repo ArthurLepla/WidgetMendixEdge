@@ -23,48 +23,40 @@ export function getProperties(values: AdvancedSankeyV2PreviewProps, defaultPrope
 export function check(values: AdvancedSankeyV2PreviewProps): Problem[] {
     const errors: Problem[] = [];
 
-    if (!values.hierarchyConfig || values.hierarchyConfig.length === 0) {
+    // Vérification de la source de données EnergyFlowNode
+    if (!values.energyFlowDataSource) {
         errors.push({
-            property: "hierarchyConfig",
-            message: "Au moins un niveau hiérarchique doit être configuré."
+            property: "energyFlowDataSource",
+            message: "La source de données EnergyFlowNode est requise."
         });
     }
 
-    // Vérification des IDs uniques des niveaux
-    const levelIds = new Set<string>();
-    values.hierarchyConfig?.forEach(config => {
-        if (levelIds.has(config.levelId)) {
-            errors.push({
-                property: "hierarchyConfig",
-                message: `L'identifiant de niveau '${config.levelId}' est utilisé plusieurs fois. Les identifiants doivent être uniques.`
-            });
-        }
-        levelIds.add(config.levelId);
-
-        // Vérification de l'entité du niveau
-        if (!config.entityPath) {
-            errors.push({
-                property: "hierarchyConfig",
-                message: `L'entité source est requise pour le niveau '${config.levelId}'.`
-            });
-        }
-
-        // Vérification de l'ordre des niveaux
-        if (config.levelOrder === null || config.levelOrder < 0) {
-            errors.push({
-                property: "hierarchyConfig",
-                message: `L'ordre du niveau '${config.levelId}' doit être un nombre positif ou nul.`
-            });
-        }
-    });
-
-    // Vérification de l'ordre des niveaux
-    const orders = values.hierarchyConfig?.map(config => config.levelOrder) || [];
-    const uniqueOrders = new Set(orders);
-    if (uniqueOrders.size !== orders.length) {
+    // Vérifications des attributs requis
+    if (!values.sourceAssetAttribute) {
         errors.push({
-            property: "hierarchyConfig",
-            message: "Chaque niveau doit avoir un ordre unique."
+            property: "sourceAssetAttribute",
+            message: "L'attribut Asset source est requis."
+        });
+    }
+
+    if (!values.targetAssetAttribute) {
+        errors.push({
+            property: "targetAssetAttribute", 
+            message: "L'attribut Asset cible est requis."
+        });
+    }
+
+    if (!values.flowValueAttribute) {
+        errors.push({
+            property: "flowValueAttribute",
+            message: "L'attribut Valeur du flux est requis."
+        });
+    }
+
+    if (!values.percentageAttribute) {
+        errors.push({
+            property: "percentageAttribute",
+            message: "L'attribut Pourcentage est requis."
         });
     }
 
@@ -87,9 +79,9 @@ export function getPreview(values: AdvancedSankeyV2PreviewProps, isDarkMode: boo
                 backgroundColor: isDarkMode ? "#454545" : "#FFFFFF"
             }
         },
-        createElement("div", null, "Advanced Sankey Diagram Preview"),
+        createElement("div", null, "Advanced Sankey Diagram Preview (EnergyFlowNode)"),
         createElement("div", null, values.title || "Diagramme Sankey"),
-        createElement("div", null, `${values.hierarchyConfig?.length || 0} niveau(x) configuré(s)`)
+        createElement("div", null, `Type: ${values.energyType} - Métrique: ${values.metricType}`)
     );
 }
 

@@ -1,5 +1,21 @@
 # 📋 Avancement du Projet AdvancedSankey
 
+## 12 août 2025 - Migration EnergyFlowNode en préservant le visuel
+
+### ⌛ Changement :
+- Intégration du nouveau backend EnergyFlowNode via `useVisualSankeyData` et `VisualDataAdapter`
+- Refactor de `SankeyChart` (types explicites `VisualNode/VisualLink`, export par défaut) en conservant les classes CSS existantes (`sankey-node`, `sankey-link`, `sankey-label`, `sankey-chart`)
+- Simplification de `AdvancedSankeyV2.tsx` pour consommer les données adaptées tout en gardant la structure DOM et les styles (`sankey-container`, `sankey-header`, etc.)
+
+### 🤔 Analyse :
+- Maintenabilité : séparation nette données/affichage, adaptation unique EnergyFlowNode → visuel. Le front reste stable et réutilisable.
+- Scalabilité : types alignés Mendix (`ListValue`, `ListAttributeValue`, `ValueStatus`) et calculs d3 isolés; la migration n’impacte pas le CSS ni le layout.
+
+### 🔜 Prochaines étapes :
+- Réintroduire le breadcrumb et le DisplayModeSwitch (consommation/coût) pour parité visuelle à 100% selon le plan.
+- Optionnel: remettre le tooltip portal (actuellement tooltip local conservé) si nécessaire.
+- Lancer build complet et tests visuels pour vérifier identité du rendu.
+
 ## 16 juin 2025 - Suppression du Repository Git
 
 ### ⌛ Changement :
