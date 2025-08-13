@@ -27,9 +27,9 @@ export interface AdvancedSankeyV2ContainerProps {
     width: number;
     height: number;
     showValues: boolean;
-    showPercentages: boolean;
-    clickedNodeAttribute?: EditableValue<string>;
     onNodeClick?: ActionValue;
+    onNodeDetails?: ActionValue;
+    selectedAssetNameAttribute?: EditableValue<string>;
     showDebugTools: boolean;
 }
 
@@ -55,8 +55,8 @@ export interface AdvancedSankeyV2PreviewProps {
     width: number | null;
     height: number | null;
     showValues: boolean;
-    showPercentages: boolean;
-    clickedNodeAttribute: string;
     onNodeClick: {} | null;
+    onNodeDetails: {} | null;
+    selectedAssetNameAttribute: string;
     showDebugTools: boolean;
 }

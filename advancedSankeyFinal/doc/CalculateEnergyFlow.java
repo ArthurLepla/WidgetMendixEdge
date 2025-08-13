@@ -107,19 +107,20 @@ public class CalculateEnergyFlow extends CustomJavaAction<java.lang.Void>
 				Asset sourceAsset = flowNode.getSourceAsset(context);
 				Asset targetAsset = flowNode.getTargetAsset(context);
 				
-				if (sourceAsset == null || targetAsset == null) {
-					Core.getLogger("CalculateEnergyFlow").warn("Asset manquant pour EnergyFlowNode: " + flowNode.getMendixObject().getId());
+				// Accepte un flux ROOT: sourceAsset peut être nul (origine virtuelle)
+				if (targetAsset == null) {
+					Core.getLogger("CalculateEnergyFlow").warn("Target asset manquant pour EnergyFlowNode: " + flowNode.getMendixObject().getId());
 					continue;
 				}
 				
-				Core.getLogger("CalculateEnergyFlow").info("🔄 Processing flow: " + sourceAsset.getNom() + " → " + targetAsset.getNom());
+				Core.getLogger("CalculateEnergyFlow").info("🔄 Processing flow: " + (sourceAsset != null ? sourceAsset.getNom() : "ROOT") + " → " + targetAsset.getNom());
 				
 				// Calculer la valeur pour l'asset target (c'est la valeur du flux)
 				java.math.BigDecimal flowValue = calculateAssetValue(context, targetAsset, CalculationTrend);
 				flowNode.setFlowValue(flowValue);
 				
 				// Alimenter le regroupement par parent pour normalisation ultérieure
-				Long parentId = sourceAsset.getMendixObject().getId().toLong();
+				Long parentId = sourceAsset != null ? sourceAsset.getMendixObject().getId().toLong() : -1L; // -1 = groupe ROOT
 				flowsByParent.computeIfAbsent(parentId, k -> new ArrayList<>()).add(flowNode);
 				
 			} catch (Exception e) {
@@ -186,6 +187,9 @@ public class CalculateEnergyFlow extends CustomJavaAction<java.lang.Void>
 		java.math.BigDecimal totalValue = java.math.BigDecimal.ZERO;
 		
 		try {
+			// 🆕 Si on utilisait un asset racine virtuel, on le détectait par le nom. Ce cas n'est plus nécessaire
+			// car la racine est représentée par des EnergyFlowNode avec source nulle.
+			
 			// Trouver la variable correspondante pour cet asset, MetricType et EnergyType
 			Variable matchingVariable = findMatchingVariable(context, asset);
 			
@@ -258,6 +262,11 @@ public class CalculateEnergyFlow extends CustomJavaAction<java.lang.Void>
 		
 		return totalValue;
 	}
+	
+	/**
+	 * 🆕 NOUVELLE MÉTHODE : Calculer la valeur du root virtuel
+	 */
+	// Plus de calcul spécifique pour un asset root virtuel — la racine est implicite (source nulle)
 	
 	/**
 	 * Trouve la variable correspondante pour un asset, MetricType et EnergyType

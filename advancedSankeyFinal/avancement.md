@@ -1,5 +1,125 @@
 # 📋 Avancement du Projet AdvancedSankey
 
+## 30 juin 2025 - Nettoyage des propriétés obsolètes
+
+### ⌛ Changement :
+**Suppression des propriétés non utilisées** dans le fichier XML du widget pour simplifier l'interface et éviter la confusion.
+
+**Propriétés retirées** :
+- `showPercentages` : Propriété non utilisée dans le code (les pourcentages sont affichés automatiquement sur les liens)
+- `clickedNodeAttribute` : Propriété obsolète remplacée par `clickedAssetAttribute` pour la vue détaillée
+
+**Propriétés conservées** (toutes utilisées) :
+- Configuration des flux : `energyFlowDataSource`, `sourceAssetAttribute`, `targetAssetAttribute`, `flowValueAttribute`, `percentageAttribute`
+- Configuration énergétique : `energyType`, `metricType`
+- Affichage : `title`, `width`, `height`, `showValues`
+- Interactions : `onNodeClick`, `onNodeDetails`, `clickedAssetAttribute`
+- Développement : `showDebugTools`
+
+### 🤔 Analyse :
+**Impact Maintenabilité** : Simplification de l'interface de configuration du widget, suppression de la confusion potentielle avec des propriétés non fonctionnelles. Les types TypeScript sont automatiquement mis à jour.
+
+**Impact UX** : Interface plus claire pour les développeurs Mendix, moins de propriétés à configurer inutilement.
+
+### 💜 Prochaines étapes :
+- Vérifier que le build fonctionne correctement après le nettoyage
+- Optionnel : ajouter des validations pour s'assurer que toutes les propriétés requises sont configurées
+
+## 30 juin 2025 - Implémentation Vue Détaillée (Ctrl+clic)
+
+### ⌛ Changement additionnel (interaction unifiée + fiabilité MF) :
+- Uniformisation: **Ctrl+clic partout** pour ouvrir la vue détaillée. Le clic simple conserve uniquement la navigation (si enfants), sinon aucune action.
+- Fiabilité: exécution du microflow `onNodeDetails` au tick suivant après mise à jour de `selectedAssetNameAttribute` (via `requestAnimationFrame`) afin d'éviter une course où la valeur n'est pas encore visible côté microflow.
+
+### 🤔 Analyse :
+Évite toute ambiguïté d’UX; supprime les effets de bord où les datasources de page s’exécutaient avant que le nom sélectionné ne soit propagé. En cas de besoin, on pourra augmenter le délai (setTimeout 0–10ms) ou forcer un commit côté microflow avant l’ouverture de page.
+
+### ⌛ Changement :
+**Nouvelle fonctionnalité d'interaction** : Ajout d'un système de vue détaillée accessible via Ctrl+clic sur les nœuds du Sankey.
+
+**Modifications apportées** :
+- **XML Widget** : Ajout de 2 nouvelles propriétés :
+  - `onNodeDetails` : Action Mendix pour ouvrir la vue détaillée
+  - `clickedAssetAttribute` : Attribut pour stocker l'asset correspondant au nœud cliqué
+- **SankeyChart** : Gestion du Ctrl+clic avec logique intelligente :
+  - Clic normal : drill-down si enfants, sinon vue détaillée
+  - Ctrl+clic : vue détaillée quel que soit le nœud
+  - Tous les nœuds sont maintenant cliquables (curseur pointer)
+- **Tooltips** : Ajout de hints contextuels "Clic: navigation • Ctrl+clic: vue détaillée"
+- **Mapping Asset** : Fonction `findAssetForNode()` pour récupérer l'asset correspondant depuis les EnergyFlowNode
+
+### 🤔 Analyse :
+**Impact UX** : L'utilisateur peut maintenant naviguer dans le Sankey ET accéder aux vues détaillées depuis le même widget, avec une interaction intuitive (Ctrl+clic). Les hints visuels guident l'utilisateur sans surcharge d'interface.
+
+**Impact Maintenabilité** : Architecture propre avec séparation des responsabilités. Le mapping asset est fait côté widget, permettant une intégration flexible avec les microflows Mendix. Les types TypeScript sont correctement mis à jour.
+
+**Impact Scalabilité** : La solution s'adapte automatiquement selon que le nœud a des enfants ou non, évitant les clics inutiles sur les feuilles.
+
+### 💜 Prochaines étapes :
+- Tester l'intégration avec les microflows Mendix
+- Optionnel : ajouter un indicateur visuel (icône) sur les nœuds feuilles pour suggérer la vue détaillée
+- Considérer l'ajout d'un double-clic comme alternative au Ctrl+clic
+
+## 13 août 2025 - Centrage SVG + Labels non chevauchants
+
+### ⌛ Changement :
+- Ajout d'un `viewBox` et `preserveAspectRatio="xMidYMid meet"` sur le `<svg>` dans `SankeyChart` pour un viewport cohérent et un centrage fiable.
+- Marges horizontales et verticales clampées (8% de la largeur, bornées à 40–120 px; 24–80 px en hauteur) pour éviter une zone vide excessive à droite.
+- Troncature mesurée côté D3 des labels avec `getComputedTextLength()` et recherche binaire; masquage automatique si la hauteur du nœud < 14 px.
+
+### 🤔 Analyse :
+Ces ajustements alignent la largeur connue du layout D3 avec celle du viewport SVG (problème observé: `svg width: 100%` vs `extent` trop étroit). Le graphe est désormais correctement centré et occupe mieux l'espace horizontal. Les labels ne se chevauchent plus grâce à la troncature calculée côté D3 (les règles CSS d'ellipsis sur `<text>` n'étant pas appliquées par les navigateurs). L'impact est strictement visuel et améliore la lisibilité sans modifier la logique métier.
+
+### 💜 Prochaines étapes :
+- Optionnel: ajouter une routine d'anti-collision des labels (léger décalage Y) pour les cas extrêmes.
+- Rendre la troncature et les seuils configurables via les props du widget.
+
+### ⌛ Changement additionnel (sécurité données 0):
+- Filtrage des liens de valeur 0 lors de la navigation et dans le rendu d3 (`useNavigationState` et `SankeyChart`) pour éviter des états D3 invalides et positions NaN.
+
+### 🤔 Analyse :
+Certaines vues remontaient des liens à 0 (ex: `USINE -> FACILITIES (0)`), ce qui peut conduire à des layouts non définis dans `d3-sankey`. En excluant ces liens non significatifs, on garantit la stabilité du calcul tout en conservant la lisibilité.
+
+## 13 août 2025 - UX Breadcrumb (suppression de la redondance à l’ouverture)
+
+### ⌛ Changement :
+- Initialisation de la navigation directement sur la racine réelle si elle est identifiable (unique `level === 0` ou nom `ALIMENTATION PRINCIPALE`).
+- Breadcrumb ajusté: quand une racine réelle est présente, on n’affiche pas le crumb "Vue d'ensemble" au démarrage.
+
+### 🤔 Analyse :
+L’ouverture montrait systématiquement "Vue d'ensemble" puis, après clic, "Vue d'ensemble > ALIMENTATION PRINCIPALE > …". Cette redondance brouille la lecture. En initialisant sur la racine réelle et en adaptant le breadcrumb, l’expérience est plus logique: on commence directement au bon niveau.
+
+### 💜 Prochaines étapes :
+- Rendre ce comportement configurable (prop: `startAtRealRoot: boolean`).
+
+### ⌛ Changement complémentaire :
+- Fallback synthétique des liens lors de la navigation si `links.length === 0` entre la racine courante et ses enfants: création de liens epsilon pour éviter un layout invalide et garder la lisibilité.
+
+### 🤔 Analyse :
+Certaines branches reportent uniquement des valeurs 0 en premier niveau (USINE → FACILITIES/PRODUCTION/SUPPORT). D3 ne positionne pas les nœuds sans liens; le fallback construit des liens visuels basés sur la somme entrante de chaque enfant (ou un epsilon), assurant un affichage stable.
+
+## 13 août 2025 - Anti-chevauchement labels/liens
+
+### ⌛ Changement :
+- Placement des labels sur des “pistes” gauche/droite hors des nœuds, à l’opposé des liens, avec connecteurs subtils.
+- Troncature mesurée; évitement de collision vertical glouton pour maintenir les espacements.
+- Retrait de l’arrière-plan précédent.
+
+### 🤔 Analyse :
+Solution légère, sans dépendances. Améliore la lisibilité dans les vues denses; peut être étendu par un algorithme itératif si besoin.
+
+## 30 juin 2025 - Correction TypeScript d3-sankey Import
+
+### ⌛ Changement :
+**Correction TypeScript** : Résolution de l'erreur TypeScript `Property 'sankeyCenter' does not exist on type 'typeof import("d3")'` en utilisant l'import direct de `sankeyCenter` depuis `d3-sankey` au lieu de l'accès via namespace `d3`.
+
+### 🤔 Analyse :
+**Impact Maintenabilité** : Correction d'une erreur de type qui empêchait la compilation TypeScript. L'utilisation correcte des imports spécifiques de `d3-sankey` améliore la clarté du code et évite les confusions entre les différents modules D3.
+
+### 🔜 Prochaines étapes :
+- Vérifier qu'aucune autre erreur TypeScript similaire n'existe dans le projet
+- S'assurer que tous les imports D3 utilisent les modules appropriés
+
 ## 12 août 2025 - Migration EnergyFlowNode en préservant le visuel
 
 ### ⌛ Changement :

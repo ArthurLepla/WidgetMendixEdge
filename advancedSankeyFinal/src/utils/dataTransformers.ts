@@ -109,3 +109,144 @@ export class EnergyCalculations {
         return `${value.toFixed(1)} ${unit}`;
     }
 }
+
+/**
+ * Service de conversion d'unités (énergie/volume) avec détection d'unité de base.
+ * - Énergie: Wh, kWh, MWh, GWh
+ * - Volume: L, m3
+ */
+export type UnitKind = "energy" | "volume" | "unknown";
+
+export interface UnitDescriptor {
+    kind: UnitKind;
+    base: string; // Unité de base interne (kWh pour énergie, L pour volume)
+    unit: string; // Unité canonique d'entrée (ex: "kwh", "m3")
+}
+
+export class UnitConversionError extends Error {
+    constructor(
+        message: string,
+        public readonly code: "UNKNOWN_UNIT" | "INCOMPATIBLE_UNITS",
+        public readonly meta?: Record<string, any>
+    ) {
+        super(message);
+        this.name = "UnitConversionError";
+    }
+}
+
+export class UnitConversionService {
+    // Tables de conversion vers unité de base
+    // Base énergie en kWh (aligné avec les capteurs)
+    private static energyToKWh: Record<string, number> = {
+        kwh: 1,
+        mwh: 1000,
+        gwh: 1000 * 1000,
+        wh: 1 / 1000
+    };
+
+    private static volumeToL: Record<string, number> = {
+        l: 1,
+        liter: 1,
+        litres: 1,
+        m3: 1000,
+        "m^3": 1000,
+        cubicmeter: 1000
+    };
+
+    /** Normalise une unité brute: lowercase, suppression espaces/punct, gestion de "m³" → "m3" */
+    private static canonicalizeUnit(raw?: string | null): string {
+        if (!raw) return "";
+        const replaced = raw.replace(/³/g, "3");
+        const cleaned = replaced.toLowerCase().replace(/[^a-z0-9]/g, "");
+        // synonymes → canonique
+        const synonyms: Record<string, string> = {
+            kilowatthour: "kwh",
+            megawatthour: "mwh",
+            gigawatthour: "gwh",
+            watthour: "wh",
+            litre: "l",
+            litres: "l",
+            liter: "l",
+            liters: "l",
+            cubicmeter: "m3",
+            cubicmeters: "m3",
+            cubicmetre: "m3",
+            cubicmetres: "m3"
+        };
+        return synonyms[cleaned] ?? cleaned;
+    }
+
+    /** Détecte le type et l'unité de base probable à partir d'une chaîne (ex: "kWh", "m3"). */
+    static detectUnit(unitInput?: string | null): UnitDescriptor {
+        const u = this.canonicalizeUnit(unitInput);
+        if (!u) return { kind: "unknown", base: "", unit: "" };
+        if (u in this.energyToKWh) return { kind: "energy", base: "kWh", unit: u };
+        if (u in this.volumeToL) return { kind: "volume", base: "L", unit: u };
+        // Aucun match → inconnu
+        return { kind: "unknown", base: "", unit: u };
+    }
+
+    /** Détecte et lève une erreur si l'unité est inconnue */
+    static requireKnownUnit(unitInput?: string | null): UnitDescriptor {
+        const d = this.detectUnit(unitInput);
+        if (d.kind === "unknown") {
+            throw new UnitConversionError("Unknown unit", "UNKNOWN_UNIT", { unit: unitInput });
+        }
+        return d;
+    }
+
+    /** Convertit une valeur depuis son unité d'origine vers une unité cible. */
+    static convert(value: number, fromUnit: string, toUnit: string): number {
+        const from = this.canonicalizeUnit(fromUnit);
+        const to = this.canonicalizeUnit(toUnit);
+        const fromDesc = this.requireKnownUnit(from);
+        const toDesc = this.requireKnownUnit(to);
+
+        if (fromDesc.kind === "energy" && toDesc.kind === "energy") {
+            const vInkWh = value * (this.energyToKWh[from] ?? 1);
+            const factor = Object.entries(this.energyToKWh).reduce((acc, [k, f]) => (k === to ? f : acc), 1);
+            return vInkWh / factor;
+        }
+
+        if (fromDesc.kind === "volume" && toDesc.kind === "volume") {
+            const vInL = value * (this.volumeToL[from] ?? 1);
+            const factor = Object.entries(this.volumeToL).reduce((acc, [k, f]) => (k === to ? f : acc), 1);
+            return vInL / factor;
+        }
+        // Incompatible
+        throw new UnitConversionError("Incompatible unit kinds", "INCOMPATIBLE_UNITS", { from: fromUnit, to: toUnit });
+    }
+
+    /**
+     * Retourne un format intelligent (valeur + unité) selon des seuils humains.
+     * Exemple: 1 500 000 Wh → 1.5 MWh; 2 000 L → 2 m3.
+     */
+    static autoFormat(value: number, baseUnit: string): { value: number; unit: string } {
+        const desc = this.requireKnownUnit(baseUnit);
+        if (desc.kind === "energy") {
+            // Politique: base capteur = kWh → MWh à partir de 1 000 kWh, GWh à partir de 1 000 000 kWh
+            const u = this.canonicalizeUnit(baseUnit);
+            if (u === "kwh") {
+                if (value >= 1_000_000) return { value: value / 1_000_000, unit: "GWh" };
+                if (value >= 1_000) return { value: value / 1_000, unit: "MWh" };
+                return { value, unit: "kWh" };
+            }
+            if (u === "mwh") {
+                if (value >= 1_000) return { value: value / 1_000, unit: "GWh" };
+                return { value, unit: "MWh" };
+            }
+            if (u === "gwh") {
+                return { value, unit: "GWh" };
+            }
+            // fallback pour d'autres unités énergie
+            if (value >= 1_000) return { value: value / 1_000, unit: "MWh" };
+            return { value, unit: "kWh" };
+        }
+        if (desc.kind === "volume") {
+            if (value >= 1000) return { value: value / 1000, unit: "m3" };
+            return { value, unit: "L" };
+        }
+        // Ne devrait pas arriver (requireKnownUnit lève déjà)
+        throw new UnitConversionError("Unknown unit", "UNKNOWN_UNIT", { unit: baseUnit });
+    }
+}

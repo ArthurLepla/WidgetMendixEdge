@@ -86,24 +86,24 @@
                 <caption>Afficher les valeurs</caption>
                 <description>Afficher les valeurs numériques sur les nœuds</description>
             </property>
-            <property key="showPercentages" type="boolean" defaultValue="true">
-                <caption>Afficher les pourcentages</caption>
-                <description>Afficher les pourcentages sur les liens</description>
-            </property>
         </propertyGroup>
 
         <!-- Interactions -->
         <propertyGroup caption="Interactions">
-            <property key="clickedNodeAttribute" type="attribute" required="false">
-                <caption>Nœud cliqué</caption>
-                <description>Attribut pour stocker le nom du nœud cliqué</description>
-                <attributeTypes>
-                    <attributeType name="String"/>
-                </attributeTypes>
-            </property>
             <property key="onNodeClick" type="action" required="false">
                 <caption>Action au clic sur nœud</caption>
                 <description>Action à exécuter lors du clic sur un nœud</description>
+            </property>
+            <property key="onNodeDetails" type="action" required="false">
+                <caption>Action vue détaillée (Ctrl+clic)</caption>
+                <description>Action à exécuter lors du Ctrl+clic sur un nœud pour ouvrir la vue détaillée</description>
+            </property>
+            <property key="selectedAssetNameAttribute" type="attribute" required="false">
+                <caption>SelectedAssetName (DataView)</caption>
+                <description>Attribut string du DataView SelectedAsset où stocker le Nom de l'Asset cliqué (Ctrl+clic)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
             </property>
         </propertyGroup>
 

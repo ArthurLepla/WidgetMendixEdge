@@ -2,6 +2,7 @@ import { AdvancedSankeyV2ContainerProps } from "../../typings/AdvancedSankeyV2Pr
 import { ValueStatus } from "mendix";
 import { EnergyFlowData } from "../types/EnergyFlow.types";
 import { ENERGY_CONFIGS, ENERGY_ICONS } from "./colorMapping";
+import { UnitConversionService } from "./dataTransformers";
 
 /**
  * Adaptateur pour transformer les EnergyFlowNode vers le format visuel existant
@@ -81,12 +82,25 @@ export class VisualDataAdapter {
 
             // Transformation des EnergyFlowNode en flux de données
             const flowData = this.extractFlowData(props);
+
+            // Détection unité de base depuis la config (props.unitOfMeasure?) ou heuristique sur titre
+            const baseUnit = (props as any).unitOfMeasure || energyConfig.unit || "kWh";
+            const unitDesc = UnitConversionService.requireKnownUnit(baseUnit);
+            const normalizedFlows = flowData.map(f => ({
+                ...f,
+                // Normaliser en unité de base (kWh pour énergie, L pour volume) pour un traitement homogène
+                value: unitDesc.kind === "energy"
+                    ? UnitConversionService.convert(f.value, baseUnit, "kWh")
+                    : unitDesc.kind === "volume"
+                        ? UnitConversionService.convert(f.value, baseUnit, "L")
+                        : f.value
+            }));
             
             // Création des nœuds visuels (même structure que l'ancien système)
-            const visualNodes = this.createVisualNodes(flowData, energyConfig);
+            const visualNodes = this.createVisualNodes(normalizedFlows, energyConfig);
             
             // Création des liens visuels (même structure que l'ancien système)
-            const visualLinks = this.createVisualLinks(flowData, visualNodes, energyConfig);
+            const visualLinks = this.createVisualLinks(normalizedFlows, visualNodes, energyConfig);
             
             // Calcul des métadonnées
             const metadata = this.calculateMetadata(visualNodes, visualLinks);
@@ -124,7 +138,7 @@ export class VisualDataAdapter {
             const percentageValue = props.percentageAttribute?.get(item)?.value; // Big | undefined
 
             return {
-                source: (sourceName ?? "Unknown Source").toString(),
+                source: (sourceName ?? "ALIMENTATION PRINCIPALE").toString(),
                 target: (targetName ?? "Unknown Target").toString(),
                 value: Number(flowValue ? flowValue.toString() : 0),
                 percentage: Number(percentageValue ? percentageValue.toString() : 0)
@@ -133,9 +147,29 @@ export class VisualDataAdapter {
     }
     
     /**
+     * Récupère TOUS les liens originaux sans filtrage pour la détection des enfants
+     */
+    static getAllOriginalLinks(props: AdvancedSankeyV2ContainerProps): any[] {
+        // Récupérer tous les flux sans filtrage
+        const allFlowData = this.extractFlowData(props);
+        
+        console.log(`[getAllOriginalLinks] Extracted ${allFlowData.length} original links`);
+        
+        return allFlowData.map(flow => ({
+            sourceName: flow.source,
+            targetName: flow.target,
+            value: flow.value,
+            percentage: flow.percentage
+        }));
+    }
+    
+    /**
      * Crée les nœuds visuels avec la même structure que l'ancien système
      */
     private static createVisualNodes(flowData: EnergyFlowData[], energyConfig: any): VisualNode[] {
+        // 🚨 FILTRAGE: Si trop de données, afficher seulement le niveau 0 et 1 par défaut
+        const shouldFilter = flowData.length > 50; // Seuil de filtrage
+        
         // Extraction des noms de nœuds uniques
         const nodeNames = new Set<string>();
         flowData.forEach(flow => {
@@ -144,13 +178,13 @@ export class VisualDataAdapter {
         });
         
         // Création des nœuds avec calcul des niveaux hiérarchiques
-        const nodes: VisualNode[] = Array.from(nodeNames).map(name => {
+        let nodes: VisualNode[] = Array.from(nodeNames).map(name => {
             const level = this.calculateNodeLevel(name, flowData);
             const value = this.calculateNodeValue(name, flowData);
             
             return {
                 id: name,
-                name: name,
+                name: this.truncateNodeName(name), // Tronquer les noms longs
                 value: value,
                 level: level,
                 color: this.getNodeColor(name, level, energyConfig),
@@ -159,7 +193,13 @@ export class VisualDataAdapter {
             };
         });
         
-        // Tri par niveau puis par valeur (pour un affichage cohérent)
+        // 🚨 FILTRAGE: Si trop de données, ne garder que les 2 premiers niveaux
+        if (shouldFilter) {
+            console.warn(`[VisualDataAdapter] Trop de données (${flowData.length} flux), filtrage automatique appliqué`);
+            nodes = nodes.filter(node => node.level <= 1);
+        }
+        
+        // Tri par niveau puis par valeur (pour un affichage cohérent)  
         return nodes.sort((a, b) => {
             if (a.level !== b.level) return a.level - b.level;
             return b.value - a.value;
@@ -171,12 +211,16 @@ export class VisualDataAdapter {
      */
     private static createVisualLinks(flowData: EnergyFlowData[], nodes: VisualNode[], energyConfig: any): VisualLink[] {
         const nodeIndexMap = new Map<string, number>();
+        const nodeIdSet = new Set<string>();
+        
         nodes.forEach((node, index) => {
             nodeIndexMap.set(node.id, index);
+            nodeIdSet.add(node.id);
         });
         
         return flowData
             .filter(flow => flow.value > 0) // Filtrer les flux vides
+            .filter(flow => nodeIdSet.has(flow.source) && nodeIdSet.has(flow.target)) // 🚨 FILTRAGE: Seuls les liens entre nœuds existants
             .map(flow => ({
                 source: nodeIndexMap.get(flow.source) || 0,
                 target: nodeIndexMap.get(flow.target) || 0,
@@ -185,7 +229,11 @@ export class VisualDataAdapter {
                 color: energyConfig.color,
                 sourceName: flow.source,
                 targetName: flow.target
-            }));
+            }))
+            .filter((link, index, arr) => {
+                // 🚨 FILTRAGE: Éviter les doublons de liens
+                return arr.findIndex(l => l.source === link.source && l.target === link.target) === index;
+            });
     }
     
     /**
@@ -261,15 +309,31 @@ export class VisualDataAdapter {
     }
     
     /**
+     * Tronque les noms trop longs pour l'affichage
+     */
+    private static truncateNodeName(name: string, maxLength: number = 30): string {
+        if (name.length <= maxLength) return name;
+        return name.substring(0, maxLength - 3) + "...";
+    }
+    
+    /**
      * Calcule les métadonnées pour le debug et l'affichage
      */
     private static calculateMetadata(nodes: VisualNode[], links: VisualLink[]) {
         const totalValue = nodes.reduce((sum, node) => sum + node.value, 0);
         
+        // Statistiques par niveau
+        const levelStats = nodes.reduce((acc, node) => {
+            acc[node.level] = (acc[node.level] || 0) + 1;
+            return acc;
+        }, {} as Record<number, number>);
+        
         return {
             totalValue,
             nodeCount: nodes.length,
-            linkCount: links.length
+            linkCount: links.length,
+            levelStats,
+            maxLevel: Math.max(...nodes.map(n => n.level), 0)
         };
     }
 }

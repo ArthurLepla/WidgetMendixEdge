@@ -4,6 +4,31 @@ import "./ui/AdvancedSankeyV2.css";
 import { useVisualSankeyData, useNodeInteractions, useNavigationState } from "./hooks/useVisualSankeyData";
 import { SankeyChart } from "./components/SankeyChart";
 
+/**
+ * Trouve l'asset correspondant à un nœud donné
+ * Utilise les données EnergyFlowNode pour faire le mapping
+ */
+function findAssetForNode(nodeId: string, props: AdvancedSankeyV2ContainerProps): string | null {
+    if (!props.energyFlowDataSource || props.energyFlowDataSource.status !== "available") {
+        return null;
+    }
+
+    // Chercher dans les données EnergyFlowNode
+    for (const item of props.energyFlowDataSource.items || []) {
+        const sourceAsset = props.sourceAssetAttribute.get(item);
+        const targetAsset = props.targetAssetAttribute.get(item);
+        
+        // Le nœud peut être soit source soit target
+        if (sourceAsset?.value === nodeId || targetAsset?.value === nodeId) {
+            // Retourner l'asset correspondant (source ou target selon le cas)
+            const assetValue = sourceAsset?.value === nodeId ? sourceAsset.value : targetAsset.value;
+            return assetValue || null;
+        }
+    }
+    
+    return null;
+}
+
 export function AdvancedSankeyV2(props: AdvancedSankeyV2ContainerProps): ReactElement {
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: props.width || 800, height: props.height || 600 });
@@ -19,9 +44,16 @@ export function AdvancedSankeyV2(props: AdvancedSankeyV2ContainerProps): ReactEl
         const update = () => {
             const bbox = containerRef.current?.getBoundingClientRect();
             if (!bbox) return;
+            
+            // 🚨 FIX: Calcul plus intelligent des dimensions
+            const effectiveWidth = Math.max(bbox.width || props.width || 800, 600);
+            const effectiveHeight = props.height || 600;
+            
+            console.log(`[AdvancedSankey] Container dimensions: ${effectiveWidth}x${effectiveHeight}`);
+            
             setDimensions({
-                width: Math.max(bbox.width || props.width || 800, 600),
-                height: props.height || 600
+                width: effectiveWidth,
+                height: effectiveHeight
             });
         };
         update();
@@ -113,15 +145,34 @@ export function AdvancedSankeyV2(props: AdvancedSankeyV2ContainerProps): ReactEl
                 </div>
             )}
 
-            <div className="sankey-chart" style={{ width: "100%", height: dimensions.height }}>
+            <div className="sankey-chart" style={{ 
+                width: "100%", 
+                height: dimensions.height,
+                minHeight: "400px", // 🚨 FIX: Hauteur minimale garantie
+                display: "flex",
+                flexDirection: "column"
+            }}>
                 <SankeyChart
                     nodes={navigation.displayNodes}
                     links={navigation.displayLinks as any}
+                    originalLinks={visualData.allLinks} 
                     width={dimensions.width}
-                    height={dimensions.height}
+                    height={Math.max(dimensions.height, 400)} // 🚨 FIX: Hauteur minimale pour D3
                     onNodeClick={node => {
                         navigation.navigateToNode(node.id);
                         interactions.handleNodeClick(node.id);
+                    }}
+                    onNodeDetails={node => {
+                        // Ctrl+clic: stocker le Nom de l'asset dans SelectedAssetName (DataView)
+                        const assetName = findAssetForNode(node.id, props);
+                        if (assetName && props.selectedAssetNameAttribute) {
+                            props.selectedAssetNameAttribute.setValue(assetName);
+                        }
+                        if (props.onNodeDetails) {
+                            // Laisser le temps au runtime Mendix de propager la mise à jour de l'attribut
+                            // avant d'exécuter le microflow d'ouverture
+                            requestAnimationFrame(() => props.onNodeDetails!.execute());
+                        }
                     }}
                     unitOfMeasure={visualData.energyConfig.unit}
                     linkColor={"#E0E0E0"}
@@ -129,13 +180,32 @@ export function AdvancedSankeyV2(props: AdvancedSankeyV2ContainerProps): ReactEl
                 />
             </div>
 
+            {/* Alerte si trop de données */}
+            {visualData.metadata.nodeCount > 50 && (
+                <div className="sankey-warning" style={{
+                    background: "#fff3cd",
+                    border: "1px solid #ffeaa7",
+                    borderRadius: "6px",
+                    padding: "12px",
+                    margin: "16px 0",
+                    color: "#856404"
+                }}>
+                    ⚠️ Volume élevé de données détecté ({visualData.metadata.nodeCount} nœuds). 
+                    Filtrage automatique appliqué pour optimiser l'affichage.
+                    <br />
+                    <small>Utilisez la navigation pour explorer les niveaux plus détaillés.</small>
+                </div>
+            )}
+
             {props.showDebugTools && (
                 <div className="debug-info">
                     <h3>🔍 Debug</h3>
                     <pre>{JSON.stringify({
                         nodeCount: visualData.metadata.nodeCount,
                         linkCount: visualData.metadata.linkCount,
-                        totalValue: visualData.metadata.totalValue
+                        totalValue: visualData.metadata.totalValue,
+                        levelStats: (visualData.metadata as any).levelStats,
+                        maxLevel: (visualData.metadata as any).maxLevel
                     }, null, 2)}</pre>
                 </div>
             )}

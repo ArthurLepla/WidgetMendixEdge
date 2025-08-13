@@ -59,6 +59,13 @@ public class CreateEnergyFlowNodes extends CustomJavaAction<java.lang.Void>
 			Core.getLogger("CreateEnergyFlowNodes").info("🗑️ Deleted " + existingFlowNodes.size() + " existing EnergyFlowNodes");
 		}
 		
+		// Clean existing virtual root assets
+		List<IMendixObject> virtualRoots = Core.retrieveXPathQuery(context, "//Smart.Asset[Nom = 'ALIMENTATION PRINCIPALE']");
+		if (!virtualRoots.isEmpty()) {
+			Core.delete(context, virtualRoots);
+			Core.getLogger("CreateEnergyFlowNodes").info("🗑️ Deleted " + virtualRoots.size() + " existing virtual root assets");
+		}
+		
 		// 1. Récupérer TOUS les assets
 		List<Asset> allAssets = Asset.load(context, "");
 		Core.getLogger("CreateEnergyFlowNodes").info("📦 Found " + allAssets.size() + " assets");
@@ -76,7 +83,7 @@ public class CreateEnergyFlowNodes extends CustomJavaAction<java.lang.Void>
 		// 4. Organiser les assets par level
 		Map<Long, List<Asset>> assetsByLevel = organizeAssetsByLevel(allAssets, levelMap);
 		
-		// 5. Créer les flux entre niveaux consécutifs
+		// 5. Créer les flux entre niveaux consécutifs + nœud racine virtuel
 		energyFlowNodes = createAllFlows(context, assetsByLevel, levelMap);
 		
 		// 6. Commit
@@ -132,7 +139,7 @@ public class CreateEnergyFlowNodes extends CustomJavaAction<java.lang.Void>
 	}
 	
 	/**
-	 * Créer tous les flux entre niveaux consécutifs
+	 * Créer tous les flux entre niveaux consécutifs + nœud racine virtuel
 	 */
 	private List<IMendixObject> createAllFlows(IContext context, Map<Long, List<Asset>> assetsByLevel, Map<Long, Level> levelMap) throws Exception {
 		List<IMendixObject> allFlowNodes = new ArrayList<>();
@@ -143,7 +150,19 @@ public class CreateEnergyFlowNodes extends CustomJavaAction<java.lang.Void>
 			.sorted((l1, l2) -> Integer.compare(l1.getSortOrder(), l2.getSortOrder()))
 			.collect(Collectors.toList());
 		
-		// Créer des flux entre chaque niveau consécutif
+		// 🆕 NOUVEAU : Créer un nœud racine virtuel si nécessaire
+		if (!sortedLevels.isEmpty()) {
+			Level firstLevel = sortedLevels.get(0);
+			List<Asset> firstLevelAssets = assetsByLevel.get(firstLevel.getMendixObject().getId().toLong());
+			
+			if (firstLevelAssets != null && !firstLevelAssets.isEmpty()) {
+				Core.getLogger("CreateEnergyFlowNodes").info("🌱 Creating virtual root node flows");
+				List<IMendixObject> rootFlows = createVirtualRootFlows(context, firstLevelAssets);
+				allFlowNodes.addAll(rootFlows);
+			}
+		}
+		
+		// Créer des flux entre chaque niveau consécutif (logique existante)
 		for (int i = 0; i < sortedLevels.size() - 1; i++) {
 			Level currentLevel = sortedLevels.get(i);
 			Level nextLevel = sortedLevels.get(i + 1);
@@ -164,6 +183,72 @@ public class CreateEnergyFlowNodes extends CustomJavaAction<java.lang.Void>
 		}
 		
 		return allFlowNodes;
+	}
+	
+	/**
+	 * 🆕 NOUVELLE MÉTHODE : Créer les flux depuis un nœud racine virtuel
+	 */
+	private List<IMendixObject> createVirtualRootFlows(IContext context, List<Asset> firstLevelAssets) throws Exception {
+		List<IMendixObject> flowNodes = new ArrayList<>();
+		
+		// Calculer la valeur totale de tous les assets du premier niveau
+		java.math.BigDecimal totalValue = calculateTotalValue(firstLevelAssets);
+		
+		Core.getLogger("CreateEnergyFlowNodes").info("🌱 Virtual root total value: " + totalValue);
+		
+		// Créer un flux depuis le root virtuel vers chaque asset du premier niveau
+		for (Asset firstLevelAsset : firstLevelAssets) {
+			java.math.BigDecimal assetValue = getAssetValue(firstLevelAsset);
+			java.math.BigDecimal percentage = calculatePercentage(assetValue, totalValue);
+			
+			EnergyFlowNode flowNode = new EnergyFlowNode(context);
+			// Représente le ROOT par une source nulle (pas d'Asset virtuel persistant)
+			flowNode.setSourceAsset((Asset) null);
+			flowNode.setTargetAsset(firstLevelAsset);
+			flowNode.setFlowValue(assetValue);
+			flowNode.setPercentage(percentage);
+			
+			flowNodes.add(flowNode.getMendixObject());
+			
+			Core.getLogger("CreateEnergyFlowNodes").info(
+				"✅ Root Flow: ROOT → " + firstLevelAsset.getNom() + 
+				" (Value: " + assetValue + ", %: " + percentage + ")");
+		}
+		
+		return flowNodes;
+	}
+	
+	/**
+	 * 🆕 NOUVELLE MÉTHODE : Créer un asset virtuel pour le root
+	 */
+	private Asset createVirtualRootAsset(IContext context) throws Exception {
+		Asset virtualRoot = new Asset(context);
+		virtualRoot.setNom("ALIMENTATION PRINCIPALE"); // Nom parlant pour l'utilisateur
+		
+		// Définir des valeurs par défaut pour éviter les erreurs
+		virtualRoot.setConsoTotalElec(java.math.BigDecimal.ZERO);
+		virtualRoot.setConsoTotalGaz(java.math.BigDecimal.ZERO);
+		virtualRoot.setConsoTotalEau(java.math.BigDecimal.ZERO);
+		virtualRoot.setConsoTotalAir(java.math.BigDecimal.ZERO);
+		
+		// Sauvegarder l'asset virtuel pour pouvoir le référencer
+		Core.commit(context, virtualRoot.getMendixObject());
+		
+		return virtualRoot;
+	}
+	
+	/**
+	 * 🆕 NOUVELLE MÉTHODE : Calculer la valeur totale d'une liste d'assets
+	 */
+	private java.math.BigDecimal calculateTotalValue(List<Asset> assets) {
+		java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+		for (Asset asset : assets) {
+			java.math.BigDecimal value = getAssetValue(asset);
+			if (value != null) {
+				total = total.add(value);
+			}
+		}
+		return total;
 	}
 	
 	/**
@@ -192,12 +277,6 @@ public class CreateEnergyFlowNodes extends CustomJavaAction<java.lang.Void>
 			// Valeur du parent pour calculer les pourcentages
 			java.math.BigDecimal sourceValue = getAssetValue(sourceAsset);
 			Core.getLogger("CreateEnergyFlowNodes").info("🔍 DEBUG createFlowsBetweenLevels - Source value for " + sourceAsset.getNom() + ": " + sourceValue);
-			
-			// En environnement de test, créer les flux même avec des valeurs à 0
-			// if (sourceValue.compareTo(java.math.BigDecimal.ZERO) <= 0) {
-			// 	Core.getLogger("CreateEnergyFlowNodes").info("🔍 DEBUG createFlowsBetweenLevels - Source value <= 0 for " + sourceAsset.getNom() + ", skipping");
-			// 	continue; // Pas de valeur à distribuer
-			// }
 			
 			// Créer un flux vers chaque enfant
 			for (Asset child : children) {
