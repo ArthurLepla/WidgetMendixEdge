@@ -1,199 +1,1312 @@
-@import "@mantine/core/styles.css";
+/*
+   Style system du widget Synthese
+   - Namespacing strict via .syntheseWidget-root pour éviter tout conflit Atlas/Mendix
+   - Utilitaires minimaux (inspirés Tailwind) réimplémentés localement
+   - Espacements et grilles cohérents pour éviter l'effet "collé"
+*/
 
-/* tailwind.config.js */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer components {
-    .btn-date {
-        @apply rounded border border-gray-200 bg-white px-2 sm:px-4 py-1 sm:py-2 transition-all hover:bg-gray-50 cursor-pointer text-base sm:text-lg lg:text-xl font-medium;
-    }
-
-    .card-base {
-        @apply bg-white rounded-xl shadow-md p-6;
-    }
-
-    .card-header {
-        @apply flex items-center gap-4;
-    }
-
-    .card-content {
-        @apply flex-1 flex flex-col gap-4 sm:gap-6 lg:gap-8;
-    }
-
-    .value-container {
-        @apply flex flex-col gap-2 sm:gap-3 lg:gap-4;
-    }
-
-    .value-large {
-        @apply text-3xl font-bold;
-    }
-
-    .value-medium {
-        @apply text-2xl font-bold;
-    }
-
-    .variation-container {
-        @apply flex items-center gap-2 sm:gap-3 lg:gap-4;
-    }
-
-    .variation-badge {
-        @apply inline-flex items-center rounded-full px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 text-base sm:text-lg lg:text-xl font-bold leading-none transition-all duration-300 ease-in-out;
-    }
-
-    .icon-container {
-        @apply p-3 rounded-lg flex items-center justify-center;
-    }
-
-    /* Typography */
-    .title-large {
-        @apply text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900;
-    }
-
-    .title-medium {
-        @apply text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900;
-    }
-
-    .text-regular {
-        @apply text-base sm:text-lg lg:text-xl text-gray-900;
-    }
-
-    .text-secondary {
-        @apply text-base sm:text-lg lg:text-xl text-gray-600;
-    }
-
-    /* Grid layouts */
-    .grid-responsive {
-        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8;
-    }
-
-    .grid-responsive-2 {
-        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2;
-    }
-
-    .grid-responsive-3 {
-        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3;
-    }
-
-    .grid-responsive-4 {
-        @apply grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-4;
-    }
-
-    /* Rest of existing styles... */
-}
-
-/* Spacing utilities */
-.gap-standard {
-    @apply gap-6;
-}
-
-.p-standard {
-    @apply p-6;
-}
-
-.m-standard {
-    @apply m-6;
-}
-
-/* Namespace pour isoler le widget des styles globaux */
+/* Root namespace - Espacement optimisé */
 .syntheseWidget-root {
-    /* Reset des propriétés globales qui pourraient affecter le layout */
-    all: revert;
-    position: relative;
-    box-sizing: border-box;
-    z-index: 1; /* Lower than the loader's z-index (50) */
+    all: initial !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    z-index: 1 !important;
+    font-family: "Barlow", Arial, sans-serif !important;
+    font-size: 16px !important;
+    color: #18213e !important;
+    padding: 1.5rem !important;
+    margin: 0 !important;
+    /* Isolation pour éviter les conflits Mendix */
+    isolation: isolate !important;
 }
 
-/* Préserver la structure des composants et le positionnement des icônes */
-.syntheseWidget-root .icon-container {
+/* Layout helpers - Système d'espacement cohérent */
+.syntheseWidget-root .flex { display: flex !important; }
+.syntheseWidget-root .items-center { align-items: center !important; }
+.syntheseWidget-root .justify-center { justify-content: center !important; }
+.syntheseWidget-root .justify-between { justify-content: space-between !important; }
+.syntheseWidget-root .gap-2 { gap: 0.5rem !important; }
+.syntheseWidget-root .gap-3 { gap: 0.75rem !important; }
+.syntheseWidget-root .gap-4 { gap: 1rem !important; }
+.syntheseWidget-root .gap-5 { gap: 1.25rem !important; }
+.syntheseWidget-root .gap-6 { gap: 1.5rem !important; }
+.syntheseWidget-root .space-y-6 > * + * { margin-top: 1.5rem !important; }
+.syntheseWidget-root .p-3 { padding: 0.75rem !important; }
+.syntheseWidget-root .p-4 { padding: 1rem !important; }
+.syntheseWidget-root .p-5 { padding: 1.25rem !important; }
+.syntheseWidget-root .p-6 { padding: 1.5rem !important; }
+.syntheseWidget-root .p-7 { padding: 1.75rem !important; }
+.syntheseWidget-root .pl-8 { padding-left: 2rem !important; }
+.syntheseWidget-root .mb-3 { margin-bottom: 0.75rem !important; }
+.syntheseWidget-root .mb-4 { margin-bottom: 1rem !important; }
+.syntheseWidget-root .mb-5 { margin-bottom: 1.25rem !important; }
+.syntheseWidget-root .mb-6 { margin-bottom: 1.5rem !important; }
+.syntheseWidget-root .mb-8 { margin-bottom: 2rem !important; }
+.syntheseWidget-root .mt-2 { margin-top: 0.5rem !important; }
+.syntheseWidget-root .mt-3 { margin-top: 0.75rem !important; }
+.syntheseWidget-root .mt-4 { margin-top: 1rem !important; }
+.syntheseWidget-root .mt-5 { margin-top: 1.25rem !important; }
+.syntheseWidget-root .mt-6 { margin-top: 1.5rem !important; }
+.syntheseWidget-root .mt-8 { margin-top: 2rem !important; }
+
+/* Sizing helpers - Icônes plus grandes pour meilleure lisibilité */
+.syntheseWidget-root .w-6 { width: 2rem !important; }
+.syntheseWidget-root .h-6 { height: 2rem !important; }
+.syntheseWidget-root .w-8 { width: 2.5rem !important; }
+.syntheseWidget-root .w-10 { width: 3rem !important; }
+.syntheseWidget-root .h-10 { height: 3rem !important; }
+@media (min-width: 640px) {
+    .syntheseWidget-root .sm\:w-12 { width: 3rem !important; }
+    .syntheseWidget-root .sm\:h-12 { height: 3rem !important; }
+}
+@media (min-width: 1024px) {
+    .syntheseWidget-root .lg\:w-14 { width: 3.5rem !important; }
+    .syntheseWidget-root .lg\:h-14 { height: 3.5rem !important; }
+}
+
+/* Vertical rhythm for top-level children - Respiration améliorée */
+.syntheseWidget-root > * + * { margin-top: 1.5rem !important; }
+
+/* Protection complète contre les conflits CSS Mendix/Atlas */
+.syntheseWidget-root * {
+    box-sizing: border-box !important;
+}
+
+.syntheseWidget-root *,
+.syntheseWidget-root *:before,
+.syntheseWidget-root *:after {
+    box-sizing: border-box !important;
+}
+
+.syntheseWidget-root h1,
+.syntheseWidget-root h2,
+.syntheseWidget-root h3,
+.syntheseWidget-root h4,
+.syntheseWidget-root h5,
+.syntheseWidget-root h6,
+.syntheseWidget-root p,
+.syntheseWidget-root div,
+.syntheseWidget-root span,
+.syntheseWidget-root button,
+.syntheseWidget-root input,
+.syntheseWidget-root select,
+.syntheseWidget-root textarea {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+/* Reset spécifique pour les boutons */
+.syntheseWidget-root button {
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    border-radius: 0 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* Reset spécifique pour les inputs */
+.syntheseWidget-root input,
+.syntheseWidget-root select,
+.syntheseWidget-root textarea {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Isolation des transformations et animations */
+.syntheseWidget-root {
+    contain: layout style paint !important;
+    will-change: auto !important;
+    transform: translateZ(0) !important;
+}
+
+/* Position/z-index helpers used by DPE settings button */
+.syntheseWidget-root .relative { position: relative !important; }
+.syntheseWidget-root .absolute { position: absolute !important; }
+.syntheseWidget-root .top-2 { top: 0.5rem !important; }
+.syntheseWidget-root .right-2 { right: 0.5rem !important; }
+.syntheseWidget-root .z-10 { z-index: 10 !important; }
+
+/* Typography - Tailles augmentées pour meilleure lisibilité */
+.syntheseWidget-root .title-large { font-size: 2.25rem !important; font-weight: 700 !important; color: #111827 !important; line-height: 1.2 !important; }
+.syntheseWidget-root .title-medium { font-size: 1.5rem !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.3 !important; }
+.syntheseWidget-root .text-regular { font-size: 1.125rem !important; color: #111827 !important; line-height: 1.5 !important; }
+.syntheseWidget-root .text-secondary { font-size: 1.125rem !important; color: #4b5563 !important; line-height: 1.5 !important; }
+.syntheseWidget-root .text-xl { font-size: 1.5rem !important; }
+.syntheseWidget-root .text-2xl { font-size: 1.875rem !important; }
+.syntheseWidget-root .font-medium { font-weight: 500 !important; }
+.syntheseWidget-root .font-semibold { font-weight: 600 !important; }
+.syntheseWidget-root .font-bold { font-weight: 700 !important; }
+.syntheseWidget-root .text-center { text-align: center !important; }
+.syntheseWidget-root .text-gray-700 { color: #374151 !important; }
+.syntheseWidget-root .text-gray-500 { color: #6b7280 !important; }
+
+/* Buttons - Removed hover effects */
+.syntheseWidget-root .btn-date { border-radius: 0.5rem !important; border: 1px solid #e5e7eb !important; background: #fff !important; padding: 0.5rem 1rem !important; cursor: pointer !important; font-size: 1rem !important; font-weight: 500 !important; }
+.syntheseWidget-root .btn-primary { padding: 0.5rem 1rem !important; font-size: 1rem !important; font-weight: 600 !important; color: #fff !important; background: #2563eb !important; border: 1px solid transparent !important; border-radius: 0.5rem !important; }
+.syntheseWidget-root .btn-secondary { padding: 0.5rem 1rem !important; font-size: 1rem !important; font-weight: 600 !important; color: #374151 !important; background: #fff !important; border: 1px solid #d1d5db !important; border-radius: 0.5rem !important; }
+
+/* Card - Retiré les effets de hover */
+.syntheseWidget-root .card-base {
+    background: #fff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06) !important;
+    padding: 1.25rem !important;
+    transition: none !important;
+}
+
+/* Nouveaux styles modernes pour les sélecteurs - Espacements optimisés */
+.syntheseWidget-root .modern-selector-card {
+    background: #fff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
+    padding: 2rem !important;
+    border: 1px solid #f1f5f9 !important;
+    margin: 0 !important;
     position: relative !important;
-    transform: none !important;
-    left: auto !important;
-    top: auto !important;
+    z-index: 1 !important;
+}
+
+.syntheseWidget-root .selector-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2rem !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .selector-icon-wrapper {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: auto !important;
-    height: auto !important;
+    padding: 0.5rem !important;
+    background: linear-gradient(135deg, rgba(24, 33, 62, 0.08) 0%, rgba(24, 33, 62, 0.12) 100%) !important;
+    border-radius: 12px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    flex-shrink: 0 !important;
 }
 
-.syntheseWidget-root svg {
-    position: relative !important;
-    transform: none !important;
-    left: auto !important;
-    top: auto !important;
+.syntheseWidget-root .selector-icon {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    color: #18213e !important;
 }
 
-/* S'assurer que les cartes conservent leur disposition */
-.syntheseWidget-root .card-base {
-    position: relative !important;
-    display: block !important;
-    width: 100% !important;
+.syntheseWidget-root .selector-content {
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
-/* Garantir que les flex containers conservent leur disposition */
-.syntheseWidget-root .flex {
-    position: relative !important;
+.syntheseWidget-root .selector-title-row {
     display: flex !important;
-}
-
-/* Garantir que les grilles conservent leur disposition */
-.syntheseWidget-root .grid-responsive-2,
-.syntheseWidget-root .grid-responsive-4 {
-    position: relative !important;
-    display: grid !important;
-}
-
-/* Replace or enhance your existing .badge-container definition */
-.syntheseWidget-root .badge-container {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    width: 100% !important;
     align-items: center !important;
     justify-content: space-between !important;
-    /* Add sufficient space between items */
-    gap: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+    gap: 1rem !important;
 }
 
-/* Ensure badges have minimum width and don't shrink */
-.syntheseWidget-root .badge {
-    flex-shrink: 0 !important;
+.syntheseWidget-root .selector-title {
+    font-size: 1.375rem !important;
+    font-weight: 700 !important;
+    color: #18213e !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+}
+/* Styles pour les nouveaux sélecteurs modernes */
+.syntheseWidget-root .tooltip-wrapper {
+    position: relative !important;
+}
+
+.syntheseWidget-root .info-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    color: #6b7280 !important;
+    cursor: pointer !important;
+    transition: color 150ms ease-in-out !important;
+}
+
+.syntheseWidget-root .info-icon:hover {
+    color: #18213e !important;
+}
+
+.syntheseWidget-root .period-tooltip {
+    position: absolute !important;
+    right: 0 !important;
+    top: calc(100% + 0.75rem) !important;
+    width: 440px !important;
+    max-width: 95vw !important;
+    background: #fff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.05) !important;
+    z-index: 100 !important;
+    padding: 1.75rem !important;
+    border: 1px solid #e5e7eb !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-8px) !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    /* Protection contre les débordements */
+    overflow: hidden !important;
+}
+
+.syntheseWidget-root .period-tooltip.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+}
+
+.syntheseWidget-root .tooltip-section {
+    margin-bottom: 1.25rem !important;
+}
+
+.syntheseWidget-root .tooltip-section:last-child {
+    margin-bottom: 0 !important;
+}
+
+.syntheseWidget-root .tooltip-header {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.syntheseWidget-root .tooltip-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    margin-right: 0.75rem !important;
+}
+
+.syntheseWidget-root .tooltip-dot.current {
+    background: #18213e !important;
+}
+
+.syntheseWidget-root .tooltip-dot.previous {
+    background: #6b7280 !important;
+}
+
+.syntheseWidget-root .tooltip-label {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #18213e !important;
+}
+
+.syntheseWidget-root .tooltip-dates {
+    padding-left: 1.5rem !important;
+}
+
+.syntheseWidget-root .date-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.syntheseWidget-root .date-row:last-child {
+    margin-bottom: 0 !important;
+}
+
+.syntheseWidget-root .date-label {
+    font-size: 0.9375rem !important;
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+}
+
+.syntheseWidget-root .date-value {
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    color: #18213e !important;
+}
+
+/* Boutons de période modernes - Espacements cohérents */
+.syntheseWidget-root .period-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .period-btn {
+    padding: 0.875rem 1.5rem !important;
+    border-radius: 12px !important;
+    background: #f8fafc !important;
+    color: #64748b !important;
+    border: 1px solid #e2e8f0 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
     white-space: nowrap !important;
-    /* Ensure the badge isn't too large */
-    max-width: fit-content !important;
-    /* Give it higher specificity than any potential conflicts */
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.syntheseWidget-root .period-btn:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #475569 !important;
+}
+
+.syntheseWidget-root .period-btn.active {
+    background: #18213e !important;
+    color: #fff !important;
+    border-color: #18213e !important;
+    box-shadow: 0 2px 4px rgba(24, 33, 62, 0.15) !important;
+}
+
+.syntheseWidget-root .period-btn.custom.active {
+    background: linear-gradient(135deg, #18213e 0%, #2d3748 100%) !important;
+}
+
+/* Styles pour LevelSelector */
+.syntheseWidget-root .select-all-btn {
+    padding: 0.5rem 0.875rem !important;
+    background: transparent !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #475569 !important;
+    cursor: pointer !important;
+    transition: all 150ms ease-in-out !important;
+}
+
+.syntheseWidget-root .select-all-btn:hover {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #18213e !important;
+}
+
+.syntheseWidget-root .level-count {
+    font-size: 0.875rem !important;
+    color: #6b7280 !important;
+    margin-top: 0.5rem !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .level-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .level-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.625rem !important;
+    padding: 0.875rem 1.25rem !important;
+    border-radius: 12px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    min-width: fit-content !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+}
+
+.syntheseWidget-root .level-btn:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #475569 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.syntheseWidget-root .level-btn.selected {
+    background: #18213e !important;
+    border-color: #18213e !important;
+    color: #fff !important;
+    box-shadow: 0 2px 4px rgba(24, 33, 62, 0.15) !important;
+}
+
+.syntheseWidget-root .level-indicator {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: currentColor !important;
+    opacity: 0.6 !important;
+}
+
+.syntheseWidget-root .level-btn.selected .level-indicator {
+    opacity: 1 !important;
+}
+
+.syntheseWidget-root .level-text {
+    font-weight: 600 !important;
+}
+
+/* Overlay pour DateRangePickerV2 */
+.syntheseWidget-root .custom-picker-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0,0,0,0.4) !important;
+    z-index: 999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+.syntheseWidget-root .custom-picker-container {
+    width: 90vw !important;
+    max-width: 1000px !important;
+    max-height: 90vh !important;
+    overflow: auto !important;
+}
+
+/* Container pour DateRangeSelector */
+.syntheseWidget-root .date-range-selector-container {
+    position: relative !important;
+    width: 100% !important;
+}
+
+.syntheseWidget-root .card-header { display: flex !important; align-items: center !important; gap: 1rem !important; }
+.syntheseWidget-root .card-content { display: flex !important; flex-direction: column !important; gap: 1.25rem !important; }
+
+/* DPE Gauge Moderne - Styles minimalistes et espacements optimisés */
+.syntheseWidget-root .dpe-card-modern {
+    background: #fff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
+    padding: 2rem !important;
+    border: 1px solid #f1f5f9 !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.syntheseWidget-root .dpe-header-modern {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2rem !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .dpe-icon-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    flex-shrink: 0 !important;
+}
+
+.syntheseWidget-root .dpe-icon-modern {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+}
+
+.syntheseWidget-root .dpe-content {
+    flex: 1 !important;
+}
+
+.syntheseWidget-root .dpe-title-modern {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.3 !important;
+}
+
+.syntheseWidget-root .dpe-subtitle-modern {
+    font-size: 0.9375rem !important;
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+}
+
+.syntheseWidget-root .dpe-grade-modern {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.875rem 1rem !important;
+    border-radius: 12px !important;
+    min-width: 80px !important;
+    text-align: center !important;
+}
+
+.syntheseWidget-root .dpe-grade-letter-modern {
+    font-size: 1.875rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.syntheseWidget-root .dpe-grade-status {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+}
+
+.syntheseWidget-root .dpe-scale-modern {
+    display: flex !important;
+    gap: 0.375rem !important;
+    margin-bottom: 2rem !important;
+    padding: 0.75rem !important;
+    background: #f8fafc !important;
+    border-radius: 12px !important;
+}
+
+.syntheseWidget-root .dpe-scale-bar {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.75rem 0.5rem !important;
+    border-radius: 8px !important;
+    position: relative !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: default !important;
+}
+
+.syntheseWidget-root .dpe-scale-bar:hover {
+    opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.syntheseWidget-root .dpe-scale-bar.current {
+    transform: none !important;
+    box-shadow: none !important;
+    z-index: 2 !important;
+}
+
+.syntheseWidget-root .scale-letter {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+.syntheseWidget-root .scale-indicator {
+    position: absolute !important;
+    bottom: 2px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 20px !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+    opacity: 0.8 !important;
+}
+
+.syntheseWidget-root .dpe-metrics-modern {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+}
+
+.syntheseWidget-root .dpe-metric-modern {
+    flex: 1 !important;
+}
+
+.syntheseWidget-root .metric-label {
+    font-size: 0.875rem !important;
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.375rem !important;
+}
+
+.syntheseWidget-root .metric-value {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.syntheseWidget-root .metric-unit {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    opacity: 0.7 !important;
+    margin-left: 0.25rem !important;
+}
+
+.syntheseWidget-root .dpe-performance-modern {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem 1rem !important;
+    background: rgba(0,0,0,0.02) !important;
+    border-radius: 10px !important;
+}
+
+.syntheseWidget-root .performance-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.syntheseWidget-root .performance-icon-svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+.syntheseWidget-root .performance-text {
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+}
+
+/* Bouton paramètres DPE et panneau des seuils */
+.syntheseWidget-root .dpe-settings-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.5rem !important;
+    background: rgba(0,0,0,0.02) !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 150ms ease-in-out !important;
+}
+
+.syntheseWidget-root .dpe-settings-btn:hover {
+    background: rgba(0,0,0,0.05) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+}
+
+.syntheseWidget-root .settings-icon {
+    width: 1rem !important;
+    height: 1rem !important;
+    color: #6b7280 !important;
+}
+
+.syntheseWidget-root .dpe-thresholds-panel {
+    margin-top: 2rem !important;
+    padding: 1.75rem !important;
+    background: #f8fafc !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.syntheseWidget-root .thresholds-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.5rem !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .info-icon-small {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    color: #6b7280 !important;
+    flex-shrink: 0 !important;
+}
+
+.syntheseWidget-root .thresholds-title {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    margin: 0 !important;
+}
+
+.syntheseWidget-root .thresholds-grid {
+    display: grid !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+}
+
+.syntheseWidget-root .threshold-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    background: #fff !important;
+    border-radius: 10px !important;
+    border-left: 4px solid #e5e7eb;
+    position: relative !important;
+    transition: all 150ms ease-in-out !important;
+    margin: 0 !important;
+    min-height: 60px !important;
+}
+
+.syntheseWidget-root .threshold-item:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.syntheseWidget-root .threshold-item.current {
+    background: rgba(24, 33, 62, 0.02) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.syntheseWidget-root .threshold-level {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    min-width: 1.5rem !important;
+    text-align: center !important;
+}
+
+.syntheseWidget-root .threshold-info {
+    flex: 1 !important;
+}
+
+.syntheseWidget-root .threshold-label {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    margin-bottom: 0.125rem !important;
+}
+
+.syntheseWidget-root .threshold-value {
+    font-size: 0.8125rem !important;
+    color: #6b7280 !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.syntheseWidget-root .current-indicator {
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+}
+
+/* Value blocks */
+.syntheseWidget-root .value-large { font-size: 1.875rem !important; line-height: 2.25rem !important; font-weight: 700 !important; }
+.syntheseWidget-root .value-medium { font-size: 1.5rem !important; line-height: 2rem !important; font-weight: 700 !important; }
+
+/* Icon container */
+.syntheseWidget-root .icon-container { padding: 0.75rem !important; border-radius: 0.5rem !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+.syntheseWidget-root .text-primary { color: #18213e !important; }
+.syntheseWidget-root .bg-primary-10 { background: rgba(24, 33, 62, 0.10) !important; }
+
+/* Grid system - Espacements optimisés et protection contre les conflits */
+.syntheseWidget-root .grid-responsive-1 { 
+    display: grid !important; 
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important; 
+    gap: 1.5rem !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+}
+
+.syntheseWidget-root .grid-responsive-2 { 
+    display: grid !important; 
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important; 
+    gap: 1.5rem !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+}
+
+@media (min-width: 640px) { 
+    .syntheseWidget-root .grid-responsive-2 { 
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+        gap: 2rem !important; 
+    } 
+}
+
+.syntheseWidget-root .grid-responsive-3 { 
+    display: grid !important; 
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important; 
+    gap: 1.5rem !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+}
+
+@media (min-width: 640px) { 
+    .syntheseWidget-root .grid-responsive-3 { 
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+        gap: 1.75rem !important; 
+    } 
+}
+
+@media (min-width: 1024px) { 
+    .syntheseWidget-root .grid-responsive-3 { 
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
+        gap: 2rem !important; 
+    } 
+}
+
+.syntheseWidget-root .grid-responsive-4 { 
+    display: grid !important; 
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important; 
+    gap: 1.5rem !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+}
+
+@media (min-width: 640px) { 
+    .syntheseWidget-root .grid-responsive-4 { 
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+        gap: 1.75rem !important; 
+    } 
+}
+
+@media (min-width: 1024px) { 
+    .syntheseWidget-root .grid-responsive-4 { 
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important; 
+        gap: 2rem !important; 
+    } 
+}
+
+/* Date selector */
+.syntheseWidget-root .date-selector .icon-container { background: rgba(24, 33, 62, 0.10) !important; }
+.syntheseWidget-root .date-selector .icon-info { width: 2rem !important; height: 2rem !important; color: #18213e !important; cursor: pointer !important; }
+.syntheseWidget-root .date-selector .tooltip { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; top: 100% !important; margin-top: 0.5rem !important; width: 500px !important; background: white !important; border-radius: 0.75rem !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; z-index: 50 !important; padding: 2rem !important; border: 1px solid #f3f4f6 !important; opacity: 0; visibility: hidden; transition: all 200ms ease-in-out; }
+.syntheseWidget-root .date-selector .tooltip.tooltip-visible { opacity: 1; visibility: visible; }
+.syntheseWidget-root .date-buttons { display: flex !important; flex-wrap: wrap !important; gap: 0.5rem !important; margin-top: 1rem !important; }
+.syntheseWidget-root .btn-toggle { padding: 0.625rem 1rem !important; border-radius: 9999px !important; background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #e5e7eb !important; font-weight: 600 !important; font-size: 1rem !important; display: flex !important; align-items: center !important; }
+.syntheseWidget-root .btn-toggle.active { background: #18213e !important; color: #fff !important; border-color: #18213e !important; }
+
+/* Modal overlay and content */
+.syntheseWidget-root .modal-overlay { position: fixed !important; inset: 0 !important; background: rgba(0,0,0,0.5) !important; z-index: 900 !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+.syntheseWidget-root .modal-content { background: white !important; border-radius: 0.75rem !important; padding: 0 !important; width: 90vw !important; max-width: 400px !important; box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; }
+.syntheseWidget-root .modal-header { padding: 1.5rem 1.5rem 0 1.5rem !important; border-bottom: 1px solid #e5e7eb !important; margin-bottom: 1.5rem !important; }
+.syntheseWidget-root .modal-body { padding: 0 1.5rem !important; }
+.syntheseWidget-root .modal-footer { padding: 1.5rem !important; border-top: 1px solid #e5e7eb !important; display: flex !important; justify-content: flex-end !important; gap: 0.75rem !important; }
+.syntheseWidget-root .form-group { margin-bottom: 1rem !important; }
+.syntheseWidget-root .form-label { display: block !important; font-size: 1rem !important; font-weight: 500 !important; color: #374151 !important; margin-bottom: 0.5rem !important; }
+.syntheseWidget-root .form-input { width: 100% !important; border: 1px solid #d1d5db !important; border-radius: 0.375rem !important; padding: 0.75rem !important; font-size: 1rem !important; }
+.syntheseWidget-root .form-input:focus { outline: none !important; border-color: #18213e !important; box-shadow: 0 0 0 3px rgba(24, 33, 62, 0.1) !important; }
+
+/* Helper classes - Icônes agrandies */
+.syntheseWidget-root .flex-1 { flex: 1 !important; }
+.syntheseWidget-root .bg-primary-10 { background: rgba(24, 33, 62, 0.1) !important; }
+.syntheseWidget-root .icon-lg { width: 2rem !important; height: 2rem !important; }
+
+/* Professional Table Styles */
+.syntheseWidget-root .table-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 1rem !important;
+}
+
+.syntheseWidget-root .btn-ghost {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.375rem !important;
+    transition: all 150ms ease-in-out !important;
+}
+
+.syntheseWidget-root .btn-ghost:hover {
+    background: rgba(24, 33, 62, 0.05) !important;
+    border-color: rgba(24, 33, 62, 0.1) !important;
+}
+
+.syntheseWidget-root .btn-sm {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.875rem !important;
+}
+
+.syntheseWidget-root .table-container {
+    border-radius: 0.75rem !important;
+    border: 1px solid #e5e7eb !important;
+    overflow: hidden !important;
+    background: #fff !important;
+}
+
+.syntheseWidget-root .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.syntheseWidget-root .data-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.syntheseWidget-root .table-header-row {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.syntheseWidget-root .table-cell-header {
+    padding: 1rem 0.75rem !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.025em !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    position: relative !important;
+}
+
+.syntheseWidget-root .sticky-col {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 10 !important;
+    background: inherit !important;
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.1) !important;
+}
+
+.syntheseWidget-root .header-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.375rem !important;
+}
+
+.syntheseWidget-root .header-label {
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+}
+
+.syntheseWidget-root .table-row {
+    transition: all 150ms ease-in-out !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.syntheseWidget-root .row-even {
+    background: #ffffff !important;
+}
+
+.syntheseWidget-root .row-odd {
+    background: #fafbfc !important;
+}
+
+.syntheseWidget-root .row-hovered {
+    background: rgba(24, 33, 62, 0.03) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.syntheseWidget-root .totals-row {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    border-top: 2px solid #cbd5e1 !important;
+    font-weight: 600 !important;
+}
+
+.syntheseWidget-root .totals-row:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+}
+
+.syntheseWidget-root .table-cell-data {
+    padding: 0.875rem 0.75rem !important;
+    font-size: 0.9375rem !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.syntheseWidget-root .level-cell {
+    font-weight: 600 !important;
+}
+
+.syntheseWidget-root .totals-cell {
+    padding: 1rem 0.75rem !important;
+    font-weight: 600 !important;
+}
+
+.syntheseWidget-root .level-badge {
     display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    min-width: 2.5rem !important;
 }
 
-/* If the color bar is pushing off the badge */
-.syntheseWidget-root .color-bar {
-    flex-grow: 0 !important;
-    max-width: calc(100% - 4rem) !important; /* Adjust based on badge width */
+.syntheseWidget-root .totals-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.375rem 1rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
-/* Add responsive adjustments for smaller screens */
+.syntheseWidget-root .metric-cell {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+}
+
+.syntheseWidget-root .metric-value {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.syntheseWidget-root .metric-value-total {
+    font-size: 1.125rem !important;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.syntheseWidget-root .metric-variation {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* Enhanced DPE Gauge Styles */
+.syntheseWidget-root .dpe-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05) !important;
+    padding: 1.5rem !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.syntheseWidget-root .dpe-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.syntheseWidget-root .dpe-icon-container {
+    padding: 1rem !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.syntheseWidget-root .dpe-icon {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+}
+
+.syntheseWidget-root .dpe-title-section {
+    flex: 1 !important;
+    margin-left: 1rem !important;
+}
+
+.syntheseWidget-root .dpe-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+}
+
+.syntheseWidget-root .dpe-subtitle {
+    font-size: 0.875rem !important;
+    color: #64748b !important;
+    margin-top: 0.25rem !important;
+}
+
+.syntheseWidget-root .dpe-grade-highlight {
+    padding: 1rem 1.5rem !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    min-width: 5rem !important;
+}
+
+.syntheseWidget-root .dpe-grade-letter {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    line-height: 1 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+.syntheseWidget-root .dpe-grade-label {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: rgba(255,255,255,0.9) !important;
+    margin-top: 0.25rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.syntheseWidget-root .dpe-scale-container {
+    position: relative !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.syntheseWidget-root .dpe-scale {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.syntheseWidget-root .dpe-scale-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 3rem !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 1.125rem !important;
+    position: relative !important;
+    transition: all 200ms ease-in-out !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.syntheseWidget-root .dpe-scale-active {
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    z-index: 2 !important;
+}
+
+.syntheseWidget-root .dpe-pulse {
+    position: absolute !important;
+    inset: -3px !important;
+    border-radius: 11px !important;
+    opacity: 0.3 !important;
+    animation: dpePulse 2s infinite !important;
+}
+
+@keyframes dpePulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.1; }
+}
+
+.syntheseWidget-root .dpe-arrow-container {
+    position: relative !important;
+    height: 1.5rem !important;
+}
+
+.syntheseWidget-root .dpe-arrow {
+    position: absolute !important;
+    transform: translateX(-50%) !important;
+    top: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 12px solid transparent !important;
+    border-right: 12px solid transparent !important;
+    border-bottom: 16px solid !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
+}
+
+.syntheseWidget-root .dpe-metrics {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+.syntheseWidget-root .dpe-metric {
+    text-align: left !important;
+}
+
+.syntheseWidget-root .dpe-metric-label {
+    font-size: 0.875rem !important;
+    color: #64748b !important;
+    margin-bottom: 0.25rem !important;
+    font-weight: 500 !important;
+}
+
+.syntheseWidget-root .dpe-metric-value {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.syntheseWidget-root .dpe-metric-unit {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+}
+
+.syntheseWidget-root .dpe-performance-indicator {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 1rem !important;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    /* You might need to reduce padding or font sizes on smaller screens */
-    .syntheseWidget-root {
-        padding: 0.5rem !important;
+    .syntheseWidget-root .table-cell-header,
+    .syntheseWidget-root .table-cell-data {
+        padding: 0.75rem 0.5rem !important;
     }
     
-    /* Make the badges more compact on smaller screens */
-    .badge {
-        font-size: 0.8rem;
-        padding: 0.2rem 0.4rem;
+    .syntheseWidget-root .header-label {
+        display: none !important;
+    }
+    
+    .syntheseWidget-root .metric-value {
+        font-size: 0.875rem !important;
+    }
+    
+    .syntheseWidget-root .btn-ghost {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.8125rem !important;
+    }
+    
+    .syntheseWidget-root .dpe-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1rem !important;
+    }
+    
+    .syntheseWidget-root .dpe-title-section {
+        margin-left: 0 !important;
+        text-align: center !important;
+    }
+    
+    .syntheseWidget-root .dpe-metrics {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+        text-align: center !important;
     }
 }
 
-/* Make sure Radix dialog is not affected by resets */
-[data-radix-dialog-content] {
-    all: initial;
-    box-sizing: border-box;
-    font-family: inherit;
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 1000 !important;
-}
+/* Chart container */
+.syntheseWidget-root .chart-container { width: 100% !important; height: 320px !important; }
+@media (min-width: 640px) { .syntheseWidget-root .chart-container { height: 350px !important; } }
+@media (min-width: 1024px) { .syntheseWidget-root .chart-container { height: 400px !important; } }
+
+/* Dialog (Radix) */
+.syntheseWidget-root .dialog-overlay { position: fixed !important; inset: 0 !important; background: rgba(0,0,0,0.5) !important; z-index: 900 !important; animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1); }
+.syntheseWidget-root .dialog-content { position: fixed !important; inset: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 1000 !important; }
+.syntheseWidget-root .dialog-panel { background: white !important; border-radius: 0.5rem !important; padding: 1.5rem !important; width: 90vw !important; max-width: 600px !important; max-height: 90vh !important; overflow-y: auto !important; margin: 1rem !important; animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1); }
+.syntheseWidget-root .dialog-title { font-size: 1.75rem !important; font-weight: 600 !important; margin-bottom: 1rem !important; color: #111827 !important; }
+.syntheseWidget-root .dialog-description { font-size: 1rem !important; color: #4b5563 !important; margin-bottom: 1.5rem !important; }
+.syntheseWidget-root .dialog-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 1rem !important; }
+@media (min-width: 768px) { .syntheseWidget-root .dialog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+.syntheseWidget-root .form-row { margin-bottom: 0.75rem !important; }
+.syntheseWidget-root .form-label { display: block !important; font-size: 1rem !important; font-weight: 500 !important; color: #374151 !important; margin-bottom: 0.25rem !important; }
+.syntheseWidget-root .form-input { width: 100% !important; border: 1px solid #d1d5db !important; border-radius: 0.375rem !important; padding: 0.5rem !important; font-size: 1rem !important; }
+.syntheseWidget-root .dialog-actions { margin-top: 1.5rem !important; display: flex !important; justify-content: flex-end !important; gap: 0.75rem !important; }
+.syntheseWidget-root .dialog-error { text-align: center !important; color: #ef4444 !important; padding: 1rem !important; border: 1px solid #fecaca !important; background: #fee2e2 !important; border-radius: 0.5rem !important; font-size: 1rem !important; }
+.syntheseWidget-root .dialog-close { position: absolute !important; top: 0.75rem !important; right: 0.75rem !important; padding: 0.25rem !important; border-radius: 9999px !important; color: #6b7280 !important; }
+
+/* Accessibility for Radix content under reset */
+[data-radix-dialog-content] { all: initial; box-sizing: border-box; font-family: inherit; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 1000 !important; }
+
+/* Keyframes for overlays (optional) */
+@keyframes overlayShow { from { opacity: 0; } to { opacity: 1; } }
+@keyframes contentShow { from { transform: translate(-50%, -45%); opacity: 0; } to { transform: translate(-50%, -50%); opacity: 1; } }
+
+

@@ -5,38 +5,42 @@ export interface DateRangeSelectorProps {
     onClickDay: () => void;
     onClickWeek: () => void;
     onClickMonth: () => void;
-    activeButton: 'day' | 'week' | 'month';
+    activeButton: "day" | "week" | "month";
     dateDebut?: Date;
     dateFin?: Date;
 }
 
 const formatDate = (date?: Date): string => {
-    if (!date) return 'N/A';
-    return date.toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    if (!date) return "N/A";
+    return date.toLocaleString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
     });
 };
 
-const getPreviousPeriodDates = (period: 'day' | 'week' | 'month', dateDebut?: Date, dateFin?: Date): { debut: string, fin: string } => {
-    if (!dateDebut || !dateFin) return { debut: 'N/A', fin: 'N/A' };
+const getPreviousPeriodDates = (
+    period: "day" | "week" | "month",
+    dateDebut?: Date,
+    dateFin?: Date
+): { debut: string; fin: string } => {
+    if (!dateDebut || !dateFin) return { debut: "N/A", fin: "N/A" };
 
     const previousDebut = new Date(dateDebut);
     const previousFin = new Date(dateFin);
 
     switch (period) {
-        case 'day':
+        case "day":
             previousDebut.setDate(previousDebut.getDate() - 1);
             previousFin.setDate(previousFin.getDate() - 1);
             break;
-        case 'week':
+        case "week":
             previousDebut.setDate(previousDebut.getDate() - 7);
             previousFin.setDate(previousFin.getDate() - 7);
             break;
-        case 'month':
+        case "month":
             previousDebut.setMonth(previousDebut.getMonth() - 1);
             previousFin.setMonth(previousFin.getMonth() - 1);
             break;
@@ -48,10 +52,10 @@ const getPreviousPeriodDates = (period: 'day' | 'week' | 'month', dateDebut?: Da
     };
 };
 
-export const DateRangeSelector = ({ 
-    onClickDay, 
-    onClickWeek, 
-    onClickMonth, 
+export const DateRangeSelector = ({
+    onClickDay,
+    onClickWeek,
+    onClickMonth,
     activeButton,
     dateDebut,
     dateFin
@@ -67,14 +71,14 @@ export const DateRangeSelector = ({
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            if (!target.closest('.tooltip-container')) {
+            if (!target.closest(".tooltip-container")) {
                 setIsTooltipVisible(false);
             }
         };
 
-        document.addEventListener('click', handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
         return () => {
-            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener("click", handleClickOutside);
         };
     }, []);
 
@@ -86,14 +90,20 @@ export const DateRangeSelector = ({
                 </div>
                 <div className="flex items-center gap-2">
                     <h3 className="title-medium">Sélection de la période</h3>
-                    <div className={`relative group flex items-center tooltip-container ${isTooltipVisible ? 'show' : ''}`}>
-                        <Info 
-                            className="w-8 h-8 text-[#18213e] cursor-pointer hover:text-[#18213e]/80 transition-colors duration-200" 
+                    <div
+                        className={`relative group flex items-center tooltip-container ${
+                            isTooltipVisible ? "show" : ""
+                        }`}
+                    >
+                        <Info
+                            className="w-8 h-8 text-[#18213e] cursor-pointer hover:text-[#18213e]/80 transition-colors duration-200"
                             onClick={toggleTooltip}
                         />
-                        <div className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[500px] bg-white rounded-xl shadow-xl transition-all duration-300 z-50 p-8 border border-gray-100 ${
-                            isTooltipVisible ? 'opacity-100 visible' : 'opacity-0 invisible'
-                        }`}>
+                        <div
+                            className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[500px] bg-white rounded-xl shadow-xl transition-all duration-300 z-50 p-8 border border-gray-100 ${
+                                isTooltipVisible ? "opacity-100 visible" : "opacity-0 invisible"
+                            }`}
+                        >
                             <div className="space-y-6">
                                 <div>
                                     <div className="font-semibold text-[#18213e] text-2xl mb-4 flex items-center">
@@ -136,9 +146,9 @@ export const DateRangeSelector = ({
                 <button
                     onClick={onClickDay}
                     className={`flex-1 py-3 px-4 rounded-lg transition-all duration-200 ${
-                        activeButton === 'day'
-                            ? 'bg-[#18213e] text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        activeButton === "day"
+                            ? "bg-[#18213e] text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                     Aujourd'hui
@@ -146,9 +156,9 @@ export const DateRangeSelector = ({
                 <button
                     onClick={onClickWeek}
                     className={`flex-1 py-3 px-4 rounded-lg transition-all duration-200 ${
-                        activeButton === 'week'
-                            ? 'bg-[#18213e] text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        activeButton === "week"
+                            ? "bg-[#18213e] text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                     Cette semaine
@@ -156,9 +166,9 @@ export const DateRangeSelector = ({
                 <button
                     onClick={onClickMonth}
                     className={`flex-1 py-3 px-4 rounded-lg transition-all duration-200 ${
-                        activeButton === 'month'
-                            ? 'bg-[#18213e] text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        activeButton === "month"
+                            ? "bg-[#18213e] text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                     Ce mois-ci

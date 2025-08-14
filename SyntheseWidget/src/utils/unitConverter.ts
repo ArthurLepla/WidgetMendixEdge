@@ -19,11 +19,7 @@ const KWH_CONVERSIONS = [
 ];
 
 // Fonction principale de formatage intelligent
-export const formatSmartValue = (
-    value: Big, 
-    _energyType: EnergyType, 
-    baseUnit: BaseUnit
-): FormattedValue => {
+export const formatSmartValue = (value: Big, _energyType: EnergyType, baseUnit: BaseUnit): FormattedValue => {
     if (!value || value.lte(0)) {
         return {
             formattedValue: "0",
@@ -49,7 +45,7 @@ const formatKwhValue = (value: Big): FormattedValue => {
             };
         }
     }
-    
+
     return {
         formattedValue: formatNumber(value),
         displayUnit: "kWh"
@@ -67,29 +63,27 @@ const formatM3Value = (value: Big): FormattedValue => {
 // Fonction de formatage des nombres avec gestion des décimales
 const formatNumber = (value: Big): string => {
     const num = value.toNumber();
-    
+
     if (num >= 1000) {
         // Pour les grandes valeurs, arrondir à l'entier ou 1 décimale
-        return num >= 10000 ? 
-            Math.round(num).toLocaleString('fr-FR') : 
-            num.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+        return num >= 10000
+            ? Math.round(num).toLocaleString("fr-FR")
+            : num.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
     } else if (num >= 100) {
         // Centaines : 1 décimale max
-        return num.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+        return num.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
     } else if (num >= 10) {
         // Dizaines : 2 décimales max
-        return num.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+        return num.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
     } else if (num >= 1) {
         // Unités : 2 décimales max
-        return num.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+        return num.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
     } else if (num >= 0.01) {
         // Petites valeurs : 3 décimales max
-        return num.toLocaleString('fr-FR', { maximumFractionDigits: 3 });
+        return num.toLocaleString("fr-FR", { maximumFractionDigits: 3 });
     } else if (num > 0) {
         // Très petites valeurs : notation scientifique si nécessaire
-        return num < 0.001 ? 
-            num.toExponential(2) : 
-            num.toLocaleString('fr-FR', { maximumFractionDigits: 4 });
+        return num < 0.001 ? num.toExponential(2) : num.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
     } else {
         return "0";
     }
@@ -104,16 +98,16 @@ export const getBaseUnitForEnergyType = (
     airUnit: BaseUnit
 ): BaseUnit => {
     switch (energyType) {
-        case 'electricity':
+        case "electricity":
             return electricityUnit;
-        case 'gas':
+        case "gas":
             return gasUnit;
-        case 'water':
+        case "water":
             return waterUnit;
-        case 'air':
+        case "air":
             return airUnit;
         default:
-            return 'kWh';
+            return "kWh";
     }
 };
 
@@ -128,18 +122,14 @@ export const isValidBaseUnit = (unit: string): unit is BaseUnit => {
 };
 
 // Fonction de conversion pour les tests ou cas spéciaux
-export const convertValue = (
-    value: Big,
-    fromUnit: BaseUnit,
-    toUnit: BaseUnit
-): Big => {
+export const convertValue = (value: Big, fromUnit: BaseUnit, toUnit: BaseUnit): Big => {
     // Si les unités sont les mêmes, pas de conversion
     if (fromUnit === toUnit) {
         return value;
     }
-    
+
     // Dans ce système simplifié, on ne fait pas de conversion entre kWh et m³
     // car cela n'a pas de sens physique
-    console.warn(`Conversion from ${fromUnit} to ${toUnit} is not supported`);
+    // Note: Conversion from ${fromUnit} to ${toUnit} is not supported
     return value;
-}; 
+};

@@ -7,34 +7,73 @@
     <description>Widget de synthèse énergétique</description>
     <icon/>
     <properties>
-        <!-- Data Source Usine -->
-        <propertyGroup caption="Data Source Usine">
-            <property key="dsUsine" type="datasource" isList="true" required="true">
-                <caption>Data Source Usine</caption>
-                <description>Sélectionner la source de données pour l'usine</description>
+        <!-- ========== Niveaux & Sélection ========== -->
+        <propertyGroup caption="Niveaux">
+            <property key="levels" type="datasource" isList="true" required="true">
+                <caption>Liste des Niveaux</caption>
+                <description>Microflow retournant tous les niveaux (Level)</description>
             </property>
-            <property key="attrTotalConsoElec" type="attribute" dataSource="dsUsine" required="true">
+            <property key="levelName" type="attribute" dataSource="levels" required="true">
+                <caption>Nom du Niveau</caption>
+                <description>Attribut nom du Level (ex: L0, L1, L2)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="levelSortOrder" type="attribute" dataSource="levels">
+                <caption>Ordre de Tri</caption>
+                <description>Entier représentant l'ordre du niveau</description>
+                <attributeTypes>
+                    <attributeType name="Integer"/>
+                </attributeTypes>
+            </property>
+            
+        </propertyGroup>
+
+        <!-- ========== Sources de Données ========== -->
+        <propertyGroup caption="Sources de Données">
+            <!-- Tous les assets -->
+            <property key="allAssets" type="datasource" isList="true" required="true">
+                <caption>Tous les Assets</caption>
+                <description>Microflow retournant tous les assets</description>
+            </property>
+            <property key="assetName" type="attribute" dataSource="allAssets" required="true">
+                <caption>Nom de l'Asset</caption>
+                <description>Attribut nom sur l'asset</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="assetLevel" type="association" dataSource="allAssets" selectableObjects="levels">
+                <caption>Asset → Level</caption>
+                <description>Association de l'asset vers son niveau</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                </associationTypes>
+            </property>
+            <!-- Attributs métriques des assets (agrégation côté widget) -->
+            <property key="attrTotalConsoElec" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Électricité</caption>
                 <description>Consommation totale électricité</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="attrTotalConsoGaz" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoGaz" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Gaz</caption>
                 <description>Consommation totale gaz</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="attrTotalConsoEau" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoEau" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Eau</caption>
                 <description>Consommation totale eau</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="attrTotalConsoAir" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoAir" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Air</caption>
                 <description>Consommation totale air</description>
                 <attributeTypes>
@@ -42,28 +81,28 @@
                 </attributeTypes>
             </property>
             <!-- Période Précédente -->
-            <property key="attrTotalConsoElecPeriodPrec" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoElecPeriodPrec" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Électricité Période Précédente</caption>
                 <description>Consommation totale électricité période précédente</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="attrTotalConsoGazPeriodPrec" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoGazPeriodPrec" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Gaz Période Précédente</caption>
                 <description>Consommation totale gaz période précédente</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="attrTotalConsoEauPeriodPrec" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoEauPeriodPrec" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Eau Période Précédente</caption>
                 <description>Consommation totale eau période précédente</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
                 </attributeTypes>
             </property>
-            <property key="attrTotalConsoAirPeriodPrec" type="attribute" dataSource="dsUsine" required="true">
+            <property key="attrTotalConsoAirPeriodPrec" type="attribute" dataSource="allAssets" required="true">
                 <caption>Total Conso Air Période Précédente</caption>
                 <description>Consommation totale air période précédente</description>
                 <attributeTypes>
@@ -72,95 +111,15 @@
             </property>
         </propertyGroup>
 
-        <!-- Data Source Secteurs -->
-        <propertyGroup caption="Data Source Secteurs">
-            <property key="dsSecteurs" type="datasource" isList="true" required="true">
-                <caption>Data Source Secteurs</caption>
-                <description>Sélectionner la source de données pour les secteurs</description>
+        <!-- ========== Période et Calculs ========== -->
+        <propertyGroup caption="Période et Calculs">
+            <property key="refreshDataAction" type="action" required="false">
+                <caption>Rafraîchir les Données</caption>
+                <description>Microflow pour recalculer les métriques via JavaActions</description>
             </property>
-            <!-- Nom du secteur -->
-            <property key="attrSecteurNom" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Nom du Secteur</caption>
-                <description>Nom du secteur</description>
-                <attributeTypes>
-                    <attributeType name="String"/>
-                </attributeTypes>
-            </property>
-            <!-- Consommations actuelles -->
-            <property key="attrSecteurConsoElec" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Électricité Secteur</caption>
-                <description>Consommation électricité par secteur</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <property key="attrSecteurConsoGaz" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Gaz Secteur</caption>
-                <description>Consommation gaz par secteur</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <property key="attrSecteurConsoEau" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Eau Secteur</caption>
-                <description>Consommation eau par secteur</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <property key="attrSecteurConsoAir" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Air Secteur</caption>
-                <description>Consommation air par secteur</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <!-- Consommations période précédente -->
-            <property key="attrSecteurConsoElecPrec" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Électricité Secteur Période Précédente</caption>
-                <description>Consommation électricité par secteur période précédente</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <property key="attrSecteurConsoGazPrec" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Gaz Secteur Période Précédente</caption>
-                <description>Consommation gaz par secteur période précédente</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <property key="attrSecteurConsoEauPrec" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Eau Secteur Période Précédente</caption>
-                <description>Consommation eau par secteur période précédente</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-            <property key="attrSecteurConsoAirPrec" type="attribute" dataSource="dsSecteurs" required="true">
-                <caption>Conso Air Secteur Période Précédente</caption>
-                <description>Consommation air par secteur période précédente</description>
-                <attributeTypes>
-                    <attributeType name="Decimal"/>
-                </attributeTypes>
-            </property>
-        </propertyGroup>
-
-        <!-- Date Range -->
-        <propertyGroup caption="Date Range">
-            <property key="dateDebut" type="attribute" required="true">
-                <caption>Date Début</caption>
-                <description>Date de début de la période</description>
-                <attributeTypes>
-                    <attributeType name="DateTime"/>
-                </attributeTypes>
-            </property>
-            <property key="dateFin" type="attribute" required="true">
-                <caption>Date Fin</caption>
-                <description>Date de fin de la période</description>
-                <attributeTypes>
-                    <attributeType name="DateTime"/>
-                </attributeTypes>
+            <property key="onPeriodChange" type="action" required="false">
+                <caption>Sur Changement Période</caption>
+                <description>Action lors du changement jour/semaine/mois</description>
             </property>
         </propertyGroup>
 

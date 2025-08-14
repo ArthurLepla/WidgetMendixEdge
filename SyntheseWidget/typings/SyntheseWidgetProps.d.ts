@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
+import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListReferenceValue } from "mendix";
 import { Big } from "big.js";
 
 export type BaseUnitElectricityEnum = "kWh" | "m3";
@@ -20,7 +20,12 @@ export interface SyntheseWidgetContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    dsUsine: ListValue;
+    levels: ListValue;
+    levelName: ListAttributeValue<string>;
+    levelSortOrder: ListAttributeValue<Big>;
+    allAssets: ListValue;
+    assetName: ListAttributeValue<string>;
+    assetLevel: ListReferenceValue;
     attrTotalConsoElec: ListAttributeValue<Big>;
     attrTotalConsoGaz: ListAttributeValue<Big>;
     attrTotalConsoEau: ListAttributeValue<Big>;
@@ -29,18 +34,8 @@ export interface SyntheseWidgetContainerProps {
     attrTotalConsoGazPeriodPrec: ListAttributeValue<Big>;
     attrTotalConsoEauPeriodPrec: ListAttributeValue<Big>;
     attrTotalConsoAirPeriodPrec: ListAttributeValue<Big>;
-    dsSecteurs: ListValue;
-    attrSecteurNom: ListAttributeValue<string>;
-    attrSecteurConsoElec: ListAttributeValue<Big>;
-    attrSecteurConsoGaz: ListAttributeValue<Big>;
-    attrSecteurConsoEau: ListAttributeValue<Big>;
-    attrSecteurConsoAir: ListAttributeValue<Big>;
-    attrSecteurConsoElecPrec: ListAttributeValue<Big>;
-    attrSecteurConsoGazPrec: ListAttributeValue<Big>;
-    attrSecteurConsoEauPrec: ListAttributeValue<Big>;
-    attrSecteurConsoAirPrec: ListAttributeValue<Big>;
-    dateDebut: EditableValue<Date>;
-    dateFin: EditableValue<Date>;
+    refreshDataAction?: ActionValue;
+    onPeriodChange?: ActionValue;
     baseUnitElectricity: BaseUnitElectricityEnum;
     baseUnitGas: BaseUnitGasEnum;
     baseUnitWater: BaseUnitWaterEnum;
@@ -103,8 +98,14 @@ export interface SyntheseWidgetPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
-    renderMode?: "design" | "xray" | "structure";
-    dsUsine: {} | { caption: string } | { type: string } | null;
+    renderMode: "design" | "xray" | "structure";
+    translate: (text: string) => string;
+    levels: {} | { caption: string } | { type: string } | null;
+    levelName: string;
+    levelSortOrder: string;
+    allAssets: {} | { caption: string } | { type: string } | null;
+    assetName: string;
+    assetLevel: string;
     attrTotalConsoElec: string;
     attrTotalConsoGaz: string;
     attrTotalConsoEau: string;
@@ -113,18 +114,8 @@ export interface SyntheseWidgetPreviewProps {
     attrTotalConsoGazPeriodPrec: string;
     attrTotalConsoEauPeriodPrec: string;
     attrTotalConsoAirPeriodPrec: string;
-    dsSecteurs: {} | { caption: string } | { type: string } | null;
-    attrSecteurNom: string;
-    attrSecteurConsoElec: string;
-    attrSecteurConsoGaz: string;
-    attrSecteurConsoEau: string;
-    attrSecteurConsoAir: string;
-    attrSecteurConsoElecPrec: string;
-    attrSecteurConsoGazPrec: string;
-    attrSecteurConsoEauPrec: string;
-    attrSecteurConsoAirPrec: string;
-    dateDebut: string;
-    dateFin: string;
+    refreshDataAction: {} | null;
+    onPeriodChange: {} | null;
     baseUnitElectricity: BaseUnitElectricityEnum;
     baseUnitGas: BaseUnitGasEnum;
     baseUnitWater: BaseUnitWaterEnum;

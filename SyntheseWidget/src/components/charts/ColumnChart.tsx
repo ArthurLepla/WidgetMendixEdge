@@ -1,9 +1,9 @@
 import { ReactElement, createElement, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import { Big } from "big.js";
-import { useLoading } from "./services/useLoading";
-import { EnergyType } from "../typings/EnergyTypes";
-import { formatSmartValue, BaseUnit } from "../utils/unitConverter";
+import { useLoading } from "../services/useLoading";
+import { EnergyType } from "../../typings/EnergyTypes";
+import { formatSmartValue, BaseUnit } from "../../utils/unitConverter";
 
 export interface SecteurData {
     name: string;
@@ -25,7 +25,6 @@ interface ColumnChartProps {
     baseUnit: BaseUnit;
 }
 
-// Mappage entre les types de graphique et les types d'énergie
 const TYPE_TO_ENERGY_MAP: Record<string, EnergyType> = {
     elec: "electricity",
     gaz: "gas",
@@ -34,25 +33,12 @@ const TYPE_TO_ENERGY_MAP: Record<string, EnergyType> = {
 };
 
 const ENERGY_CONFIG = {
-    elec: {
-        color: "#38a13c",
-        BackgroundIconColor: "rgba(56, 161, 60, 0.1)"
-    },
-    gaz: {
-        color: "#F9BE01",
-        BackgroundIconColor: "rgba(249, 190, 1, 0.1)"
-    },
-    eau: {
-        color: "#3293f3",
-        BackgroundIconColor: "rgba(50, 147, 243, 0.1)"
-    },
-    air: {
-        color: "#66D8E6",
-        BackgroundIconColor: "rgba(102, 216, 230, 0.1)"
-    }
+    elec: { color: "#38a13c", BackgroundIconColor: "rgba(56, 161, 60, 0.1)" },
+    gaz: { color: "#F9BE01", BackgroundIconColor: "rgba(249, 190, 1, 0.1)" },
+    eau: { color: "#3293f3", BackgroundIconColor: "rgba(50, 147, 243, 0.1)" },
+    air: { color: "#66D8E6", BackgroundIconColor: "rgba(102, 216, 230, 0.1)" }
 };
 
-// Fonctions utilitaires adaptées au nouveau système d'unités
 const getEnergyType = (type: string): "electricity" | "gas" | "water" | "air" => {
     switch (type) {
         case "elec":
@@ -68,7 +54,6 @@ const getEnergyType = (type: string): "electricity" | "gas" | "water" | "air" =>
     }
 };
 
-// Formatage des valeurs pour affichage avec le nouveau système
 const formatValueWithUnit = (
     value: number,
     type: string,
@@ -109,30 +94,19 @@ const getPreviousValues = (data: SecteurData[], type: string): number[] => {
     }
 };
 
-const calculateVariation = (current: number, previous: number): number => {
-    if (previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
-};
+const calculateVariation = (current: number, previous: number): number =>
+    previous === 0 ? 0 : ((current - previous) / previous) * 100;
 
 export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: ColumnChartProps): ReactElement => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
-    // Suppression de l'état hoveredIndex qui n'est pas utilisé activement
-
-    // Utiliser le hook de chargement, en ne récupérant que startLoading qui est utilisé
     const { startLoading } = useLoading();
 
-    // Fonction pour calculer la configuration optimale des labels selon le nombre d'entités
     const calculateLabelConfig = (dataLength: number, containerWidth: number) => {
         const isMobile = window.innerWidth < 640;
-
-        // Estimation de l'espace disponible par label
         const availableWidth = containerWidth * (isMobile ? 0.7 : 0.85);
         const spacePerLabel = availableWidth / dataLength;
-
-        // Configuration adaptative basée sur l'espace par label et le nombre d'entités
-        if (dataLength <= 4) {
-            // Peu d'entités : affichage normal
+        if (dataLength <= 4)
             return {
                 rotate: 0,
                 interval: 0,
@@ -141,8 +115,7 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 fontSize: 12,
                 overflow: "none"
             };
-        } else if (dataLength <= 8 && spacePerLabel > 60) {
-            // Nombre modéré : légère adaptation
+        if (dataLength <= 8 && spacePerLabel > 60)
             return {
                 rotate: isMobile ? 30 : 0,
                 interval: 0,
@@ -151,8 +124,7 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 fontSize: isMobile ? 11 : 12,
                 overflow: "truncate"
             };
-        } else if (dataLength <= 12 && spacePerLabel > 40) {
-            // Nombre élevé : rotation et troncature
+        if (dataLength <= 12 && spacePerLabel > 40)
             return {
                 rotate: isMobile ? 45 : 30,
                 interval: 0,
@@ -161,69 +133,47 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 fontSize: isMobile ? 10 : 11,
                 overflow: "truncate"
             };
-        } else if (dataLength <= 20) {
-            // Beaucoup d'entités : rotation forte + affichage sélectif
+        if (dataLength <= 20) {
             const interval = Math.ceil(dataLength / (isMobile ? 6 : 10)) - 1;
             return {
                 rotate: 45,
-                interval: interval,
+                interval,
                 width: isMobile ? 50 : 70,
                 align: "right",
                 fontSize: isMobile ? 9 : 10,
                 overflow: "truncate"
             };
-        } else {
-            // Très nombreuses entités : affichage très sélectif
-            const interval = Math.ceil(dataLength / (isMobile ? 4 : 8)) - 1;
-            return {
-                rotate: 60,
-                interval: interval,
-                width: isMobile ? 40 : 60,
-                align: "right",
-                fontSize: 9,
-                overflow: "truncate"
-            };
         }
+        const interval = Math.ceil(dataLength / (isMobile ? 4 : 8)) - 1;
+        return { rotate: 60, interval, width: isMobile ? 40 : 60, align: "right", fontSize: 9, overflow: "truncate" };
     };
 
-    // Fonction pour tronquer les noms intelligemment
     const truncateLabel = (label: string, maxLength: number): string => {
         if (label.length <= maxLength) return label;
-
-        // Essayer de garder le début et la fin si possible
         if (maxLength > 6) {
             const start = Math.ceil((maxLength - 3) / 2);
             const end = Math.floor((maxLength - 3) / 2);
             return `${label.substring(0, start)}...${label.substring(label.length - end)}`;
         }
-
         return `${label.substring(0, maxLength - 3)}...`;
     };
 
     useEffect(() => {
         const initChart = () => {
             if (!chartRef.current) return;
-
-            if (!chartInstance.current) {
-                chartInstance.current = echarts.init(chartRef.current);
-            }
+            if (!chartInstance.current) chartInstance.current = echarts.init(chartRef.current);
 
             const currentValues = getCurrentValues(data, type);
             const previousValues = getPreviousValues(data, type);
-            // Obtenir une unité d'exemple pour l'affichage de l'axe Y
             const sampleValue = currentValues.length > 0 ? currentValues[0] : 0;
             const sampleFormatted = formatValueWithUnit(sampleValue, type, baseUnit);
             const displayUnit = sampleFormatted.displayUnit;
-            const color = ENERGY_CONFIG[type].color;
+            const color = (ENERGY_CONFIG as any)[type].color;
             const isMobile = window.innerWidth < 640;
             const isClickable = !!onClickSecteur;
-
-            // Calculer la configuration optimale des labels
             const containerWidth = chartRef.current?.offsetWidth || 400;
             const labelConfig = calculateLabelConfig(data.length, containerWidth);
-
-            // Adapter la hauteur du graphique selon la rotation des labels
-            const needsExtraBottomSpace = labelConfig.rotate > 30;
+            const needsExtraBottomSpace = (labelConfig.rotate as number) > 30;
             const bottomSpacing = needsExtraBottomSpace ? (isMobile ? "25%" : "20%") : isMobile ? "20%" : "15%";
 
             const option = {
@@ -231,11 +181,7 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                     text: title,
                     left: "center",
                     top: 0,
-                    textStyle: {
-                        fontSize: 16,
-                        fontWeight: 600,
-                        color: "#111827"
-                    }
+                    textStyle: { fontSize: 16, fontWeight: 600, color: "#111827" }
                 },
                 tooltip: {
                     trigger: "axis",
@@ -244,16 +190,11 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                         const previousValue = params[0].value;
                         const variation = calculateVariation(currentValue, previousValue);
                         const variationColor = variation > 8 ? "#ef4444" : variation < 0 ? "#22c55e" : "#64748b";
-
-                        // Utiliser la fonction formatValueWithUnit pour les valeurs
                         const formattedCurrent = formatValueWithUnit(currentValue, type, baseUnit);
                         const formattedPrevious = formatValueWithUnit(previousValue, type, baseUnit);
-
-                        // Ajout d'un message pour indiquer que le secteur est cliquable
                         const clickMessage = isClickable
                             ? `<div class="mt-2 text-blue-600 font-bold">Cliquez pour voir les détails</div>`
                             : "";
-
                         return `
                             <div class="font-medium">
                                 <div class="text-lg mb-2 font-bold">${params[0].name}</div>
@@ -263,9 +204,9 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                                 <div>Période précédente: ${formattedPrevious.formattedValue} ${
                             formattedPrevious.displayUnit
                         }</div>
-                                <div style="color: ${variationColor}">
-                                    Variation: ${variation > 0 ? "+" : ""}${variation.toFixed(1)}%
-                                </div>
+                                <div style="color: ${variationColor}">Variation: ${
+                            variation > 0 ? "+" : ""
+                        }${variation.toFixed(1)}%</div>
                                 ${clickMessage}
                             </div>
                         `;
@@ -274,10 +215,7 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 legend: {
                     data: ["Période précédente", "Période actuelle"],
                     top: 30,
-                    textStyle: {
-                        fontSize: 12,
-                        fontWeight: 500
-                    }
+                    textStyle: { fontSize: 12, fontWeight: 500 }
                 },
                 grid: {
                     top: 80,
@@ -297,10 +235,11 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                         width: labelConfig.width,
                         overflow: labelConfig.overflow,
                         align: labelConfig.align,
-                        // Formatter pour tronquer les labels si nécessaire
                         formatter: (value: string) => {
                             if (labelConfig.overflow === "truncate") {
-                                const maxLength = Math.floor(labelConfig.width / (labelConfig.fontSize * 0.6));
+                                const maxLength = Math.floor(
+                                    (labelConfig.width as number) / ((labelConfig.fontSize as number) * 0.6)
+                                );
                                 return truncateLabel(value, maxLength);
                             }
                             return value;
@@ -310,37 +249,17 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 yAxis: {
                     type: "value",
                     name: displayUnit,
-                    nameTextStyle: {
-                        fontSize: 12,
-                        fontWeight: 500,
-                        padding: [0, 0, 0, 30]
-                    },
-                    axisLabel: {
-                        fontSize: 12,
-                        fontWeight: 500,
-                        formatter: `{value} ${displayUnit}`
-                    },
-                    splitLine: {
-                        lineStyle: {
-                            type: "dashed",
-                            color: "#e5e7eb"
-                        }
-                    }
+                    nameTextStyle: { fontSize: 12, fontWeight: 500, padding: [0, 0, 0, 30] },
+                    axisLabel: { fontSize: 12, fontWeight: 500, formatter: `{value} ${displayUnit}` },
+                    splitLine: { lineStyle: { type: "dashed", color: "#e5e7eb" } }
                 },
                 series: [
                     {
                         name: "Période précédente",
                         type: "bar",
                         data: previousValues,
-                        itemStyle: {
-                            color,
-                            opacity: 0.3
-                        },
-                        emphasis: {
-                            itemStyle: {
-                                opacity: 0.5
-                            }
-                        },
+                        itemStyle: { color, opacity: 0.3 },
+                        emphasis: { itemStyle: { opacity: 0.5 } },
                         barWidth: "20%",
                         z: 1
                     },
@@ -348,21 +267,13 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                         name: "Période actuelle",
                         type: "bar",
                         data: currentValues,
-                        itemStyle: {
-                            color,
-                            // Ajouter une bordure pour indiquer que c'est interactif si un gestionnaire de clic est fourni
-                            borderWidth: isClickable ? 1 : 0,
-                            borderColor: "transparent"
-                        },
+                        itemStyle: { color, borderWidth: isClickable ? 1 : 0, borderColor: "transparent" },
                         emphasis: {
-                            // Style accentué au survol
                             itemStyle: {
-                                color: color,
+                                color,
                                 opacity: 1,
-                                // Bordure plus visible et colorée au survol
                                 borderWidth: isClickable ? 2 : 0,
                                 borderColor: isClickable ? "#1f2937" : "transparent",
-                                // Effet de brillance
                                 shadowBlur: 10,
                                 shadowColor: color
                             }
@@ -372,11 +283,9 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                         z: 2
                     }
                 ]
-            };
+            } as any;
 
             chartInstance.current.setOption(option);
-
-            // Ajouter le curseur "pointer" au survol des colonnes
             if (isClickable) {
                 chartInstance.current.getZr().on("mousemove", (params: any) => {
                     const pointInPixel = [params.offsetX, params.offsetY];
@@ -386,50 +295,34 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                         chartRef.current!.style.cursor = "default";
                     }
                 });
-
                 chartInstance.current.getZr().on("mouseout", () => {
                     chartRef.current!.style.cursor = "default";
                 });
             }
-
-            // Ajouter l'événement de clic sur les colonnes avec loader
             if (onClickSecteur) {
                 chartInstance.current.on("click", params => {
                     if (params.componentType === "series") {
                         const secteurName = params.name;
-
-                        // Activer le loader avant la navigation
                         const energyType = TYPE_TO_ENERGY_MAP[type];
                         const loadingMessage = `Chargement des détails pour ${secteurName}...`;
-
-                        // Démarrer le loader avec le type d'énergie approprié
                         startLoading(loadingMessage, false, energyType);
-
-                        // Appeler le callback
                         onClickSecteur(secteurName);
                     }
                 });
             }
         };
 
-        // Initialisation différée
         const timer = setTimeout(initChart, 100);
-
         const handleResize = () => {
             if (chartInstance.current) {
                 chartInstance.current.resize();
-                // Recalculer la configuration lors du redimensionnement
                 const containerWidth = chartRef.current?.offsetWidth || 400;
                 const labelConfig = calculateLabelConfig(data.length, containerWidth);
-                const needsExtraBottomSpace = labelConfig.rotate > 30;
+                const needsExtraBottomSpace = (labelConfig.rotate as number) > 30;
                 const isMobile = window.innerWidth < 640;
                 const bottomSpacing = needsExtraBottomSpace ? (isMobile ? "25%" : "20%") : isMobile ? "20%" : "15%";
-
                 chartInstance.current.setOption({
-                    grid: {
-                        left: isMobile ? "15%" : "5%",
-                        bottom: bottomSpacing
-                    },
+                    grid: { left: isMobile ? "15%" : "5%", bottom: bottomSpacing },
                     xAxis: {
                         axisLabel: {
                             fontSize: labelConfig.fontSize,
@@ -440,7 +333,9 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                             align: labelConfig.align,
                             formatter: (value: string) => {
                                 if (labelConfig.overflow === "truncate") {
-                                    const maxLength = Math.floor(labelConfig.width / (labelConfig.fontSize * 0.6));
+                                    const maxLength = Math.floor(
+                                        (labelConfig.width as number) / ((labelConfig.fontSize as number) * 0.6)
+                                    );
                                     return truncateLabel(value, maxLength);
                                 }
                                 return value;
@@ -450,9 +345,7 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 });
             }
         };
-
         window.addEventListener("resize", handleResize);
-
         return () => {
             clearTimeout(timer);
             window.removeEventListener("resize", handleResize);
@@ -465,12 +358,12 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
 
     return (
         <div className="card-base">
-            <div ref={chartRef} className="w-full h-[300px] sm:h-[350px] lg:h-[400px]" />
+            <div ref={chartRef} className="chart-container" />
             {onClickSecteur && (
-                <div className="text-center text-sm text-gray-500 mt-2 italic">
+                <div className="text-center text-sm text-secondary mt-2 italic">
                     Survolez et cliquez sur un secteur pour voir plus de détails
                     {data.length > 12 && (
-                        <span className="block text-xs mt-1">
+                        <span className="block text-xs mt-1 text-secondary">
                             Tous les secteurs ne sont pas affichés sur l'axe - utilisez les tooltips pour voir les
                             détails
                         </span>

@@ -1,25 +1,25 @@
 import { ReactElement, createElement, useState } from "react";
 import { SyntheseWidgetPreviewProps } from "../typings/SyntheseWidgetProps";
-import { CardConsoTotal } from "./components/CardConsoTotal";
-import { ColumnChart } from "./components/ColumnChart";
-import { SecteurConsoCard } from "./components/SecteurConsoCard";
-import { DPE } from "./components/DPE";
-import { DateRangeSelector } from "./components/DateRangeSelector";
+import { CardConsoTotal } from "./components/cards/CardConsoTotal";
+import { ColumnChart } from "./components/charts/ColumnChart";
+import { LevelConsoCard } from "./components/cards/LevelConsoCard";
+import { DPE } from "./components/dpe/DPE";
+import { DateRangeSelector } from "./components/navigation/DateRangeSelector";
 import { Big } from "big.js";
 
-import "./ui/SyntheseWidget.compiled.css";
+import "./ui/SyntheseWidget.css";
 
 // Données de démonstration pour la prévisualisation avec des variations significatives
 const demoData = {
     usine: {
-        consoElec: new Big(1143.0),  // Valeur plus élevée pour montrer le DPE
-        consoGaz: new Big(0.0),      // Valeur à 0 pour tester le cas des valeurs nulles
-        consoEau: new Big(0.0),      // Valeur à 0 pour tester le cas des valeurs nulles
-        consoAir: new Big(0.0),      // Valeur à 0 pour tester le cas des valeurs nulles
-        consoElecPrec: new Big(700.0),  // +63.3% variation significative
-        consoGazPrec: new Big(0.0),     // 0% variation
-        consoEauPrec: new Big(0.0),     // 0% variation
-        consoAirPrec: new Big(0.0)      // 0% variation
+        consoElec: new Big(1143.0), // Valeur plus élevée pour montrer le DPE
+        consoGaz: new Big(0.0), // Valeur à 0 pour tester le cas des valeurs nulles
+        consoEau: new Big(0.0), // Valeur à 0 pour tester le cas des valeurs nulles
+        consoAir: new Big(0.0), // Valeur à 0 pour tester le cas des valeurs nulles
+        consoElecPrec: new Big(700.0), // +63.3% variation significative
+        consoGazPrec: new Big(0.0), // 0% variation
+        consoEauPrec: new Big(0.0), // 0% variation
+        consoAirPrec: new Big(0.0) // 0% variation
     },
     secteurs: [
         {
@@ -28,7 +28,7 @@ const demoData = {
             consoGaz: new Big(0),
             consoEau: new Big(0),
             consoAir: new Big(0),
-            consoElecPrec: new Big(600.0),   // +57.2% variation
+            consoElecPrec: new Big(600.0), // +57.2% variation
             consoGazPrec: new Big(0),
             consoEauPrec: new Big(0),
             consoAirPrec: new Big(0)
@@ -39,7 +39,7 @@ const demoData = {
             consoGaz: new Big(0),
             consoEau: new Big(0),
             consoAir: new Big(0),
-            consoElecPrec: new Big(100.0),    // +100% variation
+            consoElecPrec: new Big(100.0), // +100% variation
             consoGazPrec: new Big(0),
             consoEauPrec: new Big(0),
             consoAirPrec: new Big(0)
@@ -48,19 +48,16 @@ const demoData = {
 };
 
 export function preview({ class: className, styleObject }: SyntheseWidgetPreviewProps): ReactElement {
-    const [activeButton, setActiveButton] = useState<'day' | 'week' | 'month'>('day');
+    const [activeButton, setActiveButton] = useState<"7d" | "30d" | "mtd" | "m-1" | "ytd" | "n-1" | "custom">("30d");
     const dpeValue = demoData.usine.consoElec.toNumber();
-    const dpeGrade = calculateDPEGrade(dpeValue, activeButton);
+    const mapKeyToPeriod = (key: string): "day" | "week" | "month" =>
+        key === "7d" ? "week" : key === "30d" || key === "mtd" || key === "m-1" ? "month" : "day";
+    const dpeGrade = calculateDPEGrade(dpeValue, mapKeyToPeriod(activeButton));
 
     return (
         <div className={className} style={styleObject}>
             <div className="mb-6">
-                <DateRangeSelector
-                    onClickDay={() => setActiveButton('day')}
-                    onClickWeek={() => setActiveButton('week')}
-                    onClickMonth={() => setActiveButton('month')}
-                    activeButton={activeButton}
-                />
+                <DateRangeSelector onPreset={key => setActiveButton(key)} activeKey={activeButton} />
             </div>
 
             <div className="grid-responsive-4 mb-6">
@@ -95,16 +92,16 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
             </div>
 
             <div className="grid-responsive-2 mb-6">
-                <ColumnChart 
-                    data={demoData.secteurs} 
+                <ColumnChart
+                    data={demoData.secteurs}
                     title="Consommation Électricité par Secteur"
                     type="elec"
                     baseUnit="kWh"
                 />
-                <DPE 
+                <DPE
                     value={dpeValue}
                     grade={dpeGrade}
-                    period={activeButton}
+                    period={mapKeyToPeriod(activeButton)}
                     dsDPESettings={{ status: "available", items: [] } as any}
                     ThresholdA_Day={{} as any}
                     ThresholdB_Day={{} as any}
@@ -147,34 +144,20 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
             </div>
 
             <div className="grid-responsive-2 mb-6">
-                <ColumnChart 
-                    data={demoData.secteurs} 
-                    title="Consommation Gaz par Secteur"
-                    type="gaz"
-                    baseUnit="m3"
-                />
-                <ColumnChart 
-                    data={demoData.secteurs} 
-                    title="Consommation Eau par Secteur"
-                    type="eau"
-                    baseUnit="m3"
-                />
+                <ColumnChart data={demoData.secteurs} title="Consommation Gaz par Secteur" type="gaz" baseUnit="m3" />
+                <ColumnChart data={demoData.secteurs} title="Consommation Eau par Secteur" type="eau" baseUnit="m3" />
             </div>
 
             <div className="mb-6">
-                <ColumnChart 
-                    data={demoData.secteurs} 
-                    title="Consommation Air par Secteur"
-                    type="air"
-                    baseUnit="m3"
-                />
+                <ColumnChart data={demoData.secteurs} title="Consommation Air par Secteur" type="air" baseUnit="m3" />
             </div>
 
             <div className="grid-responsive-2">
                 {demoData.secteurs.map((secteur, index) => (
-                    <SecteurConsoCard 
-                        key={index} 
+                    <LevelConsoCard
+                        key={index}
                         {...secteur}
+                        level={"L1"}
                         baseUnitElectricity="kWh"
                         baseUnitGas="m3"
                         baseUnitWater="m3"
@@ -187,22 +170,23 @@ export function preview({ class: className, styleObject }: SyntheseWidgetPreview
 }
 
 // Calcul du grade DPE basé sur la consommation électrique
-const calculateDPEGrade = (value: number, period: 'day' | 'week' | 'month'): 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' => {
+const calculateDPEGrade = (
+    value: number,
+    period: "day" | "week" | "month"
+): "A" | "B" | "C" | "D" | "E" | "F" | "G" => {
     // Définir les seuils de base pour une journée
     const dailyThresholds = {
-        A: 200,    // <= 200 kWh/jour
-        B: 400,    // 201-400 kWh/jour
-        C: 600,    // 401-600 kWh/jour
-        D: 800,    // 601-800 kWh/jour
-        E: 1000,   // 801-1000 kWh/jour
-        F: 1200    // 1001-1200 kWh/jour
-                   // > 1200 kWh/jour = G
+        A: 200, // <= 200 kWh/jour
+        B: 400, // 201-400 kWh/jour
+        C: 600, // 401-600 kWh/jour
+        D: 800, // 601-800 kWh/jour
+        E: 1000, // 801-1000 kWh/jour
+        F: 1200 // 1001-1200 kWh/jour
+        // > 1200 kWh/jour = G
     };
 
     // Calculer le multiplicateur en fonction de la période
-    const multiplier = period === 'day' ? 1 : 
-                      period === 'week' ? 7 : 
-                      30; // pour un mois
+    const multiplier = period === "day" ? 1 : period === "week" ? 7 : 30; // pour un mois
 
     // Calculer les seuils ajustés
     const adjustedThresholds = {
@@ -215,15 +199,15 @@ const calculateDPEGrade = (value: number, period: 'day' | 'week' | 'month'): 'A'
     };
 
     // Déterminer le grade en fonction de la valeur
-    if (value <= adjustedThresholds.A) return 'A';
-    if (value <= adjustedThresholds.B) return 'B';
-    if (value <= adjustedThresholds.C) return 'C';
-    if (value <= adjustedThresholds.D) return 'D';
-    if (value <= adjustedThresholds.E) return 'E';
-    if (value <= adjustedThresholds.F) return 'F';
-    return 'G';
+    if (value <= adjustedThresholds.A) return "A";
+    if (value <= adjustedThresholds.B) return "B";
+    if (value <= adjustedThresholds.C) return "C";
+    if (value <= adjustedThresholds.D) return "D";
+    if (value <= adjustedThresholds.E) return "E";
+    if (value <= adjustedThresholds.F) return "F";
+    return "G";
 };
 
 export function getPreviewCss(): string {
-    return require("./ui/SyntheseWidget.compiled.css");
+    return require("./ui/SyntheseWidget.css");
 }

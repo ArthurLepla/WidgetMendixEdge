@@ -2,8 +2,8 @@ import { ReactElement, createElement, useEffect, useRef } from "react";
 import { Zap, Flame, Droplet, Wind } from "lucide-react";
 import { Big } from "big.js";
 import * as echarts from "echarts";
-import { formatSmartValue, BaseUnit } from "../utils/unitConverter";
-import { EnergyType } from "../typings/EnergyTypes";
+import { formatSmartValue, BaseUnit } from "../../utils/unitConverter";
+import { EnergyType } from "../../typings/EnergyTypes";
 
 export interface CardConsoTotalProps {
     title: string;
@@ -40,9 +40,6 @@ const ENERGY_CONFIG = {
     }
 };
 
-// Cette fonction est maintenant remplacée par formatSmartValue de unitConverter
-// Conservée pour compatibilité avec le code existant si nécessaire
-
 const getIcon = (type: string, className: string): ReactElement => {
     const config = ENERGY_CONFIG[type as keyof typeof ENERGY_CONFIG];
     switch (type) {
@@ -71,22 +68,17 @@ const generateTrendData = (previousValue: Big | null, currentValue: Big | null):
 
     const start = previousValue.toNumber();
     const end = currentValue.toNumber();
-
     if (start === 0 && end === 0) {
         return Array(15).fill(0);
     }
 
     const points = 15;
-
     return Array.from({ length: points }, (_, i) => {
         const progress = i / (points - 1);
-
         const smoothProgress = progress * progress * (3 - 2 * progress);
         const baseValue = start + (end - start) * smoothProgress;
-
         const maxVariation = Math.abs(end - start) * 0.08;
         const variation = Math.sin(progress * Math.PI) * maxVariation * (Math.random() * 0.5 + 0.5);
-
         return Math.max(0, baseValue + variation);
     });
 };
@@ -106,7 +98,6 @@ export const CardConsoTotal = ({
     const isSignificant = Math.abs(variation) > 8;
     const config = ENERGY_CONFIG[type];
 
-    // Formatage des valeurs avec conversion d'unités si nécessaire
     const formattedCurrentValue = hasData
         ? formatSmartValue(currentValue, type, baseUnit)
         : { formattedValue: "N/A", displayUnit: "N/A" };
@@ -114,7 +105,6 @@ export const CardConsoTotal = ({
     useEffect(() => {
         const initChart = () => {
             if (!sparklineRef.current) return;
-
             if (!chartInstance.current) {
                 chartInstance.current = echarts.init(sparklineRef.current);
             }
@@ -126,18 +116,8 @@ export const CardConsoTotal = ({
 
             const option = {
                 animation: false,
-                grid: {
-                    left: 0,
-                    right: 0,
-                    top: 4,
-                    bottom: 0,
-                    containLabel: false
-                },
-                xAxis: {
-                    type: "category",
-                    show: false,
-                    boundaryGap: false
-                },
+                grid: { left: 0, right: 0, top: 4, bottom: 0, containLabel: false },
+                xAxis: { type: "category", show: false, boundaryGap: false },
                 yAxis: {
                     type: "value",
                     show: false,
@@ -152,45 +132,25 @@ export const CardConsoTotal = ({
                         showSymbol: false,
                         symbol: "none",
                         smooth: true,
-                        lineStyle: {
-                            width: hasNoData ? 1 : 2,
-                            color: config.color
-                        },
+                        lineStyle: { width: hasNoData ? 1 : 2, color: config.color },
                         areaStyle: {
                             opacity: 1,
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                {
-                                    offset: 0,
-                                    color: config.color + (hasNoData ? "10" : "30")
-                                },
-                                {
-                                    offset: 0.5,
-                                    color: config.color + (hasNoData ? "08" : "15")
-                                },
-                                {
-                                    offset: 1,
-                                    color: config.color + (hasNoData ? "05" : "05")
-                                }
+                            color: new (echarts as any).graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: config.color + (hasNoData ? "10" : "30") },
+                                { offset: 0.5, color: config.color + (hasNoData ? "08" : "15") },
+                                { offset: 1, color: config.color + (hasNoData ? "05" : "05") }
                             ])
                         }
                     }
                 ]
-            };
+            } as any;
 
             chartInstance.current.setOption(option);
         };
 
-        // Initialisation différée pour laisser le temps au DOM de se mettre en place
         const timer = setTimeout(initChart, 100);
-
-        const handleResize = () => {
-            if (chartInstance.current) {
-                chartInstance.current.resize();
-            }
-        };
-
+        const handleResize = () => chartInstance.current?.resize();
         window.addEventListener("resize", handleResize);
-
         return () => {
             clearTimeout(timer);
             window.removeEventListener("resize", handleResize);
@@ -207,7 +167,7 @@ export const CardConsoTotal = ({
                 <div className="icon-container" style={{ backgroundColor: config.BackgroundIconColor }}>
                     {getIcon(type, "w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14")}
                 </div>
-                <h3 className="title-medium flex-1 leading-tight text-gray-900">{title}</h3>
+                <h3 className="title-medium flex-1">{title}</h3>
             </div>
             <div className="mt-4">
                 <div className="value-large" style={{ color: config.color }}>
