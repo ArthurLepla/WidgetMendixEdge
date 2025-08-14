@@ -160,7 +160,7 @@
 .syntheseWidget-root .z-10 { z-index: 10 !important; }
 
 /* Typography - Système harmonisé */
-.syntheseWidget-root .title-large { font-size: 1.8em !important; font-weight: 700 !important; color: #111827 !important; line-height: 1.2 !important; }
+.syntheseWidget-root .title-large { font-size: 2.25rem !important; font-weight: 700 !important; color: #111827 !important; line-height: 1.2 !important; }
 .syntheseWidget-root .title-medium { font-size: 1.5em !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.3 !important; }
 .syntheseWidget-root .title-small { font-size: 1.2em !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.3 !important; }
 .syntheseWidget-root .text-regular { font-size: 0.95em !important; color: #111827 !important; line-height: 1.5 !important; }
@@ -220,16 +220,16 @@
     padding: 0.5rem !important;
     background: linear-gradient(135deg, rgba(24, 33, 62, 0.08) 0%, rgba(24, 33, 62, 0.12) 100%) !important;
     border-radius: 12px !important;
-    min-width: 48px !important; /* Réduit de 60px */
-    min-height: 48px !important;
+    min-width: 56px !important; /* Aligné sur DashboardSynthese */
+    min-height: 56px !important;
     flex-shrink: 0 !important;
 }
 /* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
 .syntheseWidget-root .selector-icon,
 .syntheseWidget-root svg.selector-icon,
 .syntheseWidget-root .selector-icon-wrapper .selector-icon {
-    width: 1.5em !important;
-    height: 1.5em !important;
+    width: 1.875em !important; /* ≈ 24px sur base 12.8px */
+    height: 1.875em !important;
     color: #18213e !important;
 }
 
@@ -542,7 +542,7 @@
 .syntheseWidget-root .period-title,
 .syntheseWidget-root h2.period-title,
 .syntheseWidget-root .period-analysis-container h3.period-title {
-    font-size: 1.325em !important;
+    font-size: 2.25rem !important;
     font-weight: 700 !important;
     color: #18213e !important;
     margin: 0 0 0.5rem 0 !important;
@@ -628,16 +628,16 @@
     padding: 0.5rem !important;
     background: linear-gradient(135deg, rgba(24, 33, 62, 0.08) 0%, rgba(24, 33, 62, 0.12) 100%) !important;
     border-radius: 12px !important;
-    min-width: 48px !important;
-    min-height: 48px !important;
+    min-width: 56px !important; /* Aligné sur DashboardSynthese */
+    min-height: 56px !important;
     flex-shrink: 0 !important;
 }
 /* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
 .syntheseWidget-root .dpe-icon-modern,
 .syntheseWidget-root svg.dpe-icon-modern,
 .syntheseWidget-root .dpe-icon-wrapper .dpe-icon-modern {
-    width: 1.5em !important;
-    height: 1.5em !important;
+    width: 1.875em !important; /* ≈ 24px sur base 12.8px */
+    height: 1.875em !important;
 }
 
 .syntheseWidget-root .dpe-content {
@@ -645,7 +645,7 @@
 }
 
 .syntheseWidget-root .dpe-title-modern {
-    font-size: 1.325em !important;
+    font-size: 2.25rem !important;
     font-weight: 700 !important;
     margin-bottom: 0.25rem !important;
     line-height: 1.3 !important;
@@ -1086,7 +1086,8 @@
     font-size: 0.875em !important;
 }
 
-.syntheseWidget-root .table-container {
+/* Table container générique - renommé pour éviter les conflits avec DashboardSynthese */
+.syntheseWidget-root .generic-table-container {
     border-radius: 0.75rem !important;
     border: 1px solid #e5e7eb !important;
     overflow: hidden !important;
@@ -1271,7 +1272,7 @@
 }
 
 .syntheseWidget-root .dpe-title {
-    font-size: 1.25em !important;
+    font-size: 2.25rem !important;
     font-weight: 700 !important;
     line-height: 1.4 !important;
 }

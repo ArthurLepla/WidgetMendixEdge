@@ -1,3 +1,25 @@
+## 📅 14 août 2025 - CORRECTION Erreurs TypeScript DashboardSynthese
+
+### ⌛ Changement :
+Correction des erreurs TypeScript dans DashboardSynthese.tsx : suppression des imports inutilisés, remplacement des JSX fragments par createElement, et renommage de la variable 'entry' non utilisée.
+
+### 🤔 Analyse :
+**Problèmes identifiés** :
+- Imports inutilisés : `Space`, `TrendingUp`, `TrendingDown`, `Legend` déclarés mais jamais utilisés
+- JSX fragments (`<>`) non supportés avec la configuration TypeScript actuelle (jsxFactory sans jsxFragmentFactory)
+- Variable `entry` dans map() non utilisée (renommée en `item`)
+
+**Solution appliquée** :
+- Suppression des imports inutilisés pour réduire la taille du bundle
+- Remplacement des JSX fragments par `createElement("div", { key: "all-metrics" }, ...)` pour compatibilité
+- Renommage de `entry` en `item` dans la fonction map() de la légende
+- Maintien de la fonctionnalité tout en respectant les contraintes TypeScript
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.tsx` : correction des erreurs TypeScript
+
+---
+
 ## 📅 14 août 2025 - CORRECTION Tailles de police
 
 ### ⌛ Changement :
@@ -62,6 +84,152 @@ Correction des tailles d'icônes pour les harmoniser avec la nouvelle typographi
 ### 📁 Fichiers modifiés :
 - `src/ui/SyntheseWidget.css` : tailles d'icônes harmonisées
 - `src/components/dpe/DPEGauge.tsx` : couleurs DPE rétablies
+
+---
+
+## 📅 14 août 2025 - CORRECTION Pagination et débogage colonne électricité
+
+### ⌛ Changement :
+Activation de la pagination pour afficher plus de 6 éléments et ajout de logs de débogage pour identifier le problème de la colonne électricité.
+
+### 🤔 Analyse :
+**Problèmes identifiés** :
+- **Pagination inactive** : Avec 5 assets et `itemsPerPage = 8`, `totalPages = 1` donc pas de pagination
+- **Colonne électricité** : Problème d'affichage potentiel avec les valeurs à "0"
+- **Debug nécessaire** : Ajout de logs pour tracer les valeurs des données
+
+---
+
+## 📅 14 août 2025 - CORRECTION Espacement colonnes tableau DashboardSynthese
+
+### ⌛ Changement :
+Correction des écarts inégaux entre les colonnes du tableau dans DashboardSynthese en résolvant les conflits CSS et en optimisant le layout du tableau.
+
+### 🤔 Analyse :
+**Problèmes identifiés** :
+- **Conflit CSS** : La classe `.table-container` dans `SyntheseWidget.css` interférait avec celle de `DashboardSynthese.css`
+- **Layout instable** : `table-layout: auto` causait des largeurs de colonnes inégales
+- **Largeurs mal réparties** : Colonne Asset trop étroite (25%) vs colonnes énergie trop larges
+
+**Solution appliquée** :
+- **Résolution conflit** : Renommage de `.table-container` en `.generic-table-container` dans `SyntheseWidget.css`
+- **Layout fixe** : Passage à `table-layout: fixed` pour des largeurs stables
+- **Répartition équilibrée** : 
+  - Colonne Asset : 30% (min-width: 200px)
+  - Colonnes énergie : 17.5% chacune (min-width: 140px)
+  - Mode "all" : 70% pour les 4 colonnes énergie
+
+**Impact** :
+- Espacement uniforme entre toutes les colonnes
+- Meilleure lisibilité du tableau
+- Suppression des écarts visuels gênants
+
+---
+
+## 📅 14 août 2025 - AFFINAGE Largeurs colonnes DashboardSynthese
+
+### ⌛ Changement :
+Affinage des largeurs pour réduire l'écart visuel entre la colonne `Asset` et les colonnes énergie.
+
+### 🤔 Analyse :
+La largeur `Asset` à 30% restait trop large sur des écrans moyens, créant un trou visuel. On passe à 22% (min 160px) et on répartit les colonnes énergie à 19.5% chacune avec `table-layout: fixed` pour des largeurs réellement homogènes.
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.css` : ajustement des largeurs et min-width des colonnes
+
+---
+
+## 📅 14 août 2025 - UNIFORMISATION colonnes du tableau (5 parts égales)
+
+### ⌛ Changement :
+Suppression de toute logique de largeur différenciée. Les 5 colonnes (Asset, Electricité, Gaz, Eau, Air) utilisent maintenant la même largeur: 20% chacune, sans min-width spécifiques.
+
+### 🤔 Analyse :
+Cette stratégie simplifie le layout, élimine les écarts visuels et réduit les risques de conflit CSS. `table-layout: fixed` garantit la stabilité des colonnes.
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.css` : règles uniformes `.assets-table th, .assets-table td { width: 20%; min-width: 0; }`
+
+**Solutions appliquées** :
+- **Pagination** : Réduction de `itemsPerPage` de 8 à 6 pour activer la pagination avec 5+ assets
+- **Debug** : Ajout de `console.log` dans `renderEnergyValue` pour tracer les valeurs
+- **Structure** : Maintien de l'approche `createElement` pour compatibilité TypeScript
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.tsx` : activation pagination et ajout logs debug
+
+---
+
+## 📅 14 août 2025 - AUGMENTATION tailles titres secondaires (DPE & Période)
+
+### ⌛ Changement :
+Augmentation des tailles de titres pour les aligner sur le titre principal du dashboard.
+
+### 🤔 Analyse :
+Les titres « DPE Gauge », « Performance énergétique » et « Période d'analyse » étaient calculés à ~16.96px à cause de valeurs en em. On force des valeurs explicites à `2.25rem` pour cohérence visuelle et hiérarchique, avec spécificité élevée pour éviter les overrides Atlas/Mendix.
+
+### 📁 Fichiers modifiés :
+- `src/ui/SyntheseWidget.css` : `.period-title` et `.dpe-title` passés à `2.25rem`
+
+---
+
+## 📅 14 août 2025 - CORRECTION Affichage en-têtes Tabs Radix UI
+
+### ⌛ Changement :
+Correction de l'affichage des en-têtes de colonnes dans le tableau converti en tabs Radix UI.
+
+### 🤔 Analyse :
+Les en-têtes n'étaient pas visibles car les styles CSS pour les tabs Radix UI n'étaient pas correctement configurés. Amélioration du design avec des bordures arrondies, des états actifs/hover, et une meilleure structure visuelle.
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.css` : styles des tabs Radix UI corrigés
+
+## 📅 14 août 2025 - CORRECTION Alignement header et largeurs colonnes
+
+### ⌛ Changement :
+Correction de l'alignement des boutons d'énergie dans le header et ajustement des largeurs de colonnes du tableau pour optimiser l'espace.
+
+### 🤔 Analyse :
+**Problèmes identifiés** :
+- **Boutons d'énergie** : Non alignés à droite car le conteneur `.energy-filters` n'avait pas `justify-content: flex-end` et `flex: 1`
+- **Colonne asset trop large** : 35% créait un vide inutile, réduit à 25% pour plus d'efficacité
+- **Header content** : Manquait `width: 100%` pour utiliser toute la largeur disponible
+
+**Solutions appliquées** :
+- **Header** : Ajout de `width: 100%` au `.header-content` et `flex: 1` + `justify-content: flex-end` aux `.energy-filters`
+- **Colonnes tableau** : Réduction de la colonne asset de 35% à 25% et augmentation de la largeur minimale des colonnes d'énergie de 120px à 140px
+- **Responsive** : Maintien de la cohérence sur tous les écrans
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.css` : correction alignement header et largeurs colonnes
+
+---
+
+## 📅 14 août 2025 - AUGMENTATION Tailles de texte DashboardSynthese
+
+### ⌛ Changement :
+Augmentation significative des tailles de texte dans DashboardSynthese.css pour améliorer la lisibilité et créer une hiérarchie visuelle plus claire par rapport à SyntheseWidget.css.
+
+### 🤔 Analyse :
+**Comparaison des tailles** :
+- **SyntheseWidget.css** : base 12.8px avec titres à 1.8em (23px)
+- **DashboardSynthese.css** : maintenant avec titres à 2.25rem (36px) et texte régulier à 1.125rem (18px)
+
+**Améliorations apportées** :
+- **Titre principal** : `2.25rem` (36px) vs 1.8em (23px) - +57% plus grand
+- **Titres de sections** : `1.5rem` (24px) vs 1.5em (19px) - +26% plus grand
+- **Texte régulier** : `1.125rem` (18px) vs 0.95em (12px) - +50% plus grand
+- **Valeurs énergétiques** : `1.25rem` (20px) vs 1.125em (14px) - +43% plus grand
+- **Labels et badges** : `1rem` (16px) vs 0.8em (10px) - +60% plus grand
+
+**Hiérarchie visuelle renforcée** :
+- Variables CSS augmentées de 0.125rem à 0.25rem
+- Tous les éléments de texte proportionnellement plus grands
+- Meilleure lisibilité sur tous les écrans
+- Distinction claire avec SyntheseWidget.css
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.css` : augmentation de toutes les tailles de texte
 
 ---
 
@@ -150,6 +318,44 @@ La lisibilité est améliorée (taille de police de base) et les icônes sont pr
 - Option : granularité des presets rapides dans le picker.
 
 # Avancement - Widget SyntheseWidget
+
+## 📅 14 août 2025 - Remplacement LevelAnalysis ➜ DashboardSynthese + Palette harmonisée
+
+### ⌛ Changement :
+- Remplacement de `LevelAnalysis` par `DashboardSynthese` dans `src/SyntheseWidget.tsx`.
+- Harmonisation de la palette de couleurs dans `DashboardSynthse.css` (primaire `#18213e`, électricité `#38a13c`, gaz `#f9be01`, eau `#3293f3`, air `#66d8e6`).
+- Ajustement des couleurs des KPI de `DashboardSynthese.tsx` pour utiliser la couleur primaire.
+- Correction de l’import CSS: `DashboardSynthese.tsx` pointe désormais vers `./DashboardSynthse.css`.
+
+### 🤔 Analyse :
+La nouvelle vue `DashboardSynthese` offre une UX plus riche (AntD + Framer Motion) tout en respectant la charte couleur du widget. La variable `--primary-color` est alignée sur `#18213e`, et les couleurs énergie utilisent la palette globale, assurant une cohérence visuelle avec `SyntheseWidget.css`. Un `!important` ciblé garantit que la couleur des valeurs dans le tableau n’est pas écrasée par le reset global.
+
+### 💜 Prochaines étapes :
+- Uniformiser les tailles typographiques dans `DashboardSynthse.css` pour refléter les tokens de `SyntheseWidget.css` (polices/icônes en `em`).
+- QA visuelle et tests d’accessibilité (focus visibles AntD sous namespace widget).
+
+### 📁 Fichiers modifiés :
+- `src/SyntheseWidget.tsx`
+- `src/components/dashboard/DashboardSynthese.tsx`
+- `src/components/dashboard/DashboardSynthse.css`
+
+## 📅 14 août 2025 - Filtres énergie icônes-only (modernes & minimalistes)
+
+### ⌛ Changement :
+- Remplacement des boutons texte par 4 boutons ronds icône-only (Électricité, Gaz, Eau, Air) dans `DashboardSynthese.tsx`.
+- États actif/inactif avec couleurs de la palette; clic sur une icône active ➜ réinitialise le filtre (mode « toutes »).
+- Styles dédiés `energy-icon-btn` dans `DashboardSynthse.css` (40×40px, cercle, ombres légères, focus visible).
+
+### 🤔 Analyse :
+Interface plus sobre et rapide à scanner, parfaitement alignée à la palette (`#38a13c`, `#f9be01`, `#3293f3`, `#66d8e6`). Le comportement toggle garde la possibilité de revenir à « toutes » sans bouton supplémentaire. Les tailles d’icônes (16px) restent harmonieuses avec la typo réduite (`.syntheseWidget-root`), sans heurter les resets Atlas.
+
+### 💜 Prochaines étapes :
+- Option: animer l’état actif (scale léger ou glow) via Framer Motion.
+- Passer les tailles en `em` pour suivre la base `.syntheseWidget-root`.
+
+### 📁 Fichiers modifiés :
+- `src/components/dashboard/DashboardSynthese.tsx`
+- `src/components/dashboard/DashboardSynthse.css`
 
 ## 📅 14 août 2025 - Fix tooltip ECharts + couleurs DPE
 

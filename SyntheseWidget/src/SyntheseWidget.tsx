@@ -9,7 +9,7 @@ import { CardConsoTotal } from "./components/cards/CardConsoTotal";
 import { DPEGauge } from "./components/dpe/DPEGauge";
 import { DateRangeSelector } from "./components/navigation/DateRangeSelector";
 import { LoadingOverlay } from "./components/LoadingOverlay";
-import { LevelAnalysis } from "./components/dashboard/LevelAnalysis";
+import { DashboardSynthese } from "./components/dashboard/DashboardSynthese";
 import { LoadingService } from "./components/services/LoadingService";
 import { BaseUnit } from "./utils/unitConverter";
 import { AssetLevelAdapter } from "./adapters/AssetLevelAdapter";
@@ -466,10 +466,10 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
                     />
                 </div>
 
-                {/* Analyse par niveau (unifié) */}
+                {/* Analyse par niveau (DashboardSynthese) */}
                 {selectedLevel && (
                     <div className="mb-8">
-                        <LevelAnalysis
+                        <DashboardSynthese
                             levelNames={visibleLevels}
                             selectedLevel={selectedLevel}
                             onChangeLevel={setSelectedLevel}

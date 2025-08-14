@@ -4,6 +4,7 @@ import { DonutEnergyChart } from "../charts/DonutEnergyChart";
 import { AssetsByEnergyTable, AssetRow } from "./AssetsByEnergyTable";
 import "./LevelAnalysis.css";
 
+
 type EnergyKey = "all" | "electricity" | "gas" | "water" | "air";
 
 interface LevelAnalysisProps {
