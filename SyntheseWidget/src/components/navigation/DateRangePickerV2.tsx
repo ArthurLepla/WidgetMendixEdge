@@ -3,11 +3,7 @@ import { createElement } from "react";
 import {
     format,
     startOfDay,
-    endOfDay,
-    startOfWeek,
-    endOfWeek,
     startOfMonth,
-    endOfMonth,
     isSameDay,
     isAfter,
     isBefore,
@@ -23,46 +19,7 @@ import "./DateRangePickerV2.css";
 import * as Popover from "@radix-ui/react-popover";
 
 // Types et interfaces
-interface DatePreset {
-    label: string;
-    getValue: () => DateRange;
-}
-
-const presets: DatePreset[] = [
-    {
-        label: "Aujourd'hui",
-        getValue: () => ({
-            from: startOfDay(new Date()),
-            to: endOfDay(new Date())
-        })
-    },
-    {
-        label: "Cette semaine",
-        getValue: () => ({
-            from: startOfWeek(new Date(), { weekStartsOn: 1 }),
-            to: endOfWeek(new Date(), { weekStartsOn: 1 })
-        })
-    },
-    {
-        label: "Ce mois-ci",
-        getValue: () => ({
-            from: startOfMonth(new Date()),
-            to: endOfMonth(new Date())
-        })
-    },
-    {
-        label: "Mois dernier",
-        getValue: () => {
-            const now = new Date();
-            const firstDayLastMonth = startOfMonth(new Date(now.getFullYear(), now.getMonth() - 1));
-            const lastDayLastMonth = endOfMonth(firstDayLastMonth);
-            return {
-                from: firstDayLastMonth,
-                to: lastDayLastMonth
-            };
-        }
-    }
-];
+// Suppression des presets - déjà présents dans DateRangeSelector.tsx
 
 export interface DateRangePickerV2Props {
     className?: string;
@@ -496,54 +453,34 @@ export function DateRangePickerV2({
     };
 
     const handleSelect = (range: DateRange | undefined) => {
-        setHoveredDate(null); // Clear hover on selection
-        if (range?.to && (!tempDate?.to || range.to !== tempDate.to)) {
+        setHoveredDate(null);
+        if (!range?.from) {
+            setTempDate(undefined);
+            return;
+        }
+        // Si from et to sont définis → appliquer immédiatement et fermer
+        if (range.from && range.to) {
             const endDate = new Date(range.to);
-            endDate.setHours(23);
-            endDate.setMinutes(59);
-            setTempDate({
-                from: range.from,
-                to: endDate
-            });
-        } else {
-            setTempDate(range);
+            endDate.setHours(23, 59, 59, 999);
+            const applied = { from: range.from, to: endDate } as DateRange;
+            setTempDate(applied);
+            // Appliquer directement
+            setDate(applied);
+            if (startDateAttribute?.status === ValueStatus.Available) startDateAttribute.setValue(applied.from);
+            if (endDateAttribute?.status === ValueStatus.Available) endDateAttribute.setValue(applied.to as Date);
+            if (onDateChange?.canExecute) onDateChange.execute();
+            if (onCustomDateChange) onCustomDateChange(applied.from as Date, applied.to as Date);
+            setOpen(false);
+            return;
         }
+        setTempDate({ from: range.from, to: undefined });
     };
 
-    const handleFromTimeChange = (newDate: Date) => {
-        if (!tempDate?.from) return;
-        const newFrom = new Date(tempDate.from);
-        newFrom.setHours(newDate.getHours());
-        newFrom.setMinutes(newDate.getMinutes());
-        setTempDate({ ...tempDate, from: newFrom });
-    };
+    const handleFromTimeChange = (_newDate: Date) => {};
 
-    const handleToTimeChange = (newDate: Date) => {
-        if (!tempDate?.to) return;
-        const newTo = new Date(tempDate.to);
-        newTo.setHours(newDate.getHours());
-        newTo.setMinutes(newDate.getMinutes());
-        setTempDate({ ...tempDate, to: newTo });
-    };
+    const handleToTimeChange = (_newDate: Date) => {};
 
-    const handlePresetSelect = (preset: DatePreset) => {
-        const range = preset.getValue();
-        setDate(range);
-        setTempDate(range);
-
-        if (startDateAttribute?.status === ValueStatus.Available && range.from) {
-            startDateAttribute.setValue(range.from);
-        }
-        if (endDateAttribute?.status === ValueStatus.Available && range.to) {
-            endDateAttribute.setValue(range.to);
-        }
-
-        if (onDateChange?.canExecute) {
-            onDateChange.execute();
-        }
-
-        setOpen(false);
-    };
+    // Suppression de handlePresetSelect - les presets sont gérés par DateRangeSelector.tsx
 
     const handleApply = () => {
         if (!tempDate?.from || !tempDate?.to) return;
@@ -596,7 +533,9 @@ export function DateRangePickerV2({
                             console.log("DateRangePickerV2: Click triggered, current open state:", open);
                             setOpen(!open);
                         }}
-                        whileTap={{ scale: 0.995 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.1 }}
                         type="button"
                     >
                         <CalendarIcon size={20} className="drp-trigger-icon" />
@@ -610,38 +549,26 @@ export function DateRangePickerV2({
                         <Popover.Portal>
                             <Popover.Content
                                 side="bottom"
-                                align="end"
-                                sideOffset={8}
-                                collisionPadding={16}
+                                align="start"
+                                sideOffset={4}
+                                collisionPadding={20}
                                 className="drp-dropdown"
                                 style={{
                                     zIndex: 10000
                                 }}
                             >
                                 <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.2 }}
+                                    initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                                    transition={{ 
+                                        duration: 0.15,
+                                        ease: "easeOut"
+                                    }}
                                 >
                                     <div className="drp-container">
-                                        <div className="drp-sidebar">
-                                            <div className="drp-sidebar-title">Périodes rapides</div>
-                                            {presets.map(preset => (
-                                                <motion.button
-                                                    key={preset.label}
-                                                    className="drp-preset"
-                                                    onClick={() => handlePresetSelect(preset)}
-                                                    whileHover={{ x: 4 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    type="button"
-                                                >
-                                                    {preset.label}
-                                                </motion.button>
-                                            ))}
-                                        </div>
-
-                                        <div className="drp-main">
+                                        {/* Suppression de la sidebar - les presets sont dans DateRangeSelector.tsx */}
+                                        <div className="drp-main drp-main--full-width">
                                             <div className="drp-header">
                                                 <CalendarIcon size={20} className="drp-header-icon" />
                                                 <span className="drp-header-text">

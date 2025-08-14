@@ -1,29 +1,19 @@
-import React, { ReactElement, createElement, useEffect, useState, useMemo, useCallback } from "react";
+import React, { ReactElement, createElement, useEffect, useState, useMemo } from "react";
 import { Big } from "big.js";
 import { ListAttributeValue } from "mendix";
 import { SyntheseWidgetContainerProps } from "../typings/SyntheseWidgetProps";
 import { CardConsoTotal } from "./components/cards/CardConsoTotal";
 // ColumnChart retiré (stacked chart + tableau suffisent pour lecture rapide)
-type SecteurData = {
-    name: string;
-    consoElec: Big;
-    consoGaz: Big;
-    consoEau: Big;
-    consoAir: Big;
-    consoElecPrec: Big;
-    consoGazPrec: Big;
-    consoEauPrec: Big;
-    consoAirPrec: Big;
-};
-import { StackedBarChart } from "./components/charts/StackedBarChart";
+// Ancienne structure Overview supprimée
+// StackedBarChart retiré de l'Overview (inutile avec cumuls) – conservé au besoin futur
 import { DPEGauge } from "./components/dpe/DPEGauge";
 import { DateRangeSelector } from "./components/navigation/DateRangeSelector";
-import { LevelSelector } from "./components/navigation/LevelSelector";
 import { LoadingOverlay } from "./components/LoadingOverlay";
+import { LevelAnalysis } from "./components/dashboard/LevelAnalysis";
 import { LoadingService } from "./components/services/LoadingService";
 import { BaseUnit } from "./utils/unitConverter";
 import { AssetLevelAdapter } from "./adapters/AssetLevelAdapter";
-import { ByLevelTable } from "./components/dashboard/ByLevelTable";
+// ByLevelTable retiré de l'Overview pour éviter redondance multi-niveaux
 
 import "./ui/SyntheseWidget.css";
 import "./styles/loader.css";
@@ -147,9 +137,9 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
         consoAirPrec: new Big(0)
     });
 
-    const [secteursData, setSecteursData] = useState<SecteurData[]>([]);
-    const [allLevelNames, setAllLevelNames] = useState<string[]>([]);
+    // Données agrégées par niveau (Overview retiré). Conservé si besoin futur.
     const [visibleLevels, setVisibleLevels] = useState<string[]>([]);
+    const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 
     const [activePeriod, setActivePeriod] = useState<"day" | "week" | "month">("day");
     const [activePreset, setActivePreset] = useState<"7d" | "30d" | "mtd" | "m-1" | "ytd" | "n-1" | "custom">("30d");
@@ -206,15 +196,9 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
 
     useEffect(() => {
         if (levels?.status !== "available" || !levels.items) {
-            setSecteursData([]);
+            setVisibleLevels([]);
             return;
         }
-        if (allAssets?.status !== "available" || !allAssets.items) {
-            setSecteursData([]);
-            return;
-        }
-
-        // Construire un index Level → metrics agrégées
         const levelKey = (item: any) => levelName.get(item).value ?? "";
         const sortedLevels = [...levels.items].sort((a, b) => {
             const av = levelSortOrder?.get(a).value as any;
@@ -223,101 +207,16 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
             const bi = bv instanceof Big ? bv.toNumber() : typeof bv === "number" ? bv : 0;
             return ai - bi;
         });
-
-        const mapByLevel: Record<
-            string,
-            {
-                name: string;
-                consoElec: Big;
-                consoGaz: Big;
-                consoEau: Big;
-                consoAir: Big;
-                consoElecPrec: Big;
-                consoGazPrec: Big;
-                consoEauPrec: Big;
-                consoAirPrec: Big;
-            }
-        > = {};
-
-        // Pré-initialiser toutes les entrées de niveaux
-        sortedLevels.forEach(l => {
-            const name = levelKey(l) || "Niveau";
-            mapByLevel[name] = {
-                name,
-                consoElec: new Big(0),
-                consoGaz: new Big(0),
-                consoEau: new Big(0),
-                consoAir: new Big(0),
-                consoElecPrec: new Big(0),
-                consoGazPrec: new Big(0),
-                consoEauPrec: new Big(0),
-                consoAirPrec: new Big(0)
-            };
-        });
-
-        // Agréger tous les assets par leur niveau
-        allAssets.items.forEach(asset => {
-            // Récupérer l'ObjectItem de niveau via l'association assetLevel (Reference)
-            const assoc = (assetLevel as any)?.get(asset);
-            const levelObj = assoc?.status === "available" ? assoc.value : undefined;
-            const levelNameStr = levelObj ? levelName.get(levelObj).value ?? "" : "";
-            const key = levelNameStr || "";
-            if (!mapByLevel[key]) {
-                // si un asset réfère un niveau non listé (peu probable), l'initialiser à la volée
-                mapByLevel[key] = {
-                    name: key || "Niveau",
-                    consoElec: new Big(0),
-                    consoGaz: new Big(0),
-                    consoEau: new Big(0),
-                    consoAir: new Big(0),
-                    consoElecPrec: new Big(0),
-                    consoGazPrec: new Big(0),
-                    consoEauPrec: new Big(0),
-                    consoAirPrec: new Big(0)
-                };
-            }
-
-            const bucket = mapByLevel[key];
-            bucket.consoElec = bucket.consoElec.plus(attrTotalConsoElec.get(asset).value || 0);
-            bucket.consoGaz = bucket.consoGaz.plus(attrTotalConsoGaz.get(asset).value || 0);
-            bucket.consoEau = bucket.consoEau.plus(attrTotalConsoEau.get(asset).value || 0);
-            bucket.consoAir = bucket.consoAir.plus(attrTotalConsoAir.get(asset).value || 0);
-            bucket.consoElecPrec = bucket.consoElecPrec.plus(attrTotalConsoElecPeriodPrec.get(asset).value || 0);
-            bucket.consoGazPrec = bucket.consoGazPrec.plus(attrTotalConsoGazPeriodPrec.get(asset).value || 0);
-            bucket.consoEauPrec = bucket.consoEauPrec.plus(attrTotalConsoEauPeriodPrec.get(asset).value || 0);
-            bucket.consoAirPrec = bucket.consoAirPrec.plus(attrTotalConsoAirPeriodPrec.get(asset).value || 0);
-        });
-
-        const secteurs: SecteurData[] = Object.values(mapByLevel);
-        setSecteursData(secteurs);
         const names = sortedLevels.map(levelKey).filter(n => n && n.length > 0);
-        setAllLevelNames(names);
         if (visibleLevels.length === 0) {
             setVisibleLevels(names);
+            if (!selectedLevel && names.length > 0) setSelectedLevel(names[0]);
         }
-    }, [
-        levels,
-        levelName,
-        levelSortOrder,
-        allAssets,
-        assetLevel,
-        attrTotalConsoElec,
-        attrTotalConsoGaz,
-        attrTotalConsoEau,
-        attrTotalConsoAir,
-        attrTotalConsoElecPeriodPrec,
-        attrTotalConsoGazPeriodPrec,
-        attrTotalConsoEauPeriodPrec,
-        attrTotalConsoAirPeriodPrec
-    ]);
+    }, [levels, levelName, levelSortOrder, visibleLevels.length, selectedLevel]);
 
-    const toggleLevel = useCallback((level: string) => {
-        setVisibleLevels(prev => (prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]));
-    }, []);
+    // toggleLevel retiré (sélection via clic sur Overview)
 
-    const filteredSecteursData = useMemo(() => {
-        return secteursData.filter(d => visibleLevels.includes(d.name));
-    }, [secteursData, visibleLevels]);
+    // filteredSecteursData non utilisé après simplification Overview
 
     const handleDateRangeChange = (period: "day" | "week" | "month") => {
         setActivePeriod(period);
@@ -479,6 +378,43 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
     // Totaux globaux non utilisés retirés
     // Variables de synthèse non utilisées retirées pour éviter les avertissements TS
 
+    // Build analysis data for selectedLevel
+    const assetsOfSelectedLevel = useMemo(() => {
+        if (!selectedLevel || allAssets?.status !== "available" || !allAssets.items) return [] as any[];
+        return allAssets.items.filter(a => {
+            const assoc = (assetLevel as any)?.get(a);
+            const lvl = assoc?.status === "available" ? assoc.value : undefined;
+            const name = lvl ? levelName.get(lvl).value ?? "" : "";
+            return name === selectedLevel;
+        });
+    }, [selectedLevel, allAssets, assetLevel, levelName]);
+
+    const selectedLevelMix = useMemo(() => {
+        const sum = { elec: 0, gaz: 0, eau: 0, air: 0 };
+        assetsOfSelectedLevel.forEach(a => {
+            sum.elec += Number(attrTotalConsoElec.get(a).value || 0);
+            sum.gaz += Number(attrTotalConsoGaz.get(a).value || 0);
+            sum.eau += Number(attrTotalConsoEau.get(a).value || 0);
+            sum.air += Number(attrTotalConsoAir.get(a).value || 0);
+        });
+        return [
+            { name: "Électricité", value: sum.elec },
+            { name: "Gaz", value: sum.gaz },
+            { name: "Eau", value: sum.eau },
+            { name: "Air", value: sum.air }
+        ];
+    }, [assetsOfSelectedLevel, attrTotalConsoElec, attrTotalConsoGaz, attrTotalConsoEau, attrTotalConsoAir]);
+
+    const assetsTableRows = useMemo(() => {
+        return assetsOfSelectedLevel.map(a => ({
+            name: String((props as any).assetName.get(a).value || "Asset"),
+            electricity: Number(attrTotalConsoElec.get(a).value || 0),
+            gas: Number(attrTotalConsoGaz.get(a).value || 0),
+            water: Number(attrTotalConsoEau.get(a).value || 0),
+            air: Number(attrTotalConsoAir.get(a).value || 0)
+        }));
+    }, [assetsOfSelectedLevel, attrTotalConsoElec, attrTotalConsoGaz, attrTotalConsoEau, attrTotalConsoAir, props]);
+
     return (
         <React.Fragment>
             {/* LoadingOverlay positioned outside the main content flow */}
@@ -491,12 +427,7 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
                     <DateRangeSelector onPreset={handlePreset} activeKey={activePreset} />
                 </div>
 
-                {/* Filtres de niveaux visibles - Déplacé sous le sélecteur de période */}
-                {allLevelNames.length > 0 && (
-                    <div className="mb-6">
-                        <LevelSelector levels={allLevelNames} selected={visibleLevels} onToggle={toggleLevel} />
-                    </div>
-                )}
+                {/* Retrait du LevelSelector d'en-tête — la sélection se fait via Overview/Analyse */}
 
                 {/* DPE Reworked */}
                 <div className="mb-6">
@@ -535,34 +466,18 @@ export function SyntheseWidget(props: SyntheseWidgetContainerProps): ReactElemen
                     />
                 </div>
 
-                {/* Section graphiques - Container unifié */}
-                <div className="grid-responsive-2">
-                    {/* Répartition empilée par niveau */}
-                    <StackedBarChart
-                        data={filteredSecteursData}
-                        title="Répartition par niveau"
-                        baseUnitElectricity={baseUnitElectricity as BaseUnit}
-                        baseUnitGas={baseUnitGas as BaseUnit}
-                        baseUnitWater={baseUnitWater as BaseUnit}
-                        baseUnitAir={baseUnitAir as BaseUnit}
-                    />
-
-                    {/* Tableau de détail */}
-                    <ByLevelTable
-                        rows={filteredSecteursData.map(s => ({
-                            level: s.name,
-                            electricity: s.consoElec.toNumber(),
-                            gas: s.consoGaz.toNumber(),
-                            water: s.consoEau.toNumber(),
-                            air: s.consoAir.toNumber(),
-                            electricityPrev: s.consoElecPrec.toNumber(),
-                            gasPrev: s.consoGazPrec.toNumber(),
-                            waterPrev: s.consoEauPrec.toNumber(),
-                            airPrev: s.consoAirPrec.toNumber()
-                        }))}
-                        primaryColor="#18213e"
-                    />
-                </div>
+                {/* Analyse par niveau (unifié) */}
+                {selectedLevel && (
+                    <div className="mb-8">
+                        <LevelAnalysis
+                            levelNames={visibleLevels}
+                            selectedLevel={selectedLevel}
+                            onChangeLevel={setSelectedLevel}
+                            donutData={selectedLevelMix}
+                            assetRows={assetsTableRows}
+                        />
+                    </div>
+                )}
             </div>
         </React.Fragment>
     );

@@ -12,11 +12,10 @@
     box-sizing: border-box !important;
     z-index: 1 !important;
     font-family: "Barlow", Arial, sans-serif !important;
-    font-size: 16px !important;
-    color: #18213e !important;
+    font-size: 12.8px !important; /* Réduction globale -20% (base 16px -> 12.8px) */
+    color: #111827 !important;
     padding: 1.5rem !important;
     margin: 0 !important;
-    /* Isolation pour éviter les conflits Mendix */
     isolation: isolate !important;
 }
 
@@ -49,27 +48,45 @@
 .syntheseWidget-root .mt-6 { margin-top: 1.5rem !important; }
 .syntheseWidget-root .mt-8 { margin-top: 2rem !important; }
 
-/* Sizing helpers - Icônes plus grandes pour meilleure lisibilité */
-.syntheseWidget-root .w-6 { width: 2rem !important; }
-.syntheseWidget-root .h-6 { height: 2rem !important; }
-.syntheseWidget-root .w-8 { width: 2.5rem !important; }
-.syntheseWidget-root .w-10 { width: 3rem !important; }
-.syntheseWidget-root .h-10 { height: 3rem !important; }
+/* Sizing helpers - Icônes harmonisées avec la typographie */
+.syntheseWidget-root .w-6 { width: 1.5em !important; }
+.syntheseWidget-root .h-6 { height: 1.5em !important; }
+.syntheseWidget-root .w-8 { width: 2em !important; }
+.syntheseWidget-root .w-10 { width: 2.5em !important; }
+.syntheseWidget-root .h-10 { height: 2.5em !important; }
 @media (min-width: 640px) {
-    .syntheseWidget-root .sm\:w-12 { width: 3rem !important; }
-    .syntheseWidget-root .sm\:h-12 { height: 3rem !important; }
+    .syntheseWidget-root .sm\:w-12 { width: 3em !important; }
+    .syntheseWidget-root .sm\:h-12 { height: 3em !important; }
 }
 @media (min-width: 1024px) {
-    .syntheseWidget-root .lg\:w-14 { width: 3.5rem !important; }
-    .syntheseWidget-root .lg\:h-14 { height: 3.5rem !important; }
+    .syntheseWidget-root .lg\:w-14 { width: 3.5em !important; }
+    .syntheseWidget-root .lg\:h-14 { height: 3.5em !important; }
 }
 
 /* Vertical rhythm for top-level children - Respiration améliorée */
-.syntheseWidget-root > * + * { margin-top: 1.5rem !important; }
+.syntheseWidget-root > * + *:not(.grid-responsive-1):not(.grid-responsive-2):not(.grid-responsive-3):not(.grid-responsive-4) { 
+    margin-top: 1.5rem !important; 
+}
 
 /* Protection complète contre les conflits CSS Mendix/Atlas */
 .syntheseWidget-root * {
     box-sizing: border-box !important;
+}
+
+/* Force les tailles de police pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root h1,
+.syntheseWidget-root h2,
+.syntheseWidget-root h3,
+.syntheseWidget-root h4,
+.syntheseWidget-root h5,
+.syntheseWidget-root h6,
+.syntheseWidget-root p,
+.syntheseWidget-root button,
+.syntheseWidget-root span,
+.syntheseWidget-root div {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
 }
 
 .syntheseWidget-root *,
@@ -93,14 +110,21 @@
 .syntheseWidget-root textarea {
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
-    outline: none !important;
-    background: transparent !important;
     font-family: inherit !important;
     font-size: inherit !important;
     line-height: inherit !important;
     color: inherit !important;
     text-decoration: none !important;
+}
+
+/* Interactive elements keep neutral backgrounds/borders */
+.syntheseWidget-root button,
+.syntheseWidget-root input,
+.syntheseWidget-root select,
+.syntheseWidget-root textarea {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
 }
 
 /* Reset spécifique pour les boutons */
@@ -126,11 +150,7 @@
 }
 
 /* Isolation des transformations et animations */
-.syntheseWidget-root {
-    contain: layout style paint !important;
-    will-change: auto !important;
-    transform: translateZ(0) !important;
-}
+.syntheseWidget-root { contain: layout style paint !important; will-change: auto !important; }
 
 /* Position/z-index helpers used by DPE settings button */
 .syntheseWidget-root .relative { position: relative !important; }
@@ -139,13 +159,16 @@
 .syntheseWidget-root .right-2 { right: 0.5rem !important; }
 .syntheseWidget-root .z-10 { z-index: 10 !important; }
 
-/* Typography - Tailles augmentées pour meilleure lisibilité */
-.syntheseWidget-root .title-large { font-size: 2.25rem !important; font-weight: 700 !important; color: #111827 !important; line-height: 1.2 !important; }
-.syntheseWidget-root .title-medium { font-size: 1.5rem !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.3 !important; }
-.syntheseWidget-root .text-regular { font-size: 1.125rem !important; color: #111827 !important; line-height: 1.5 !important; }
-.syntheseWidget-root .text-secondary { font-size: 1.125rem !important; color: #4b5563 !important; line-height: 1.5 !important; }
-.syntheseWidget-root .text-xl { font-size: 1.5rem !important; }
-.syntheseWidget-root .text-2xl { font-size: 1.875rem !important; }
+/* Typography - Système harmonisé */
+.syntheseWidget-root .title-large { font-size: 1.8em !important; font-weight: 700 !important; color: #111827 !important; line-height: 1.2 !important; }
+.syntheseWidget-root .title-medium { font-size: 1.5em !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.3 !important; }
+.syntheseWidget-root .title-small { font-size: 1.2em !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.3 !important; }
+.syntheseWidget-root .text-regular { font-size: 0.95em !important; color: #111827 !important; line-height: 1.5 !important; }
+.syntheseWidget-root .text-secondary { font-size: 0.95em !important; color: #4b5563 !important; line-height: 1.5 !important; }
+.syntheseWidget-root .text-small { font-size: 0.9em !important; color: #111827 !important; line-height: 1.5 !important; }
+.syntheseWidget-root .text-xs { font-size: 0.8em !important; color: #6b7280 !important; line-height: 1.5 !important; }
+.syntheseWidget-root .text-xl { font-size: 1.5em !important; }
+.syntheseWidget-root .text-2xl { font-size: 1.875em !important; }
 .syntheseWidget-root .font-medium { font-weight: 500 !important; }
 .syntheseWidget-root .font-semibold { font-weight: 600 !important; }
 .syntheseWidget-root .font-bold { font-weight: 700 !important; }
@@ -154,17 +177,19 @@
 .syntheseWidget-root .text-gray-500 { color: #6b7280 !important; }
 
 /* Buttons - Removed hover effects */
-.syntheseWidget-root .btn-date { border-radius: 0.5rem !important; border: 1px solid #e5e7eb !important; background: #fff !important; padding: 0.5rem 1rem !important; cursor: pointer !important; font-size: 1rem !important; font-weight: 500 !important; }
-.syntheseWidget-root .btn-primary { padding: 0.5rem 1rem !important; font-size: 1rem !important; font-weight: 600 !important; color: #fff !important; background: #2563eb !important; border: 1px solid transparent !important; border-radius: 0.5rem !important; }
-.syntheseWidget-root .btn-secondary { padding: 0.5rem 1rem !important; font-size: 1rem !important; font-weight: 600 !important; color: #374151 !important; background: #fff !important; border: 1px solid #d1d5db !important; border-radius: 0.5rem !important; }
+.syntheseWidget-root .btn-date { border-radius: 0.5rem !important; border: 1px solid #e5e7eb !important; background: #fff !important; padding: 0.5rem 1rem !important; cursor: pointer !important; font-size: 1.125em !important; font-weight: 500 !important; }
+.syntheseWidget-root .btn-primary { padding: 0.5rem 1rem !important; font-size: 1.125em !important; font-weight: 600 !important; color: #fff !important; background: #2563eb !important; border: 1px solid transparent !important; border-radius: 0.5rem !important; }
+.syntheseWidget-root .btn-secondary { padding: 0.5rem 1rem !important; font-size: 1.125em !important; font-weight: 600 !important; color: #374151 !important; background: #fff !important; border: 1px solid #d1d5db !important; border-radius: 0.5rem !important; }
 
 /* Card - Retiré les effets de hover */
 .syntheseWidget-root .card-base {
     background: #fff !important;
     border-radius: 12px !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06) !important;
-    padding: 1.25rem !important;
+    padding: 1.5rem !important; /* Augmenté de 1.25rem à 1.5rem */
     transition: none !important;
+    /* Espacement interne pour éviter le contenu collé */
+    margin: 0 !important;
 }
 
 /* Nouveaux styles modernes pour les sélecteurs - Espacements optimisés */
@@ -187,6 +212,7 @@
     padding: 0 !important;
 }
 
+/* Fix tailles icônes/wrappers DateRangeSelector */
 .syntheseWidget-root .selector-icon-wrapper {
     display: flex !important;
     align-items: center !important;
@@ -194,14 +220,16 @@
     padding: 0.5rem !important;
     background: linear-gradient(135deg, rgba(24, 33, 62, 0.08) 0%, rgba(24, 33, 62, 0.12) 100%) !important;
     border-radius: 12px !important;
-    min-width: 48px !important;
+    min-width: 48px !important; /* Réduit de 60px */
     min-height: 48px !important;
     flex-shrink: 0 !important;
 }
-
-.syntheseWidget-root .selector-icon {
-    width: 1.5rem !important;
-    height: 1.5rem !important;
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .selector-icon,
+.syntheseWidget-root svg.selector-icon,
+.syntheseWidget-root .selector-icon-wrapper .selector-icon {
+    width: 1.5em !important;
+    height: 1.5em !important;
     color: #18213e !important;
 }
 
@@ -219,7 +247,7 @@
 }
 
 .syntheseWidget-root .selector-title {
-    font-size: 1.375rem !important;
+    font-size: 1.325em !important;
     font-weight: 700 !important;
     color: #18213e !important;
     margin: 0 !important;
@@ -233,8 +261,8 @@
 }
 
 .syntheseWidget-root .info-icon {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
+    width: 1.25em !important;
+    height: 1.25em !important;
     color: #6b7280 !important;
     cursor: pointer !important;
     transition: color 150ms ease-in-out !important;
@@ -300,7 +328,7 @@
 }
 
 .syntheseWidget-root .tooltip-label {
-    font-size: 1rem !important;
+    font-size: 1em !important;
     font-weight: 600 !important;
     color: #18213e !important;
 }
@@ -321,13 +349,13 @@
 }
 
 .syntheseWidget-root .date-label {
-    font-size: 0.9375rem !important;
+    font-size: 0.9375em !important;
     color: #6b7280 !important;
     font-weight: 500 !important;
 }
 
 .syntheseWidget-root .date-value {
-    font-size: 0.9375rem !important;
+    font-size: 0.9375em !important;
     font-weight: 600 !important;
     color: #18213e !important;
 }
@@ -348,7 +376,7 @@
     color: #64748b !important;
     border: 1px solid #e2e8f0 !important;
     font-weight: 600 !important;
-    font-size: 1rem !important;
+    font-size: 0.95em !important;
     cursor: pointer !important;
     transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
     white-space: nowrap !important;
@@ -376,12 +404,15 @@
 }
 
 /* Styles pour LevelSelector */
-.syntheseWidget-root .select-all-btn {
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .select-all-btn,
+.syntheseWidget-root button.select-all-btn,
+.syntheseWidget-root .level-selector .select-all-btn {
     padding: 0.5rem 0.875rem !important;
     background: transparent !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    font-size: 0.875rem !important;
+    font-size: 0.9em !important;
     font-weight: 500 !important;
     color: #475569 !important;
     cursor: pointer !important;
@@ -395,7 +426,7 @@
 }
 
 .syntheseWidget-root .level-count {
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     color: #6b7280 !important;
     margin-top: 0.5rem !important;
     padding: 0 !important;
@@ -417,7 +448,7 @@
     border-radius: 12px !important;
     background: #f8fafc !important;
     border: 1px solid #e2e8f0 !important;
-    font-size: 1rem !important;
+    font-size: 0.95em !important;
     font-weight: 600 !important;
     color: #64748b !important;
     cursor: pointer !important;
@@ -483,6 +514,89 @@
     width: 100% !important;
 }
 
+/* Nouvelles classes pour DateRangeSelector corrigé */
+.syntheseWidget-root .period-analysis-container {
+    background: #fff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
+    padding: 2rem !important;
+    border: 1px solid #f1f5f9 !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.syntheseWidget-root .period-analysis-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2rem !important;
+    padding: 0 !important;
+}
+
+.syntheseWidget-root .period-content {
+    flex: 1 !important;
+}
+
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .period-title,
+.syntheseWidget-root h2.period-title,
+.syntheseWidget-root .period-analysis-container h3.period-title {
+    font-size: 1.325em !important;
+    font-weight: 700 !important;
+    color: #18213e !important;
+    margin: 0 0 0.5rem 0 !important;
+    line-height: 1.3 !important;
+}
+
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .period-subtitle,
+.syntheseWidget-root p.period-subtitle,
+.syntheseWidget-root div.period-subtitle,
+.syntheseWidget-root .period-analysis-container .period-subtitle {
+    font-size: 1em !important; /* Harmonisé */
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+}
+
+.syntheseWidget-root .info-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 0.5rem !important;
+    cursor: pointer !important;
+    border-radius: 8px !important;
+    transition: all 150ms ease-in-out !important;
+}
+
+.syntheseWidget-root .info-btn:hover {
+    background: rgba(0,0,0,0.05) !important;
+}
+
+.syntheseWidget-root .info-tooltip {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    position: relative !important;
+}
+
+.syntheseWidget-root .tooltip-text {
+    font-size: 1em !important; /* Harmonisé */
+    color: #374151 !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+}
+
+.syntheseWidget-root .period-selector {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .syntheseWidget-root .card-header { display: flex !important; align-items: center !important; gap: 1rem !important; }
 .syntheseWidget-root .card-content { display: flex !important; flex-direction: column !important; gap: 1.25rem !important; }
 
@@ -506,20 +620,24 @@
     padding: 0 !important;
 }
 
+/* Harmonisation: même styles que selector-icon-wrapper pour compat */
 .syntheseWidget-root .dpe-icon-wrapper {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 0.5rem !important;
+    background: linear-gradient(135deg, rgba(24, 33, 62, 0.08) 0%, rgba(24, 33, 62, 0.12) 100%) !important;
     border-radius: 12px !important;
     min-width: 48px !important;
     min-height: 48px !important;
     flex-shrink: 0 !important;
 }
-
-.syntheseWidget-root .dpe-icon-modern {
-    width: 1.5rem !important;
-    height: 1.5rem !important;
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .dpe-icon-modern,
+.syntheseWidget-root svg.dpe-icon-modern,
+.syntheseWidget-root .dpe-icon-wrapper .dpe-icon-modern {
+    width: 1.5em !important;
+    height: 1.5em !important;
 }
 
 .syntheseWidget-root .dpe-content {
@@ -527,14 +645,17 @@
 }
 
 .syntheseWidget-root .dpe-title-modern {
-    font-size: 1.25rem !important;
+    font-size: 1.325em !important;
     font-weight: 700 !important;
     margin-bottom: 0.25rem !important;
     line-height: 1.3 !important;
 }
 
-.syntheseWidget-root .dpe-subtitle-modern {
-    font-size: 0.9375rem !important;
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .dpe-subtitle-modern,
+.syntheseWidget-root div.dpe-subtitle-modern,
+.syntheseWidget-root .dpe-content .dpe-subtitle-modern {
+    font-size: 1em !important; /* Harmonisé */
     color: #6b7280 !important;
     font-weight: 500 !important;
 }
@@ -551,14 +672,14 @@
 }
 
 .syntheseWidget-root .dpe-grade-letter-modern {
-    font-size: 1.875rem !important;
+    font-size: 1.875em !important;
     font-weight: 800 !important;
     line-height: 1 !important;
     margin-bottom: 0.25rem !important;
 }
 
 .syntheseWidget-root .dpe-grade-status {
-    font-size: 0.75rem !important;
+    font-size: 0.75em !important;
     font-weight: 600 !important;
     color: #6b7280 !important;
     text-transform: uppercase !important;
@@ -584,6 +705,8 @@
     position: relative !important;
     transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
     cursor: default !important;
+    background: var(--scale-color) !important; /* Force la couleur */
+    opacity: 0.8 !important;
 }
 
 .syntheseWidget-root .dpe-scale-bar:hover {
@@ -593,13 +716,15 @@
 }
 
 .syntheseWidget-root .dpe-scale-bar.current {
+    background: var(--scale-color) !important; /* Force la couleur active */
+    opacity: 1 !important;
     transform: none !important;
     box-shadow: none !important;
     z-index: 2 !important;
 }
 
 .syntheseWidget-root .scale-letter {
-    font-size: 1rem !important;
+    font-size: 1em !important;
     font-weight: 700 !important;
     z-index: 1 !important;
     position: relative !important;
@@ -627,22 +752,25 @@
     flex: 1 !important;
 }
 
-.syntheseWidget-root .metric-label {
-    font-size: 0.875rem !important;
+/* Augmentation de la spécificité pour éviter les conflits Mendix/Atlas */
+.syntheseWidget-root .metric-label,
+.syntheseWidget-root div.metric-label,
+.syntheseWidget-root .dpe-metric-modern .metric-label {
+    font-size: 1em !important; /* Harmonisé */
     color: #6b7280 !important;
     font-weight: 500 !important;
     margin-bottom: 0.375rem !important;
 }
 
 .syntheseWidget-root .metric-value {
-    font-size: 1.5rem !important;
+    font-size: 1.5em !important; /* Gardé pour les valeurs importantes */
     font-weight: 700 !important;
     line-height: 1.2 !important;
     font-variant-numeric: tabular-nums !important;
 }
 
 .syntheseWidget-root .metric-unit {
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     font-weight: 500 !important;
     opacity: 0.7 !important;
     margin-left: 0.25rem !important;
@@ -664,12 +792,12 @@
 }
 
 .syntheseWidget-root .performance-icon-svg {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
+    width: 1.25em !important;
+    height: 1.25em !important;
 }
 
 .syntheseWidget-root .performance-text {
-    font-size: 0.9375rem !important;
+    font-size: 0.9375em !important;
     font-weight: 600 !important;
 }
 
@@ -692,8 +820,8 @@
 }
 
 .syntheseWidget-root .settings-icon {
-    width: 1rem !important;
-    height: 1rem !important;
+    width: 1em !important;
+    height: 1em !important;
     color: #6b7280 !important;
 }
 
@@ -716,14 +844,14 @@
 }
 
 .syntheseWidget-root .info-icon-small {
-    width: 1.125rem !important;
-    height: 1.125rem !important;
+    width: 1.125em !important;
+    height: 1.125em !important;
     color: #6b7280 !important;
     flex-shrink: 0 !important;
 }
 
 .syntheseWidget-root .thresholds-title {
-    font-size: 1rem !important;
+    font-size: 1em !important;
     font-weight: 600 !important;
     color: #374151 !important;
     margin: 0 !important;
@@ -749,8 +877,29 @@
     min-height: 60px !important;
 }
 
+.syntheseWidget-root .threshold-letter {
+    font-size: 1.25em !important;
+    font-weight: 700 !important;
+    min-width: 1.5rem !important;
+    text-align: center !important;
+}
+
+.syntheseWidget-root .threshold-value {
+    font-size: 1em !important; /* Harmonisé */
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+    margin: 0 0.5rem 0 0 !important;
+}
+
+.syntheseWidget-root .threshold-label {
+    font-size: 1em !important; /* Harmonisé */
+    color: #374151 !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
 .syntheseWidget-root .threshold-item:hover {
-    transform: none !important;
+    transform: none !important; /* Supprime translate */
     box-shadow: none !important;
 }
 
@@ -760,7 +909,7 @@
 }
 
 .syntheseWidget-root .threshold-level {
-    font-size: 1.25rem !important;
+    font-size: 1.25em !important;
     font-weight: 700 !important;
     min-width: 1.5rem !important;
     text-align: center !important;
@@ -771,14 +920,14 @@
 }
 
 .syntheseWidget-root .threshold-label {
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     font-weight: 600 !important;
     color: #374151 !important;
     margin-bottom: 0.125rem !important;
 }
 
 .syntheseWidget-root .threshold-value {
-    font-size: 0.8125rem !important;
+    font-size: 0.8125em !important;
     color: #6b7280 !important;
     font-variant-numeric: tabular-nums !important;
 }
@@ -786,7 +935,7 @@
 .syntheseWidget-root .current-indicator {
     padding: 0.25rem 0.5rem !important;
     border-radius: 4px !important;
-    font-size: 0.75rem !important;
+    font-size: 0.75em !important;
     font-weight: 600 !important;
     color: #fff !important;
     text-transform: uppercase !important;
@@ -794,8 +943,8 @@
 }
 
 /* Value blocks */
-.syntheseWidget-root .value-large { font-size: 1.875rem !important; line-height: 2.25rem !important; font-weight: 700 !important; }
-.syntheseWidget-root .value-medium { font-size: 1.5rem !important; line-height: 2rem !important; font-weight: 700 !important; }
+.syntheseWidget-root .value-large { font-size: 2em !important; line-height: 2.25rem !important; font-weight: 700 !important; }
+.syntheseWidget-root .value-medium { font-size: 1.5em !important; line-height: 2rem !important; font-weight: 700 !important; }
 
 /* Icon container */
 .syntheseWidget-root .icon-container { padding: 0.75rem !important; border-radius: 0.5rem !important; display: flex !important; align-items: center !important; justify-content: center !important; }
@@ -817,6 +966,9 @@
     gap: 1.5rem !important; 
     margin: 0 !important; 
     padding: 0 !important; 
+    /* Espacement vertical par défaut pour éviter les cartes collées */
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
 }
 
 @media (min-width: 640px) { 
@@ -854,6 +1006,9 @@
     gap: 1.5rem !important; 
     margin: 0 !important; 
     padding: 0 !important; 
+    /* Espacement vertical par défaut pour éviter les cartes collées */
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
 }
 
 @media (min-width: 640px) { 
@@ -872,11 +1027,11 @@
 
 /* Date selector */
 .syntheseWidget-root .date-selector .icon-container { background: rgba(24, 33, 62, 0.10) !important; }
-.syntheseWidget-root .date-selector .icon-info { width: 2rem !important; height: 2rem !important; color: #18213e !important; cursor: pointer !important; }
-.syntheseWidget-root .date-selector .tooltip { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; top: 100% !important; margin-top: 0.5rem !important; width: 500px !important; background: white !important; border-radius: 0.75rem !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; z-index: 50 !important; padding: 2rem !important; border: 1px solid #f3f4f6 !important; opacity: 0; visibility: hidden; transition: all 200ms ease-in-out; }
+.syntheseWidget-root .date-selector .icon-info { width: 2em !important; height: 2em !important; color: #18213e !important; cursor: pointer !important; }
+.syntheseWidget-root .date-selector .tooltip { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; top: 100% !important; margin-top: 0.5rem !important; width: 500px !important; background: white !important; border-radius: 0.75rem !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; z-index: 50 !important; padding: 2rem !important; border: 1px solid #f3f4f6 !important; opacity: 0; visibility: hidden; transition: opacity 200ms ease-in-out, visibility 200ms ease-in-out; }
 .syntheseWidget-root .date-selector .tooltip.tooltip-visible { opacity: 1; visibility: visible; }
 .syntheseWidget-root .date-buttons { display: flex !important; flex-wrap: wrap !important; gap: 0.5rem !important; margin-top: 1rem !important; }
-.syntheseWidget-root .btn-toggle { padding: 0.625rem 1rem !important; border-radius: 9999px !important; background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #e5e7eb !important; font-weight: 600 !important; font-size: 1rem !important; display: flex !important; align-items: center !important; }
+.syntheseWidget-root .btn-toggle { padding: 0.625rem 1rem !important; border-radius: 9999px !important; background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #e5e7eb !important; font-weight: 600 !important; font-size: 1em !important; display: flex !important; align-items: center !important; }
 .syntheseWidget-root .btn-toggle.active { background: #18213e !important; color: #fff !important; border-color: #18213e !important; }
 
 /* Modal overlay and content */
@@ -886,14 +1041,14 @@
 .syntheseWidget-root .modal-body { padding: 0 1.5rem !important; }
 .syntheseWidget-root .modal-footer { padding: 1.5rem !important; border-top: 1px solid #e5e7eb !important; display: flex !important; justify-content: flex-end !important; gap: 0.75rem !important; }
 .syntheseWidget-root .form-group { margin-bottom: 1rem !important; }
-.syntheseWidget-root .form-label { display: block !important; font-size: 1rem !important; font-weight: 500 !important; color: #374151 !important; margin-bottom: 0.5rem !important; }
-.syntheseWidget-root .form-input { width: 100% !important; border: 1px solid #d1d5db !important; border-radius: 0.375rem !important; padding: 0.75rem !important; font-size: 1rem !important; }
+.syntheseWidget-root .form-label { display: block !important; font-size: 1.125em !important; font-weight: 500 !important; color: #374151 !important; margin-bottom: 0.5rem !important; }
+.syntheseWidget-root .form-input { width: 100% !important; border: 1px solid #d1d5db !important; border-radius: 0.375rem !important; padding: 0.75rem !important; font-size: 1.125em !important; }
 .syntheseWidget-root .form-input:focus { outline: none !important; border-color: #18213e !important; box-shadow: 0 0 0 3px rgba(24, 33, 62, 0.1) !important; }
 
 /* Helper classes - Icônes agrandies */
 .syntheseWidget-root .flex-1 { flex: 1 !important; }
 .syntheseWidget-root .bg-primary-10 { background: rgba(24, 33, 62, 0.1) !important; }
-.syntheseWidget-root .icon-lg { width: 2rem !important; height: 2rem !important; }
+.syntheseWidget-root .icon-lg { width: 1.5em !important; height: 1.5em !important; }
 
 /* Professional Table Styles */
 .syntheseWidget-root .table-header {
@@ -903,12 +1058,17 @@
     margin-bottom: 1rem !important;
 }
 
+/* Tabs énergie pour Pareto */
+/* energy-tabs moved to LevelAnalysis.css */
+
+/* Grouping Analyse moved to LevelAnalysis.css */
+
 .syntheseWidget-root .btn-ghost {
     background: transparent !important;
     border: 1px solid transparent !important;
     padding: 0.5rem 0.75rem !important;
     border-radius: 0.5rem !important;
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     font-weight: 500 !important;
     display: flex !important;
     align-items: center !important;
@@ -923,7 +1083,7 @@
 
 .syntheseWidget-root .btn-sm {
     padding: 0.375rem 0.75rem !important;
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
 }
 
 .syntheseWidget-root .table-container {
@@ -954,7 +1114,7 @@
     padding: 1rem 0.75rem !important;
     text-align: left !important;
     font-weight: 600 !important;
-    font-size: 0.875rem !important;
+    font-size: 0.95em !important; /* Harmonisé */
     letter-spacing: 0.025em !important;
     border-bottom: 2px solid #e2e8f0 !important;
     position: relative !important;
@@ -977,7 +1137,7 @@
 
 .syntheseWidget-root .header-label {
     font-weight: 600 !important;
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
 }
 
 .syntheseWidget-root .table-row {
@@ -1011,7 +1171,7 @@
 
 .syntheseWidget-root .table-cell-data {
     padding: 0.875rem 0.75rem !important;
-    font-size: 0.9375rem !important;
+    font-size: 0.95em !important; /* Harmonisé */
     vertical-align: middle !important;
     border-bottom: 1px solid #f1f5f9 !important;
 }
@@ -1031,7 +1191,7 @@
     justify-content: center !important;
     padding: 0.25rem 0.75rem !important;
     border-radius: 9999px !important;
-    font-size: 0.875rem !important;
+    font-size: 1em !important; /* Harmonisé */
     font-weight: 600 !important;
     min-width: 2.5rem !important;
 }
@@ -1042,8 +1202,11 @@
     justify-content: center !important;
     padding: 0.375rem 1rem !important;
     border-radius: 0.5rem !important;
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     font-weight: 700 !important;
+    background: #f8fafc !important;
+    color: #374151 !important;
+    border: 1px solid #e2e8f0 !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
@@ -1055,13 +1218,13 @@
 }
 
 .syntheseWidget-root .metric-value {
-    font-size: 1rem !important;
+    font-size: 1.125em !important; /* Harmonisé */
     font-weight: 600 !important;
     font-variant-numeric: tabular-nums !important;
 }
 
 .syntheseWidget-root .metric-value-total {
-    font-size: 1.125rem !important;
+    font-size: 1.125em !important;
     font-weight: 700 !important;
     font-variant-numeric: tabular-nums !important;
 }
@@ -1070,7 +1233,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 0.25rem !important;
-    font-size: 0.75rem !important;
+    font-size: 0.75em !important;
 }
 
 /* Enhanced DPE Gauge Styles */
@@ -1098,8 +1261,8 @@
 }
 
 .syntheseWidget-root .dpe-icon {
-    width: 1.75rem !important;
-    height: 1.75rem !important;
+    width: 1.75em !important;
+    height: 1.75em !important;
 }
 
 .syntheseWidget-root .dpe-title-section {
@@ -1108,13 +1271,13 @@
 }
 
 .syntheseWidget-root .dpe-title {
-    font-size: 1.25rem !important;
+    font-size: 1.25em !important;
     font-weight: 700 !important;
     line-height: 1.4 !important;
 }
 
 .syntheseWidget-root .dpe-subtitle {
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     color: #64748b !important;
     margin-top: 0.25rem !important;
 }
@@ -1128,7 +1291,7 @@
 }
 
 .syntheseWidget-root .dpe-grade-letter {
-    font-size: 2rem !important;
+    font-size: 2em !important;
     font-weight: 900 !important;
     color: #ffffff !important;
     line-height: 1 !important;
@@ -1136,7 +1299,7 @@
 }
 
 .syntheseWidget-root .dpe-grade-label {
-    font-size: 0.75rem !important;
+    font-size: 0.75em !important;
     font-weight: 600 !important;
     color: rgba(255,255,255,0.9) !important;
     margin-top: 0.25rem !important;
@@ -1163,17 +1326,13 @@
     height: 3rem !important;
     border-radius: 8px !important;
     font-weight: 700 !important;
-    font-size: 1.125rem !important;
+    font-size: 1.125em !important;
     position: relative !important;
     transition: all 200ms ease-in-out !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
-.syntheseWidget-root .dpe-scale-active {
-    transform: scale(1.05) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-    z-index: 2 !important;
-}
+.syntheseWidget-root .dpe-scale-active { box-shadow: none !important; z-index: 2 !important; }
 
 .syntheseWidget-root .dpe-pulse {
     position: absolute !important;
@@ -1218,20 +1377,20 @@
 }
 
 .syntheseWidget-root .dpe-metric-label {
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     color: #64748b !important;
     margin-bottom: 0.25rem !important;
     font-weight: 500 !important;
 }
 
 .syntheseWidget-root .dpe-metric-value {
-    font-size: 1.5rem !important;
+    font-size: 1.5em !important;
     font-weight: 700 !important;
     font-variant-numeric: tabular-nums !important;
 }
 
 .syntheseWidget-root .dpe-metric-unit {
-    font-size: 0.875rem !important;
+    font-size: 0.875em !important;
     font-weight: 500 !important;
     color: #64748b !important;
 }
@@ -1240,7 +1399,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 0.5rem !important;
-    font-size: 1rem !important;
+    font-size: 1em !important;
 }
 
 /* Responsive adjustments */
@@ -1255,12 +1414,12 @@
     }
     
     .syntheseWidget-root .metric-value {
-        font-size: 0.875rem !important;
+        font-size: 0.875em !important;
     }
     
     .syntheseWidget-root .btn-ghost {
         padding: 0.375rem 0.5rem !important;
-        font-size: 0.8125rem !important;
+        font-size: 0.8125em !important;
     }
     
     .syntheseWidget-root .dpe-header {
@@ -1291,15 +1450,16 @@
 .syntheseWidget-root .dialog-overlay { position: fixed !important; inset: 0 !important; background: rgba(0,0,0,0.5) !important; z-index: 900 !important; animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1); }
 .syntheseWidget-root .dialog-content { position: fixed !important; inset: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 1000 !important; }
 .syntheseWidget-root .dialog-panel { background: white !important; border-radius: 0.5rem !important; padding: 1.5rem !important; width: 90vw !important; max-width: 600px !important; max-height: 90vh !important; overflow-y: auto !important; margin: 1rem !important; animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1); }
-.syntheseWidget-root .dialog-title { font-size: 1.75rem !important; font-weight: 600 !important; margin-bottom: 1rem !important; color: #111827 !important; }
-.syntheseWidget-root .dialog-description { font-size: 1rem !important; color: #4b5563 !important; margin-bottom: 1.5rem !important; }
+.syntheseWidget-root .echarts-tooltip { background: #ffffff !important; color: #111827 !important; border: 1px solid #e5e7eb !important; border-radius: 0.5rem !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; padding: 0.75rem 1rem !important; z-index: 1100 !important; pointer-events: none !important; font-size: 0.875em !important; }
+.syntheseWidget-root .dialog-title { font-size: 1.325em !important; font-weight: 600 !important; margin-bottom: 1rem !important; color: #111827 !important; }
+.syntheseWidget-root .dialog-description { font-size: 0.95em !important; color: #4b5563 !important; margin-bottom: 1.5rem !important; }
 .syntheseWidget-root .dialog-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 1rem !important; }
 @media (min-width: 768px) { .syntheseWidget-root .dialog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
 .syntheseWidget-root .form-row { margin-bottom: 0.75rem !important; }
-.syntheseWidget-root .form-label { display: block !important; font-size: 1rem !important; font-weight: 500 !important; color: #374151 !important; margin-bottom: 0.25rem !important; }
-.syntheseWidget-root .form-input { width: 100% !important; border: 1px solid #d1d5db !important; border-radius: 0.375rem !important; padding: 0.5rem !important; font-size: 1rem !important; }
+.syntheseWidget-root .form-label { display: block !important; font-size: 1em !important; font-weight: 500 !important; color: #374151 !important; margin-bottom: 0.25rem !important; }
+.syntheseWidget-root .form-input { width: 100% !important; border: 1px solid #d1d5db !important; border-radius: 0.375rem !important; padding: 0.5rem !important; font-size: 1em !important; }
 .syntheseWidget-root .dialog-actions { margin-top: 1.5rem !important; display: flex !important; justify-content: flex-end !important; gap: 0.75rem !important; }
-.syntheseWidget-root .dialog-error { text-align: center !important; color: #ef4444 !important; padding: 1rem !important; border: 1px solid #fecaca !important; background: #fee2e2 !important; border-radius: 0.5rem !important; font-size: 1rem !important; }
+.syntheseWidget-root .dialog-error { text-align: center !important; color: #ef4444 !important; padding: 1rem !important; border: 1px solid #fecaca !important; background: #fee2e2 !important; border-radius: 0.5rem !important; font-size: 1em !important; }
 .syntheseWidget-root .dialog-close { position: absolute !important; top: 0.75rem !important; right: 0.75rem !important; padding: 0.25rem !important; border-radius: 9999px !important; color: #6b7280 !important; }
 
 /* Accessibility for Radix content under reset */
@@ -1307,6 +1467,6 @@
 
 /* Keyframes for overlays (optional) */
 @keyframes overlayShow { from { opacity: 0; } to { opacity: 1; } }
-@keyframes contentShow { from { transform: translate(-50%, -45%); opacity: 0; } to { transform: translate(-50%, -50%); opacity: 1; } }
+@keyframes contentShow { from { opacity: 0; } to { opacity: 1; } }
 
 

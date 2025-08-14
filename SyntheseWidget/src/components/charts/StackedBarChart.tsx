@@ -18,6 +18,7 @@ interface StackedBarChartProps {
     baseUnitGas: BaseUnit;
     baseUnitWater: BaseUnit;
     baseUnitAir: BaseUnit;
+    onSelectLevel?: (levelName: string) => void;
 }
 
 const SERIES_CONFIG = [
@@ -33,7 +34,8 @@ export const StackedBarChart = ({
     baseUnitElectricity,
     baseUnitGas,
     baseUnitWater,
-    baseUnitAir
+    baseUnitAir,
+    onSelectLevel
 }: StackedBarChartProps): ReactElement => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -79,6 +81,8 @@ export const StackedBarChart = ({
             },
             tooltip: {
                 trigger: "axis",
+                className: "echarts-tooltip",
+                renderMode: "html",
                 axisPointer: { type: "shadow" },
                 formatter: (params: any[]) => {
                     const name = params?.[0]?.axisValueLabel || "";
@@ -102,12 +106,23 @@ export const StackedBarChart = ({
         } as any;
 
         chartInstance.current.setOption(option);
+
+        // Click handler to select a level from the bar
+        const handler = (params: any) => {
+            if (params && typeof params.name === "string" && onSelectLevel) {
+                onSelectLevel(params.name);
+            }
+        };
+        chartInstance.current.getZr().off("click");
+        chartInstance.current.off("click");
+        chartInstance.current.on("click", handler);
         const handleResize = () => chartInstance.current?.resize();
         window.addEventListener("resize", handleResize);
         return () => {
             window.removeEventListener("resize", handleResize);
+            chartInstance.current?.off("click", handler);
         };
-    }, [data, title, baseUnitElectricity, baseUnitGas, baseUnitWater, baseUnitAir]);
+    }, [data, title, baseUnitElectricity, baseUnitGas, baseUnitWater, baseUnitAir, onSelectLevel]);
 
     return (
         <div className="card-base">

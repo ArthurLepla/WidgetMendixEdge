@@ -185,6 +185,8 @@ export const ColumnChart = ({ data, title, type, onClickSecteur, baseUnit }: Col
                 },
                 tooltip: {
                     trigger: "axis",
+                    className: "echarts-tooltip",
+                    renderMode: "html",
                     formatter: (params: any[]) => {
                         const currentValue = params[1].value;
                         const previousValue = params[0].value;

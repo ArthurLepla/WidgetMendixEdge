@@ -67,16 +67,16 @@ export function DPEGauge({
     const currentColor = getColor(grade);
 
     return (
-        <div className="dpe-card-modern">
+            <div className="dpe-card-modern">
             <div className="dpe-header-modern">
-                <div className="dpe-icon-wrapper" style={{ background: `${primaryColor}08` }}>
-                    <Gauge className="dpe-icon-modern" style={{ color: primaryColor }} />
+                <div className="selector-icon-wrapper">
+                    <Gauge className="selector-icon" />
                 </div>
                 <div className="dpe-content">
                     <div className="dpe-title-modern" style={{ color: primaryColor }}>
-                        Performance Énergétique
+                        Performance énergétique (DPE)
                     </div>
-                    <div className="dpe-subtitle-modern">Indice DPE de l'installation</div>
+                    <div className="dpe-subtitle-modern">Indice synthétique sur la période</div>
                 </div>
                 <div
                     className="dpe-grade-modern"
@@ -98,10 +98,7 @@ export function DPEGauge({
                         key={letter}
                         className={`dpe-scale-bar ${letter === grade ? "current" : ""}`}
                         style={{
-                            background:
-                                letter === grade
-                                    ? `linear-gradient(135deg, ${getColor(letter)} 0%, ${getColor(letter)}dd 100%)`
-                                    : getColor(letter),
+                            background: getColor(letter), // Force directement la couleur
                             opacity: letter === grade ? 1 : 0.7
                         }}
                         title={`Niveau ${letter} - ${GRADE_LABELS[letter]}`}
@@ -154,46 +151,31 @@ export function DPEGauge({
                     </div>
                     <div className="thresholds-grid">
                         {Object.entries(thresholds).map(([level, threshold]) => {
-                            const color = DPE_COLORS[level];
+                            const color = getColor(level as any);
                             const isCurrent = level === grade;
                             return (
                                 <div
                                     key={level}
                                     className={`threshold-item ${isCurrent ? "current" : ""}`}
-                                    style={{ borderLeftColor: color }}
+                                    style={{
+                                        borderLeft: `4px solid ${color}`, // Couleur visible
+                                        background: isCurrent ? `${color}10` : "transparent"
+                                    }}
                                 >
-                                    <div className="threshold-level" style={{ color }}>
+                                    <span className="threshold-letter" style={{ color }}>
                                         {level}
-                                    </div>
-                                    <div className="threshold-info">
-                                        <div className="threshold-label">{GRADE_LABELS[level]}</div>
-                                        <div className="threshold-value">
-                                            ≤ {Intl.NumberFormat().format(threshold)} kWh
-                                        </div>
-                                    </div>
-                                    {isCurrent && (
-                                        <div className="current-indicator" style={{ background: color }}>
-                                            Actuel
-                                        </div>
-                                    )}
+                                    </span>
+                                    <span className="threshold-value">≤ {threshold} kWh</span>
+                                    <span className="threshold-label">{GRADE_LABELS[level]}</span>
                                 </div>
                             );
                         })}
                         <div className="threshold-item">
-                            <div className="threshold-level" style={{ color: DPE_COLORS.G }}>
+                            <span className="threshold-letter" style={{ color: getColor("G") }}>
                                 G
-                            </div>
-                            <div className="threshold-info">
-                                <div className="threshold-label">{GRADE_LABELS.G}</div>
-                                <div className="threshold-value">
-                                    &gt; {Intl.NumberFormat().format(thresholds.F)} kWh
-                                </div>
-                            </div>
-                            {grade === "G" && (
-                                <div className="current-indicator" style={{ background: DPE_COLORS.G }}>
-                                    Actuel
-                                </div>
-                            )}
+                            </span>
+                            <span className="threshold-value">&gt; {thresholds.F} kWh</span>
+                            <span className="threshold-label">{GRADE_LABELS.G}</span>
                         </div>
                     </div>
                 </div>
